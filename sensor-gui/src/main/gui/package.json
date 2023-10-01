@@ -1,0 +1,19 @@
+{
+  "name": "sensor",
+  "private": true,
+  "scripts": {
+    "dev": "nuxi dev",
+    "build": "nuxi build",
+    "generate": "nuxi generate",
+    "start": "nuxi preview"
+  },
+  "dependencies": {
+    "@quasar/extras": "1.16.7",
+    "nuxt": "3.8.1",
+    "quasar": "^2.13.0",
+    "sass": "1.69.5"
+  },
+  "devDependencies": {
+    "nuxt-quasar-ui": "2.0.6"
+  }
+}
