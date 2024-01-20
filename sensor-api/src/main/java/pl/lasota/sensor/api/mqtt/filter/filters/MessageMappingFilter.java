@@ -7,21 +7,21 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import pl.lasota.sensor.api.mqtt.filter.Chain;
 import pl.lasota.sensor.api.mqtt.filter.Filter;
-import pl.lasota.sensor.core.model.Message;
+import pl.lasota.sensor.core.mqttPayloads.MessageFrame;
 
 @Component
 @Slf4j
 @Scope("prototype")
-public class MessageMappingFilter implements Filter<String, Message> {
+public class MessageMappingFilter implements Filter<String, MessageFrame> {
 
     @Override
-    public void execute(String request, Chain<Message> chain) {
+    public void execute(String request, Chain<MessageFrame> chain) {
         ObjectMapper mapper = new ObjectMapper();
         try {
-            Message message = mapper.readValue(request, Message.class);
-            chain.doFilter(message);
+            MessageFrame messageFrame = mapper.readValue(request, MessageFrame.class);
+            chain.doFilter(messageFrame);
         } catch (JsonProcessingException e) {
-            log.error("Problem with parsing message {}", request, e);
+            log.error("Problem with parsing messageFrame {}", request, e);
         }
     }
 

@@ -1,0 +1,7 @@
+user anonymous
+topic write $share/+
+topic read device/+
+
+user mqttUserServer
+topic read $share/mygroup/server
+topic write device/+

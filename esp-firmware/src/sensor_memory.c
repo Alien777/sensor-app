@@ -7,14 +7,9 @@ static void close_storage(nvs_handle_t handle);
 static esp_err_t nvs_write_str(nvs_handle_t handle, const char *key, const char *value);
 static esp_err_t nvs_read_str(nvs_handle_t handle, const char *key, char *value, size_t *length);
 
-// Improve error handling by separating error check and program halt
+
 static void handle_error(esp_err_t err)
 {
-    if (err != ESP_OK)
-    {
-        // Log error and handle it appropriately
-        // Example: printf("Error occurred: %s", esp_err_to_name(err));
-    }
 }
 
 static int open_storage(nvs_handle_t *handle, nvs_open_mode mode)

@@ -12,6 +12,41 @@
 ### sensor-gui
 #### layer for user, to setup sensor config etc.
 
+## Flow:
+
+
+* EPS -> MQTT-> SENSOR APP - connection device
+* SENSOR APP -> MQTT -> ESP - sending pin config
+* ESP -> MQTT ->  SENSOR APP - analog adc value sending
+
+
+## Payload configuration from server to ESP. sensor_runner.c
+
+```json
+{
+  "input": [
+    {
+      "pin": 32
+    }
+  ],
+  "output": [
+    {
+      "pin": 4,
+      "type": "ANALOG",
+      "atten": 3,
+      "width": 12,
+      "sampling": 5000,  //sleep thread
+      "min_adc": 100, //barrier min- after across sensor value won't send to server
+      "max_adc": 2000 //barrier max- after across sensor value won't send to server
+    }
+  ]
+}
+```
+also send device_key, member_key.
+
+## Esp panel
+![img.png](readme/img.png)
+
 ## TODO
 ### The list below will be updated
 * ~~Simple layout for ESP~~

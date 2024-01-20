@@ -2,6 +2,7 @@ package pl.lasota.sensor.core.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import pl.lasota.sensor.core.model.device.Device;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -43,6 +44,6 @@ public class Member {
     private Role role;
 
     @OneToMany(mappedBy = "member", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private Set<Sensor> sensors = new HashSet<>();
+    private Set<Device> devices = new HashSet<>();
 
 }

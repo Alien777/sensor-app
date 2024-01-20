@@ -22,12 +22,11 @@ public class MqttMessageReceiver {
         FilterChain filterChain = new FilterChain()
                 .addFilter(ac.getBean(MessageMappingFilter.class))
                 .addFilter(ac.getBean(IsExistMemberFilter.class))
-                .addFilter(ac.getBean(CheckCorrectJsonMessageFilter.class))
                 .addFilter(ac.getBean(SaveSensorFilter.class))
                 .addFilter(ac.getBean(SaveSensorValueFilter.class));
 
-        log.info("Received message from {}, {}", messagePayload.topic(), messagePayload.message());
-        filterChain.doFilter(messagePayload.message());
+        log.info("Received messageFrame from {}, {}", messagePayload.topic(), messagePayload.messageFrame());
+        filterChain.doFilter(messagePayload.messageFrame());
     }
 
 }

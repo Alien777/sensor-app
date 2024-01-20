@@ -1,27 +1,29 @@
-package pl.lasota.sensor.core.model;
+package pl.lasota.sensor.core.model.device;
 
 import jakarta.persistence.*;
 import lombok.*;
+import pl.lasota.sensor.core.model.Member;
+import pl.lasota.sensor.core.model.sensor.Sensor;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 @Entity
-@Table(name = "sensor")
+@Table(name = "device")
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Sensor {
+public class Device {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(name = "device_key", unique = true, updatable = false, length = 12)
-    private String device_key;
+    private String deviceKey;
 
     @Column(name = "name")
     private String name;
@@ -30,16 +32,16 @@ public class Sensor {
     @JoinColumn(name = "member_id", updatable = false)
     private Member member;
 
-    @OneToMany(mappedBy = "sensor", fetch = FetchType.LAZY)
-    private List<SensorReading> sensorReading = new ArrayList<>();
+    @OneToMany(mappedBy = "device", fetch = FetchType.LAZY)
+    private List<Sensor> sensor = new ArrayList<>();
 
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Sensor sensor = (Sensor) o;
-        return Objects.equals(id, sensor.id);
+        Device device = (Device) o;
+        return Objects.equals(id, device.id);
     }
 
     @Override

@@ -1,4 +1,4 @@
-package pl.lasota.sensor.core.model;
+package pl.lasota.sensor.core.model.device;
 
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import jakarta.persistence.*;
@@ -13,23 +13,19 @@ import java.time.OffsetDateTime;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class SensorReading {
+public class DeviceConfig {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "sensor_id")
-    private Sensor sensor;
+    @JoinColumn(name = "device_id")
+    private Device device;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "message_type")
-    private MessageType messageType;
-
-    @Column(name="message", columnDefinition = "jsonb")
+    @Column(name="config", columnDefinition = "jsonb")
     @Type(value = JsonBinaryType.class)
-    private String message;
+    private String config;
 
     @Column(name = "time")
     private OffsetDateTime time;

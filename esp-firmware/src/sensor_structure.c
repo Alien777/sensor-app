@@ -6,13 +6,26 @@ const char *message_type_convert_to_chars(message_type state)
     {
     case DEVICE_CONNECTED:
         return "DEVICE_CONNECTED";
-    case SENSOR_VALUE:
-        return "SENSOR_VALUE";
+    case SINGLE_ADC_SIGNAL:
+        return "SINGLE_ADC_SIGNAL";
     case CONFIG:
         return "CONFIG";
     default:
         return "UNKNOWN";
     }
+}
+
+input_type chars_convert_to_input_type(const char *state)
+{
+    if (strcmp(state, "ANALOG") == 0)
+    {
+        return ANALOG;
+    }
+    else if (strcmp(state, "DIGITAL") == 0)
+    {
+        return DIGITAL;
+    }
+    return UNKNOWN_INPUT;
 }
 
 message_type chars_convert_to_message_type(const char *state)
@@ -21,9 +34,9 @@ message_type chars_convert_to_message_type(const char *state)
     {
         return DEVICE_CONNECTED;
     }
-    else if (strcmp(state, "SENSOR_VALUE") == 0)
+    else if (strcmp(state, "SINGLE_ADC_SIGNAL") == 0)
     {
-        return SENSOR_VALUE;
+        return SINGLE_ADC_SIGNAL;
     }
     else if (strcmp(state, "CONFIG") == 0)
     {
@@ -34,7 +47,6 @@ message_type chars_convert_to_message_type(const char *state)
         return UNKNOWN;
     }
 }
-
 
 const char *convert_wifi_network_to_json(WifiNetwork *head)
 {
@@ -85,7 +97,6 @@ Message json_to_message(const char *j)
         const char *error_ptr = cJSON_GetErrorPtr();
         if (error_ptr != NULL)
         {
-            fprintf(stderr, "Błąd przed: %s\n", error_ptr);
         }
         return msg;
     }
@@ -128,6 +139,65 @@ Message json_to_message(const char *j)
             return msg;
         }
         msg.message_type = type;
+    }
+    if (msg.message_type == CONFIG)
+    {
+
+        cJSON *payload_c = cJSON_GetObjectItem(json, "payload");
+        if (payload_c == NULL)
+        {
+            cJSON_Delete(json);
+            return msg;
+        }
+        cJSON *output_c = cJSON_GetObjectItemCaseSensitive(payload_c, "output");
+        if (output_c != NULL && cJSON_IsArray(output_c))
+        {
+            int input_count = cJSON_GetArraySize(output_c);
+            msg.outputSensor = MIN(input_count, MAX_S);
+            for (int i = 0; i < msg.outputSensor; ++i)
+            {
+                cJSON *output_item = cJSON_GetArrayItem(output_c, i);
+                if (output_item != NULL && cJSON_IsObject(output_item))
+                {
+                    // Parse each field in the input JSON object and assign to msg.input[i] fields
+                    cJSON *type_c = cJSON_GetObjectItemCaseSensitive(output_item, "type");
+                    cJSON *pin_c = cJSON_GetObjectItemCaseSensitive(output_item, "pin");
+                    cJSON *width_c = cJSON_GetObjectItemCaseSensitive(output_item, "width");
+                    cJSON *atten_c = cJSON_GetObjectItemCaseSensitive(output_item, "atten");
+                    cJSON *sampling_c = cJSON_GetObjectItemCaseSensitive(output_item, "sampling");
+                    cJSON *min_adc_c = cJSON_GetObjectItemCaseSensitive(output_item, "min_adc");
+                    cJSON *max_adc_c = cJSON_GetObjectItemCaseSensitive(output_item, "max_adc");
+                    if (type_c != NULL && cJSON_IsString(type_c))
+                    {
+                        msg.output[i].type = chars_convert_to_input_type(type_c->valuestring);
+                    }
+                    if (pin_c != NULL && cJSON_IsNumber(pin_c))
+                    {
+                        msg.output[i].pin = pin_c->valueint;
+                    }
+                    if (width_c != NULL && cJSON_IsNumber(width_c))
+                    {
+                        msg.output[i].width = width_c->valuedouble;
+                    }
+                    if (atten_c != NULL && cJSON_IsNumber(atten_c))
+                    {
+                        msg.output[i].atten = atten_c->valuedouble;
+                    }
+                    if (sampling_c != NULL && cJSON_IsNumber(sampling_c))
+                    {
+                        msg.output[i].sampling = sampling_c->valueint;
+                    }
+                    if (min_adc_c != NULL && cJSON_IsNumber(min_adc_c))
+                    {
+                        msg.output[i].min_adc = min_adc_c->valueint;
+                    }
+                    if (max_adc_c != NULL && cJSON_IsNumber(max_adc_c))
+                    {
+                        msg.output[i].max_adc = max_adc_c->valueint;
+                    }
+                }
+            }
+        }
     }
 
     cJSON_Delete(json);
