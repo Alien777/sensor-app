@@ -9,13 +9,15 @@ server:
 #    level:
 #      org: DEBUG
 spring:
+  config:
+    import: file:/home/${USER}/Documents/container/sensor/oauth-config.yml
   security:
     oauth2:
       client:
         registration:
           google:
-            clientId: <change_it>
-            clientSecret: <change_it>
+            clientId: ${google.oauth2.clientId}
+            clientSecret: ${google.oauth2.clientSecret}
   datasource:
     url: jdbc:postgresql://localhost:5432/sensor
     username: db
