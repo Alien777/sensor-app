@@ -1,0 +1,38 @@
+server:
+  port: 8080
+  servlet:
+    session:
+      cookie:
+        name: "SENSOR_APP_COOKIES"
+        max-age: 360000000
+#logging:
+#    level:
+#      org: DEBUG
+spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            clientId: <change_it>
+            clientSecret: <change_it>
+  datasource:
+    url: jdbc:postgresql://localhost:5432/sensor
+    username: db
+    password: db
+  jpa:
+    hibernate:
+      ddl-auto: update # Dostosuj tę wartość do swoich potrzeb
+    properties:
+      hibernate:
+        format_sql: true
+    show-sql: true
+sensor:
+  gui-url: http://localhost:3000
+  redirect:
+    login-success: http://localhost:3000/oauth2
+    logout: http://localhost:3000
+    auth-exception: http://localhost:3000/auth-error
+  jwt:
+    secret: Gkl3uP7ATJcLNka0p7+v4hY0OcTu9H08+QP1sFYE4PI=
+    expiration: 1440

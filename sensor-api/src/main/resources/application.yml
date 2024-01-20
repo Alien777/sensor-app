@@ -1,0 +1,24 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/sensor
+    username: db
+    password: db
+  jpa:
+    hibernate:
+      ddl-auto: update # Dostosuj tę wartość do swoich potrzeb
+    properties:
+      hibernate:
+        format_sql: true
+    show-sql: false
+    open-in-view: false
+sensor:
+  mqtt:
+    client-id: ${random.uuid}
+    url: tcp://127.0.0.1:1883
+    topic: $share/mygroup/server
+    username: mqttUserServer
+    password: mqtt
+    max-reconnect-delay: 5000
+    connection-timeout: 30000
+    automatic-reconnect: true
+
