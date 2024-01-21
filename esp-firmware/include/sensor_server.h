@@ -4,8 +4,8 @@
 
 #include <esp_log.h>
 #include <esp_http_server.h>
-
+#include <ctype.h>  
 void server_initial();
 
 
-#endif // SENSOR_MEMORY_H
+#endif 

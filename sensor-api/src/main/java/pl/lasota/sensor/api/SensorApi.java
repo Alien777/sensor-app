@@ -9,7 +9,7 @@ import org.springframework.integration.annotation.IntegrationComponentScan;
 
 
 @SpringBootApplication(scanBasePackages = {"pl.lasota.sensor.core", "pl.lasota.sensor.api"})
-@EntityScan(value = {"pl.lasota.sensor.core.model"})
+@EntityScan(value = {"pl.lasota.sensor.core.models"})
 @EnableJpaRepositories("pl.lasota.sensor.core.repository")
 public class SensorApi {
 

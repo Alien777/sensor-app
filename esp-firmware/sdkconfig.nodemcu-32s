@@ -339,11 +339,8 @@ CONFIG_PARTITION_TABLE_MD5=y
 # end of Partition Table
 
 #
-# Example Configuration
+# Configuration
 #
-CONFIG_ESP_WIFI_SSID="dom"
-CONFIG_ESP_WIFI_PASSWORD="1abcd234"
-CONFIG_ESP_MAXIMUM_RETRY=5
 # CONFIG_ESP_WIFI_AUTH_OPEN is not set
 # CONFIG_ESP_WIFI_AUTH_WEP is not set
 # CONFIG_ESP_WIFI_AUTH_WPA_PSK is not set
@@ -352,7 +349,7 @@ CONFIG_ESP_WIFI_AUTH_WPA_WPA2_PSK=y
 # CONFIG_ESP_WIFI_AUTH_WPA3_PSK is not set
 # CONFIG_ESP_WIFI_AUTH_WPA2_WPA3_PSK is not set
 # CONFIG_ESP_WIFI_AUTH_WAPI_PSK is not set
-# end of Example Configuration
+# end of Configuration
 
 #
 # Compiler options

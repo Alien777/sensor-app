@@ -3,7 +3,7 @@ function attachClickEventToAvailableSSIDItem(item) {
         const ssidName = this.querySelector("#name-ssid").textContent;
         document.getElementById("ssid").value = ssidName;
         const passwordValue = this.querySelector("#password-ssid").textContent;
-        if (passwordValue === "tak") {
+        if (passwordValue === "secure") {
             document.getElementById("password").style.display = "block";
         } else {
             document.getElementById("password").style.display = "none";
@@ -11,13 +11,15 @@ function attachClickEventToAvailableSSIDItem(item) {
     });
 }
 
-function fetchConnectedSSID() {
-    fetch("/connected-ssid")
+function fetchInformation() {
+    fetch("/information")
         .then(response => response.json())
         .then(data => {
-            document.getElementById("current-connected").textContent = data.ssid || "Brak połączenia";
-            document.getElementById("current-connected-ip").textContent = data.ip || "Brak ip";
-            document.getElementById("device").textContent = data.device || "Nie przypisano id";
+            document.getElementById("ssid-json").textContent = data.ssid || "No info";
+            document.getElementById("ssid").textContent = data.ssid || "No info";
+            document.getElementById("ip-json").textContent = data.ip || "No info";
+            document.getElementById("device-key-json").textContent = data.device || "No info";
+            document.getElementById("server-ip-json").textContent = data.server_ip || "No info";
         })
         .catch(error => {
             console.error('Error fetching connected SSID:', error);
@@ -40,7 +42,7 @@ function fetchAvailablesSSID() {
                 </div>
                 <div class="pass">
                     <span>🔒</span>
-                    <span id="password-ssid">${ssidData.hasPassword ? 'tak' : 'nie'}</span>
+                    <span id="password-ssid">${ssidData.hasPassword ? 'secure' : 'open'}</span>
                 </div>
                 <div class="signal">
                     <span>📶</span>
@@ -60,38 +62,14 @@ function fetchAvailablesSSID() {
 
 
 document.addEventListener('DOMContentLoaded', function () {
-    const form = document.getElementById('save-connection');
+    const form = document.getElementById('save');
 
     form.addEventListener('submit', function (event) {
         event.preventDefault();
 
         const formData = new FormData(form);
 
-        fetch('/connect-wifi', {
-            method: 'POST',
-            body: formData
-        })
-            .then(response => response.text())
-            .then(data => {
-                // W tym miejscu możesz wyświetlić odpowiedź serwera, np. komunikat o pomyślnym zapisie
-                console.log(data);
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
-    });
-});
-
-
-document.addEventListener('DOMContentLoaded', function () {
-    const form = document.getElementById('save-server-key');
-
-    form.addEventListener('submit', function (event) {
-        event.preventDefault();
-
-        const formData = new FormData(form);
-
-        fetch('/save-server-key', {
+        fetch('/save', {
             method: 'POST',
             body: formData
         })
@@ -108,7 +86,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 document.addEventListener("DOMContentLoaded", function () {
-    fetchConnectedSSID();
+    fetchInformation();
     fetchAvailablesSSID();
 
 });

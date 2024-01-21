@@ -3,63 +3,60 @@
 
 <head>
     <meta charset="utf-8">
-    <title>Captive Portal</title>
+    <title>Sensor</title>
     <link rel="stylesheet" href="style.css">
     <script src="script.js"></script>
 </head>
 <body>
-    <div class="contener">
-        <div class="card">
-            <div class="card-header">
-                Dostępne sieci
-            </div>
-            <div class="card-content">
-                <ul class="lista">
-                </ul>
-                <button onclick="fetchAvailablesSSID()" style="float:right">Odśwież</button>
-            </div>
-
+<div class="contener">
+    <div class="card">
+        <div class="card-header">
+            Available networks
         </div>
-        <div class="card">
-            <div class="card-header">
-                Konfiguruj sieć
-            </div>
-            <div class="card-content">
-                <div class="current-connected">Aktualnie połączony z: <em id="current-connected"></em></div>
-                <div class="current-connected">Aktualnie połączony z: <em id="current-connected-ip"></em></div>
-                <br />
-                <form id="save-connection">
-                    <div id="ssid_lab" style="display: block;">
-                        <label for="ssid">SSID</label>
-                        <input type="text" id="ssid" name="ssid">
-                    </div>
-
-                    <div id="password" style="display: block;">
-                        <label for="password">Hasło</label>
-                        <input type="password" name="password">
-                    </div>
-
-                    <button >Połącz</button>
-                </form>
-            </div>
+        <div class="card-content">
+            <ul class="lista">
+            </ul>
+            <button onclick="fetchAvailablesSSID()" style="float:right">Refresh networks</button>
         </div>
-        <div class="card">
-            <div class="card-header">
-                Inicializacja
-            </div>
-            <div class="card-content">
-                <div class="current-connected">ID urządzenia: <em id="device"></em></div>
-                <br />
-                <form id="save-server-key">
-                    <div style="display: block;">
-                        <label for="devive">Klucz serwera</label>
-                        <input type="text" name="server_key" id="server_key" >
-                    </div>
 
-                    <button>Zapisz</button>
-                </form>
-            </div>
-        </div>
     </div>
+    <div class="card">
+        <div class="card-header">
+            Config
+        </div>
+        <div class="card-content">
+            <div class="info">Current with ssid: <em id="ssid-json"></em></div>
+            <div class="info">Device IP: <em id="ip-json"></em></div>
+            <div class="info">ID device (MAC): <em id="device-key-json"></em></div>
+            <div class="info">Server IP: <em id="server-ip-json"></em></div>
+            <br>
+            <br>
+            <br>
+            <form id="save">
+                <div id="ssid_lab" style="display: block;">
+                    <label for="ssid">SSID Wifi</label>
+                    <input maxlength="32" type="text" id="ssid" name="ssid">
+                </div>
+
+                <div id="password" style="display: block;">
+                    <label for="password">Password Wifi</label>
+                    <input maxlength="64" type="password" name="password">
+                </div>
+                <div style="display: block;">
+                    <label for="devive">Member key</label>
+                    <input maxlength="16" type="text" name="member_key" id="member_key">
+                </div>
+                <div style="display: block;">
+                    <label for="devive">Server IP</label>
+                    <input maxlength="15" type="text" name="server_ip" id="server_ip">
+                </div>
+                <hr>
+                <br>
+                <button>Save</button>
+                <em style="color: red;"> *If field is empty will be not save</em>
+            </form>
+        </div>
+    </div>     
+</div>
 </body>
 </html>

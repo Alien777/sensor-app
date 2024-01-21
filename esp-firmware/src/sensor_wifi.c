@@ -65,8 +65,6 @@ static void event_handler(void *arg, esp_event_base_t event_base, int32_t event_
     }
 }
 
-
-
 void connect(const char *ssid, const char *password)
 {
     if (strlen(ssid) >= 32 || strlen(password) >= 64)
@@ -148,7 +146,6 @@ char *currentSSIDConnection()
     return (char *)config.sta.ssid;
 }
 
-
 WifiNetwork *scan()
 {
     static WifiNetwork networks[MAX_NETWORKS];
@@ -159,15 +156,16 @@ WifiNetwork *scan()
         .ssid = NULL,
         .bssid = NULL,
         .channel = 0,
-        .show_hidden = true,
+        .show_hidden = false,
         .scan_type = WIFI_SCAN_TYPE_ACTIVE,
         .scan_time = {
-            .active = {.min = 120, .max = 150},
+            .active = {.min = 50, .max = 60},
         },
     };
 
     esp_err_t ret = esp_wifi_scan_start(&scanConfig, true);
-    if (ret != ESP_OK) {
+    if (ret != ESP_OK)
+    {
         ESP_LOGE(TAG_WIF, "esp_wifi_scan_start() failed with error: %s", esp_err_to_name(ret));
     }
 
@@ -194,7 +192,6 @@ WifiNetwork *scan()
         *current = network;
         current = &(network->next);
     }
-
 
     return head;
 }
@@ -237,15 +234,18 @@ static void connect_task(void *pvParameters)
 
 void connection_initial()
 {
-    char ssid[32] = {0};
-    char password[64] = {0};
-    esp_err_t ret = get_wifi_credentials(ssid, sizeof(ssid), password, sizeof(password));
+
+    ConfigEps configEsp;
+    load_config(&configEsp);
+    esp_err_t ret = load_config(&configEsp);
 
     if (ret == ESP_OK)
     {
-        if (strlen(ssid) > 0 && strlen(password) > 0)
+   
+        if (strlen(configEsp.wifi_ssid) > 0 && strlen(configEsp.wifi_password) > 0)
         {
-            connect(ssid, password);
+            ESP_LOGE("MAIN", "ssid or password is empty");
+            connect(configEsp.wifi_ssid, configEsp.wifi_password);
         }
         else
         {

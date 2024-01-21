@@ -22,6 +22,7 @@ typedef struct WifiNetwork WifiNetwork;
 typedef struct OutputTask OutputTask;
 typedef struct Message Message;
 typedef struct Output Output;
+typedef struct ConfigEps ConfigEps;
 typedef enum
 {
     DEVICE_CONNECTED,
@@ -72,8 +73,18 @@ struct WifiNetwork
     WifiNetwork *next; // Wskaźnik na następny element
 };
 
+struct ConfigEps
+{
+    char wifi_ssid[32];
+    char wifi_password[64];
+    char member_key[17];
+    char server_ip[17];
+    bool inited;
+};
+
 const char *convert_wifi_network_to_json(WifiNetwork *head);
 const char *message_type_convert_to_chars(message_type state);
+const char *topicSubscribe();
 message_type chars_convert_to_message_type(const char *state);
 input_type chars_convert_to_input_type(const char *state);
 Message json_to_message(const char *j);
