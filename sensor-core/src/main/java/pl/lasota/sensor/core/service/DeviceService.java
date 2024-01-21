@@ -1,19 +1,17 @@
 package pl.lasota.sensor.core.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pl.lasota.sensor.core.exceptions.NotFoundSensorConfigException;
-import pl.lasota.sensor.core.model.*;
-import pl.lasota.sensor.core.model.device.Device;
-import pl.lasota.sensor.core.model.device.DeviceConfig;
-import pl.lasota.sensor.core.model.sensor.ConnectedDevice;
-import pl.lasota.sensor.core.model.sensor.Sensor;
-import pl.lasota.sensor.core.model.sensor.Sensor.SensorBuilder;
-import pl.lasota.sensor.core.model.sensor.SingleAdcSignal;
-import pl.lasota.sensor.core.mqttPayloads.MessageFrame;
+import pl.lasota.sensor.core.models.*;
+import pl.lasota.sensor.core.models.device.Device;
+import pl.lasota.sensor.core.models.device.DeviceConfig;
+import pl.lasota.sensor.core.models.sensor.ConnectedDevice;
+import pl.lasota.sensor.core.models.sensor.Sensor;
+import pl.lasota.sensor.core.models.sensor.Sensor.SensorBuilder;
+import pl.lasota.sensor.core.models.mqtt.payload.MessageFrame;
 import pl.lasota.sensor.core.repository.MemberRepository;
 import pl.lasota.sensor.core.repository.DeviceConfigRepository;
 import pl.lasota.sensor.core.repository.SensorRecordingRepository;

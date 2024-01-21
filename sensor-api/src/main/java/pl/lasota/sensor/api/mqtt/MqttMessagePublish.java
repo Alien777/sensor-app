@@ -7,7 +7,7 @@ import org.eclipse.paho.mqttv5.client.IMqttClient;
 import org.eclipse.paho.mqttv5.common.MqttException;
 import org.eclipse.paho.mqttv5.common.MqttMessage;
 import org.springframework.stereotype.Component;
-import pl.lasota.sensor.core.mqttPayloads.MessageFrame;
+import pl.lasota.sensor.core.models.mqtt.payload.MessageFrame;
 
 @Component
 @Slf4j

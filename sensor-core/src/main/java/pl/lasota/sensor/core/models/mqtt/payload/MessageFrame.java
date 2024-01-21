@@ -1,4 +1,4 @@
-package pl.lasota.sensor.core.mqttPayloads;
+package pl.lasota.sensor.core.models.mqtt.payload;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -8,9 +8,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import pl.lasota.sensor.core.model.MessageType;
-import pl.lasota.sensor.core.model.sensor.Sensor;
-import pl.lasota.sensor.core.model.sensor.SingleAdcSignal;
+import pl.lasota.sensor.core.models.MessageType;
+import pl.lasota.sensor.core.models.sensor.Sensor;
+import pl.lasota.sensor.core.models.sensor.SingleAdcSignal;
 
 @Data
 @AllArgsConstructor

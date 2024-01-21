@@ -5,7 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import pl.lasota.sensor.core.model.device.Device;
+import pl.lasota.sensor.core.models.device.Device;
 
 import java.util.Optional;
 

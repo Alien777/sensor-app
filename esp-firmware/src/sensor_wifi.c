@@ -65,7 +65,7 @@ static void event_handler(void *arg, esp_event_base_t event_base, int32_t event_
     }
 }
 
-#include <string.h> // Dla funkcji strncpy
+
 
 void connect(const char *ssid, const char *password)
 {
@@ -169,7 +169,6 @@ WifiNetwork *scan()
     esp_err_t ret = esp_wifi_scan_start(&scanConfig, true);
     if (ret != ESP_OK) {
         ESP_LOGE(TAG_WIF, "esp_wifi_scan_start() failed with error: %s", esp_err_to_name(ret));
-        // Tutaj możesz zdecydować, co robić dalej - czy zwrócić błąd, czy spróbować ponownie itp.
     }
 
     uint16_t number = 0;
@@ -196,7 +195,7 @@ WifiNetwork *scan()
         current = &(network->next);
     }
 
-    // Nie ma potrzeby zwalniania pamięci, ponieważ jest ona statyczna
+
     return head;
 }
 
@@ -206,14 +205,12 @@ static void connect_task(void *pvParameters)
     {
         ESP_LOGI("WIFI", "Checking WiFi status...");
 
-        // Assuming configTICK_RATE_HZ is set to 1000.
-        const TickType_t xDelay = pdMS_TO_TICKS(10000); // 10 seconds
+        const TickType_t xDelay = pdMS_TO_TICKS(10000);
 
-        vTaskDelay(xDelay); // Delay the task for the specified time.
+        vTaskDelay(xDelay);
 
         ESP_LOGI("WIFI", "Attempting to acquire WiFi mutex.");
 
-        // Take the mutex before accessing shared resources.
         if (xSemaphoreTake(mutex, portMAX_DELAY))
         {
 
@@ -229,7 +226,6 @@ static void connect_task(void *pvParameters)
                 disableAaccessPoint();
             }
 
-            // Always release the mutex when done.
             xSemaphoreGive(mutex);
         }
         else
@@ -265,7 +261,7 @@ void connection_initial()
 }
 
 const char *get_mac_address()
-{ // Poprawiona deklaracja funkcji
+{
     uint8_t mac[6];
     esp_base_mac_addr_get(mac);
     sprintf(device_key, "%02X%02X%02X%02X%02X%02X", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);

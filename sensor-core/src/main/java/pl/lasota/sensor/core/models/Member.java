@@ -1,8 +1,8 @@
-package pl.lasota.sensor.core.model;
+package pl.lasota.sensor.core.models;
 
 import jakarta.persistence.*;
 import lombok.*;
-import pl.lasota.sensor.core.model.device.Device;
+import pl.lasota.sensor.core.models.device.Device;
 
 import java.util.HashSet;
 import java.util.Set;

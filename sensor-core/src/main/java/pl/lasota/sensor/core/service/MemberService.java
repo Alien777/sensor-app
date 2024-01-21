@@ -6,9 +6,9 @@ import org.springframework.transaction.annotation.Transactional;
 import pl.lasota.sensor.core.exceptions.SaveMemberException;
 import pl.lasota.sensor.core.exceptions.UserExistingException;
 import pl.lasota.sensor.core.exceptions.UserNotExistingException;
-import pl.lasota.sensor.core.model.Member;
-import pl.lasota.sensor.core.model.Provider;
-import pl.lasota.sensor.core.model.Role;
+import pl.lasota.sensor.core.models.Member;
+import pl.lasota.sensor.core.models.Provider;
+import pl.lasota.sensor.core.models.Role;
 import pl.lasota.sensor.core.repository.MemberRepository;
 
 import java.util.Optional;

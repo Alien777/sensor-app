@@ -2,13 +2,13 @@
 #ifndef SENSOR_WIFI_H
 #define SENSOR_WIFI_H
 
-#include <string.h> // Dla funkcji strncpy
+#include <string.h>
 #include <esp_wifi.h>
 #include <esp_event.h>
 #include <esp_log.h>
 #include <esp_mac.h>
 #include "sensor_structure.h"
-#define MAX_NETWORKS 20 // Maksymalna liczba sieci, którą chcemy obsłużyć
+#define MAX_NETWORKS 20
 
 #define EXAMPLE_ESP_MAXIMUM_RETRY 4
 

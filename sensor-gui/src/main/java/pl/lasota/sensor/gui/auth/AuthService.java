@@ -13,7 +13,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Service;
-import pl.lasota.sensor.core.model.Member;
+import pl.lasota.sensor.core.models.Member;
 import pl.lasota.sensor.gui.auth.jwt.JwtResolver;
 import pl.lasota.sensor.gui.auth.model.SessionStorage;
 import pl.lasota.sensor.gui.auth.model.User;

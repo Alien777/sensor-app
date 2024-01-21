@@ -1,10 +1,10 @@
-package pl.lasota.sensor.core.model.sensor;
+package pl.lasota.sensor.core.models.sensor;
 
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
-import pl.lasota.sensor.core.model.device.Device;
-import pl.lasota.sensor.core.model.MessageType;
+import pl.lasota.sensor.core.models.device.Device;
+import pl.lasota.sensor.core.models.MessageType;
 
 import java.time.OffsetDateTime;
 

@@ -33,7 +33,7 @@ static esp_err_t process_file_contents(FILE *file, void *arg)
     {
         httpd_resp_sendstr_chunk(req, lineRead);
     }
-    httpd_resp_sendstr_chunk(req, NULL); // End of response
+    httpd_resp_sendstr_chunk(req, NULL);
     return ESP_OK;
 }
 
@@ -44,19 +44,16 @@ static esp_err_t fileHandler(httpd_req_t *req)
     char filePath[128];
     snprintf(filePath, sizeof(filePath), "/spiffs/%s", fileName);
 
-    // Ustal typ MIME na podstawie rozszerzenia pliku
-    const char *type = "text/plain"; // domyślny typ
+    const char *type = "text/plain";
     if (strstr(fileName, ".html"))
         type = "text/html";
     else if (strstr(fileName, ".css"))
         type = "text/css";
     else if (strstr(fileName, ".js"))
         type = "application/javascript";
-    // Możesz dodać więcej typów MIME jeśli potrzebujesz
 
     httpd_resp_set_type(req, type);
 
-    // Przetwarzanie pliku z przekazaną funkcją pomocniczą
     return process_file(filePath, process_file_contents, req);
 }
 
@@ -87,11 +84,10 @@ static int scanHandler(httpd_req_t *req)
 static esp_err_t getInformation(httpd_req_t *req)
 {
 
-    char response[300]; // Increased buffer size for SSID + IP
+    char response[300];
     char *ssid = currentSSIDConnection();
-    char ip_str[16] = {0}; // Buffer for the IP address string
+    char ip_str[16] = {0};
 
-    // Get the network interface handle for the WiFi station interface.
     esp_netif_t *wifi_netif = esp_netif_get_handle_from_ifkey("WIFI_STA_DEF");
     if (wifi_netif == NULL)
     {
@@ -99,17 +95,17 @@ static esp_err_t getInformation(httpd_req_t *req)
         return ESP_FAIL;
     }
 
-    // Get IP address.
+
     esp_netif_ip_info_t ip_info;
     if (esp_netif_get_ip_info(wifi_netif, &ip_info) == ESP_OK)
     {
-        // Convert the IP address to string
+
         esp_ip4addr_ntoa(&ip_info.ip, ip_str, sizeof(ip_str));
     }
     else
     {
         ESP_LOGE(TAG_CONTROLLER, "Unable to get the IP address.");
-        strcpy(ip_str, "Unavailable"); // Use a placeholder in case of error
+        strcpy(ip_str, "Unavailable");
     }
 
     if (ssid == NULL)
@@ -138,7 +134,7 @@ static esp_err_t saveWifiCredentialHandler(httpd_req_t *req)
 
     while (remaining > 0)
     {
-        /* Read the data for the request */
+
         if ((ret = httpd_req_recv(req, content, MIN((unsigned int)remaining, sizeof(content)))) <= 0)
         {
             if (ret == HTTPD_SOCK_ERR_TIMEOUT)
@@ -148,7 +144,7 @@ static esp_err_t saveWifiCredentialHandler(httpd_req_t *req)
             return ESP_FAIL;
         }
 
-        /* Extract ssid and password from multipart content */
+
         char *ssid_start = strstr(content, "name=\"ssid\"\r\n\r\n");
         char *password_start = strstr(content, "name=\"password\"\r\n\r\n");
 
@@ -166,10 +162,10 @@ static esp_err_t saveWifiCredentialHandler(httpd_req_t *req)
     }
     ESP_LOGE("SS", "ssid %s password %s", ssid, password);
     save_wifi_credentials(ssid, password);
-    /* Use ssid and password to connect */
+
     connect(ssid, password);
 
-    /* Send a response back to the client */
+
     const char *resp_str = "Trying to connect with provided SSID and password";
     httpd_resp_send(req, resp_str, strlen(resp_str));
 
@@ -185,7 +181,7 @@ static esp_err_t saveServerKeyHandler(httpd_req_t *req)
 
     while (remaining > 0)
     {
-        /* Read the data for the request */
+
         if ((ret = httpd_req_recv(req, content, MIN((unsigned int)remaining, sizeof(content)))) <= 0)
         {
             if (ret == HTTPD_SOCK_ERR_TIMEOUT)
@@ -195,7 +191,7 @@ static esp_err_t saveServerKeyHandler(httpd_req_t *req)
             return ESP_FAIL;
         }
 
-        /* Extract ssid and password from multipart content */
+
         char *server_key = strstr(content, "name=\"server_key\"\r\n\r\n");
 
         if (server_key)

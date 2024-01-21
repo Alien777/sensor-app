@@ -6,9 +6,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.eclipse.paho.mqttv5.common.MqttException;
 import org.springframework.stereotype.Component;
 import pl.lasota.sensor.core.exceptions.NotFoundSensorConfigException;
-import pl.lasota.sensor.core.mqttPayloads.MessageFrame;
-import pl.lasota.sensor.core.model.MessageType;
-import pl.lasota.sensor.core.model.device.DeviceConfig;
+import pl.lasota.sensor.core.models.mqtt.payload.MessageFrame;
+import pl.lasota.sensor.core.models.device.DeviceConfig;
 import pl.lasota.sensor.core.service.DeviceService;
 
 import java.io.IOException;

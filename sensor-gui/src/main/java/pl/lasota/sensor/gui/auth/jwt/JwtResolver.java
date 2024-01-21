@@ -5,15 +5,12 @@ import io.jsonwebtoken.*;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.stereotype.Component;
-import pl.lasota.sensor.core.model.Role;
 import pl.lasota.sensor.gui.auth.model.User;
 import pl.lasota.sensor.gui.config.properties.SensorProperties;
 import pl.lasota.sensor.gui.exceptions.AuthException;
 
 import javax.crypto.SecretKey;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 @Component
 @RequiredArgsConstructor

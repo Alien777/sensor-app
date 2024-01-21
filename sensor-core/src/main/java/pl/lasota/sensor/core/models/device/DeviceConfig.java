@@ -1,4 +1,4 @@
-package pl.lasota.sensor.core.model.device;
+package pl.lasota.sensor.core.models.device;
 
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import jakarta.persistence.*;

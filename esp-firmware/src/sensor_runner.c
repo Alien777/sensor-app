@@ -8,7 +8,6 @@ static void freeOutputTask(OutputTask *task);
 static void closeAllTasks();
 static void addTask(TaskHandle_t task, OutputTask *outputTask);
 
-// Tablica do przechowywania identyfikatorów zadań
 TaskHandle_t tasks[MAX_TASKS];
 OutputTask *outputDataTask[MAX_TASKS];
 int taskCount = 0;

@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import pl.lasota.sensor.api.mqtt.filter.Chain;
 import pl.lasota.sensor.api.mqtt.filter.Filter;
-import pl.lasota.sensor.core.mqttPayloads.MessageFrame;
+import pl.lasota.sensor.core.models.mqtt.payload.MessageFrame;
 
 @Component
 @Slf4j

@@ -81,7 +81,7 @@ const char *convert_wifi_network_to_json(WifiNetwork *head)
     }
     if (writePtr != jsonBuffer && *(writePtr - 1) == ',')
     {
-        writePtr--; // Usuwanie końcowego przecinka
+        writePtr--;
     }
     *writePtr++ = ']';
     *writePtr = '\0';
@@ -90,7 +90,7 @@ const char *convert_wifi_network_to_json(WifiNetwork *head)
 
 Message json_to_message(const char *j)
 {
-    Message msg = {0}; // Inicjalizacja struktury zerami
+    Message msg = {0};
     cJSON *json = cJSON_Parse(j);
     if (json == NULL)
     {
@@ -101,7 +101,7 @@ Message json_to_message(const char *j)
         return msg;
     }
 
-    // Parsowanie i przypisywanie wartości do struktury
+
     cJSON *member_key = cJSON_GetObjectItemCaseSensitive(json, MEMBER_KEY);
     if (member_key == NULL)
     {

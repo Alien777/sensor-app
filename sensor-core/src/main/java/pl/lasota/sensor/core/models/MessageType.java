@@ -1,4 +1,4 @@
-package pl.lasota.sensor.core.model;
+package pl.lasota.sensor.core.models;
 
 public enum MessageType {
 

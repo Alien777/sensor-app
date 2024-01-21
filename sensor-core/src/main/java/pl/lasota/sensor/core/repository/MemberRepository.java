@@ -3,8 +3,8 @@ package pl.lasota.sensor.core.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import pl.lasota.sensor.core.model.Member;
-import pl.lasota.sensor.core.model.Provider;
+import pl.lasota.sensor.core.models.Member;
+import pl.lasota.sensor.core.models.Provider;
 
 import java.util.Optional;
 
