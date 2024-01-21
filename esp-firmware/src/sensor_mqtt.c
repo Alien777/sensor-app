@@ -93,9 +93,8 @@ void mqtt_initial()
         client = NULL;
     }
 
-    char server_uri[50]; // Zakładałem adres będzie miał maksymalnie 50 znaków
+    char server_uri[50];
 
-    // Następnie gdzieś w kodzie, przypisz wartość do tej zmiennej
     strcpy(server_uri, "mqtt://");
     strcat(server_uri, config.server_ip);
     strcat(server_uri, ":1883");

@@ -98,7 +98,6 @@ static void enableAccessPoint()
     {
         ESP_LOGI(TAG_WIF, "Enabling AP");
         esp_wifi_stop();
-        // esp_wifi_disconnect();
 
         wifi_config_t ap_config = {};
         strncpy((char *)ap_config.ap.ssid, WIFI_AP_SSID, 32);         // Rzutowanie w stylu C
@@ -109,7 +108,7 @@ static void enableAccessPoint()
         ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_APSTA));
         ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_AP, &ap_config));
         ESP_ERROR_CHECK(esp_wifi_start());
-        ap_enabled = true; // Aktualizuj stan zmiennej
+        ap_enabled = true;
     }
 }
 
@@ -135,7 +134,6 @@ char *currentSSIDConnection()
     wifi_ap_record_t ap_info;
     if (esp_wifi_sta_get_ap_info(&ap_info) != ESP_OK)
     {
-        // Nie jest połączony z żadnym AP
         return NULL;
     }
     if (esp_wifi_get_config(WIFI_IF_STA, &config) != ESP_OK)

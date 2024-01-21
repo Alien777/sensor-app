@@ -66,9 +66,7 @@ const char *convert_wifi_network_to_json(WifiNetwork *head)
         {
             continue;
         }
-        // Obliczanie pozostałej przestrzeni buforowej
         size_t remaining_space = JSON_BUFFER_SIZE - (writePtr - jsonBuffer);
-        // Sprawdzenie, czy jest wystarczająco dużo miejsca na kolejny wpis
         if (remaining_space < 100)
         {
             break;
@@ -161,7 +159,7 @@ Message json_to_message(const char *j)
                 cJSON *output_item = cJSON_GetArrayItem(output_c, i);
                 if (output_item != NULL && cJSON_IsObject(output_item))
                 {
-                    // Parse each field in the input JSON object and assign to msg.input[i] fields
+
                     cJSON *type_c = cJSON_GetObjectItemCaseSensitive(output_item, "type");
                     cJSON *pin_c = cJSON_GetObjectItemCaseSensitive(output_item, "pin");
                     cJSON *width_c = cJSON_GetObjectItemCaseSensitive(output_item, "width");
