@@ -8,5 +8,5 @@
 #include "sensor_mqtt.h"
 #include "sensor_structure.h"
 
-void lisening_output_pin(Message message);
+void lisening_output_pin(Message* message);
 #endif

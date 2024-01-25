@@ -1,16 +1,21 @@
+import type {RuntimeConfig} from "nuxt/schema";
+
 export interface UserInfo {
     fullName: string
     id: number,
     roles: Array<string>
 }
 
-export const storageUtils = () => {
-    const {cookieApp} = configUtils();
+export const storageUtils = (runtimeConfig: any) => {
+    const {cookieApp} = configUtils(runtimeConfig);
 
     const age: number = 86400;
     const tokenCookie = useCookie("token", {
         maxAge: age,
-        expires: new Date(new Date().getTime() + age * 1000)
+        expires: new Date(new Date().getTime() + age * 1000),
+        secure: false, // Ustaw true, jeśli używasz HTTPS
+        httpOnly: false, // Ustaw true, aby zapobiec dostępowi do cookie przez JavaScript
+        sameSite: 'lax', // Opcje: 'lax', 'strict', 'none'
     });
 
     const userCookie = useCookie("user", {

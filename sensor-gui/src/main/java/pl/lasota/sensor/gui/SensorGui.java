@@ -9,7 +9,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @SpringBootApplication
 @ComponentScan(value = {"pl.lasota.sensor.core", "pl.lasota.sensor.gui"})
-@EntityScan(value = {"pl.lasota.sensor.core.model"})
+@EntityScan(value = {"pl.lasota.sensor.core.models"})
 @EnableJpaRepositories("pl.lasota.sensor.core.repository")
 public class SensorGui {
     public static void main(String[] args) {

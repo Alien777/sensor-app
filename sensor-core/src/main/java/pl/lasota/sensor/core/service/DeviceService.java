@@ -18,6 +18,7 @@ import pl.lasota.sensor.core.repository.SensorRecordingRepository;
 import pl.lasota.sensor.core.repository.DeviceRepository;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.Optional;
 
 
@@ -51,7 +52,6 @@ public class DeviceService {
         Sensor sensor = sensorBuilder.time(OffsetDateTime.now())
                 .device(device)
                 .messageType(messageFrame.getMessageType())
-                .device(device)
                 .build();
 
         device.getSensor().add(sensor);
@@ -62,11 +62,13 @@ public class DeviceService {
     }
 
     @Transactional
-    public void insertDevice(String memberKey, String deviceKey) {
+    public void insertDevice(String memberKey, String deviceKey, String version) {
         Optional<Member> memberByMemberKey = mr.findMemberByMemberKey(memberKey);
         memberByMemberKey.ifPresent(member -> {
             Device device = Device.builder()
                     .member(member)
+                    .version(version)
+                    .version(deviceKey)
                     .deviceKey(deviceKey)
                     .build();
 
@@ -78,14 +80,34 @@ public class DeviceService {
         });
     }
 
+    @Transactional
+    public boolean updateVersion(String memberKey, String deviceKey, String version) {
+        if (version == null || version.isEmpty()) {
+            return false;
+        }
+        Optional<Device> deviceOptional = dr.findSensorBy(memberKey, deviceKey);
+        if (deviceOptional.isEmpty()) {
+            return false;
+        }
+
+        Device device = deviceOptional.get();
+        if (version.equals(device.getVersion())) {
+            return false;
+        }
+
+        device.setVersion(version);
+        return true;
+    }
+
     public boolean isDeviceExisting(String memberKey, String deviceKey) {
         return dr.existsSensor(memberKey, deviceKey);
     }
 
-    public DeviceConfig getLastDeviceConfig(String deviceKey) throws NotFoundSensorConfigException {
-        return dcr.findLastSensorConfig(deviceKey).orElseThrow(NotFoundSensorConfigException::new);
+    public DeviceConfig getLastDeviceConfig(String deviceKey, String version) throws NotFoundSensorConfigException {
+        return dcr.findLastSensorConfig(deviceKey, version).orElseThrow(NotFoundSensorConfigException::new);
     }
 
-
-
+    public List<Device> getAllDevice(String memberKey) {
+        return dr.findAllForMember(memberKey);
+    }
 }

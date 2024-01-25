@@ -22,8 +22,9 @@ public class Utils {
 
     public void sendConfig(MessageFrame request) {
         try {
-            DeviceConfig lastDeviceConfig = deviceService.getLastDeviceConfig(request.getDeviceKey());
-            MessageFrame response = MessageFrame.createConfigPayload(request.getDeviceKey(), request.getMemberKey(),lastDeviceConfig.getConfig());
+            DeviceConfig lastDeviceConfig = deviceService.getLastDeviceConfig(request.getDeviceKey(), request.getVersion());
+            MessageFrame response = MessageFrame.createConfigPayload(lastDeviceConfig.getForVersion(), request.getDeviceKey(),
+                    request.getMemberKey(), lastDeviceConfig.getConfig());
             mqttMessagePublish.publish(response);
         } catch (MqttException e) {
             log.error("Problem with send config file", e);

@@ -14,16 +14,17 @@ import pl.lasota.sensor.api.mqtt.model.MessagePayload;
 @RequiredArgsConstructor
 public class MqttMessageReceiver {
 
-
     private final ApplicationContext ac;
 
     @Async
     public void received(MessagePayload messagePayload) {
+
         FilterChain filterChain = new FilterChain()
                 .addFilter(ac.getBean(MessageMappingFilter.class))
                 .addFilter(ac.getBean(IsExistMemberFilter.class))
                 .addFilter(ac.getBean(SaveSensorFilter.class))
-                .addFilter(ac.getBean(SaveSensorValueFilter.class));
+                .addFilter(ac.getBean(SaveSensorValueFilter.class))
+                .addFilter(ac.getBean(LastStepFilter.class));
 
         log.info("Received messageFrame from {}, {}", messagePayload.topic(), messagePayload.messageFrame());
         filterChain.doFilter(messagePayload.messageFrame());

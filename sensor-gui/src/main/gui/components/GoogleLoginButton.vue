@@ -11,7 +11,8 @@
 </template>
 
 <script setup lang="ts">
-const {isAuth} = authUtils();
+const runtimeConfig = useRuntimeConfig();
+const {isAuth} = authUtils(runtimeConfig);
 
-const {apiHost} = configUtils()
+const {apiHost} = configUtils(runtimeConfig)
 </script>

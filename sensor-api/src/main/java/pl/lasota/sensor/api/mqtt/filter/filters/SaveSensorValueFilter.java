@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import pl.lasota.sensor.api.mqtt.filter.Chain;
+import pl.lasota.sensor.api.mqtt.filter.Context;
 import pl.lasota.sensor.api.mqtt.filter.Filter;
 import pl.lasota.sensor.api.mqtt.Utils;
 import pl.lasota.sensor.core.models.mqtt.payload.MessageFrame;
@@ -19,19 +20,17 @@ import pl.lasota.sensor.core.service.DeviceService;
 public class SaveSensorValueFilter implements Filter<MessageFrame, MessageFrame> {
 
     private final DeviceService deviceService;
-    private final Utils utils;
 
     @Override
-    public void execute(MessageFrame request, Chain<MessageFrame> chain) {
-
+    public void execute(MessageFrame request, Context context, Chain<MessageFrame> chain) {
         if (request.getMessageType().equals(MessageType.DEVICE_CONNECTED)) {
-            utils.sendConfig(request);
+            context.setShouldSendConfig(true);
         }
-
         try {
             deviceService.insertReading(request);
         } catch (JsonProcessingException e) {
             log.error("Problem with save sensor value ", e);
         }
+        chain.doFilter(request);
     }
 }

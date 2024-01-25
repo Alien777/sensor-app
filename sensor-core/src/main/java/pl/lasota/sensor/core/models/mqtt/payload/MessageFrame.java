@@ -23,6 +23,10 @@ public class MessageFrame {
     @JsonIgnore
     private static final String PIN = "pin";
 
+
+    @JsonProperty("version")
+    private String version;
+
     @JsonProperty("device_key")
     private String deviceKey;
 
@@ -46,8 +50,8 @@ public class MessageFrame {
     }
 
     @JsonIgnore
-    public static MessageFrame createConfigPayload(String deviceKey, String memberKey, String payload) throws JsonProcessingException {
-        return new MessageFrame(deviceKey, memberKey, MessageType.CONFIG, om.readTree(payload));
+    public static MessageFrame createConfigPayload(String version, String deviceKey, String memberKey, String payload) throws JsonProcessingException {
+        return new MessageFrame(version, deviceKey, memberKey, MessageType.CONFIG, om.readTree(payload));
     }
 
     @JsonIgnore

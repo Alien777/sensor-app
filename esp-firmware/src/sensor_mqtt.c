@@ -38,8 +38,14 @@ static void mqttEventHandler(void *handler_args, esp_event_base_t base, int32_t 
         if (strncmp(event->topic, topicSubscribe(), event->topic_len) == 0)
         {
             ESP_LOGI(TAG_MQTT, "Received data: %s", event->data);
-            Message message = json_to_message(event->data);
-            lisening_output_pin(message);
+            Message message = {0};
+            esp_err_t err = json_to_message(event->data, &message);
+            if (err == ESP_FAIL)
+            {
+                ESP_LOGE(TAG_MQTT, "Problem with convert message");
+                break;
+            }
+            lisening_output_pin(&message);
         }
         break;
     case MQTT_EVENT_ERROR:
@@ -61,7 +67,7 @@ void publish(const char *message, message_type type)
     const char *message_type = message_type_convert_to_chars(type);
 
     int requiredSize = snprintf(NULL, 0,
-                                "{\"%s\":\"%s\",\"%s\":\"%s\",\"payload\":%s,\"message_type\":\"%s\"}",
+                                "{\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"payload\":%s,\"message_type\":\"%s\"}", "version", VERSION_FIRMWARE,
                                 DEVICE_KEY, device_key, MEMBER_KEY, config.member_key, message, message_type) +
                        1;
 
@@ -70,7 +76,7 @@ void publish(const char *message, message_type type)
     if (json != NULL)
     {
         snprintf(json, requiredSize,
-                 "{\"%s\":\"%s\",\"%s\":\"%s\",\"payload\":%s,\"message_type\":\"%s\"}",
+                 "{\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"payload\":%s,\"message_type\":\"%s\"}", "version", VERSION_FIRMWARE,
                  DEVICE_KEY, device_key, MEMBER_KEY, config.member_key, message, message_type);
         esp_mqtt_client_publish(client, PUBLISH_TOPIC, json, 0, 2, 0);
         free(json);

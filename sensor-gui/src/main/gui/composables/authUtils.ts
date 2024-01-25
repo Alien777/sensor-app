@@ -1,12 +1,14 @@
-import {storageUtils, UserInfo} from "~/composables/storageUtils";
+import {storageUtils, type UserInfo} from "~/composables/storageUtils";
 
-export const authUtils = () => {
-    let {fetchApi} = fetchUtils();
-    const {setToken, setUser, clear, getToken, getUser, getCookieApp} = storageUtils();
+export const authUtils = (runtimeConfig: any) => {
+    let {fetchApi} = fetchUtils(runtimeConfig);
+    const {setToken, setUser, clear, getToken, getUser, getCookieApp} = storageUtils(runtimeConfig);
 
     const logout = () => {
         fetchApi('/auth/logout', {method: 'delete'}).finally(() => clear())
-            .then(value => navigateTo("/"))
+            .then(() => {
+                navigateTo("/");
+            })
     }
 
     const authNavigate = async () => {
@@ -80,7 +82,6 @@ export const authUtils = () => {
     }
 
     const username = () => {
-        console.log(getUser()?.fullName);
         return getUser()?.fullName as string;
     }
 

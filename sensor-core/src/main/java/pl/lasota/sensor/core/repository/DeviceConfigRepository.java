@@ -12,6 +12,6 @@ import java.util.Optional;
 @Repository
 public interface DeviceConfigRepository extends JpaRepository<DeviceConfig, Long> {
 
-    @Query("SELECT s FROM DeviceConfig s WHERE s.device.deviceKey = :deviceKey ORDER BY s.time DESC LIMIT 1")
-    Optional<DeviceConfig> findLastSensorConfig(@Param("deviceKey") String deviceKey);
+    @Query("SELECT s FROM DeviceConfig s WHERE s.device.deviceKey = :deviceKey AND s.forVersion = :version ORDER BY s.time DESC LIMIT 1")
+    Optional<DeviceConfig> findLastSensorConfig(@Param("deviceKey") String deviceKey, @Param("version") String version);
 }

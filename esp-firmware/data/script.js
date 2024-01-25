@@ -75,8 +75,6 @@ document.addEventListener('DOMContentLoaded', function () {
         })
             .then(response => response.text())
             .then(data => {
-                // W tym miejscu możesz wyświetlić odpowiedź serwera, np. komunikat o pomyślnym zapisie
-                console.log(data);
             })
             .catch(error => {
                 console.error('Error:', error);

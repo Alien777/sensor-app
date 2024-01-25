@@ -1,6 +1,9 @@
 package pl.lasota.sensor.core.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pl.lasota.sensor.core.exceptions.SaveMemberException;
@@ -12,11 +15,13 @@ import pl.lasota.sensor.core.models.Role;
 import pl.lasota.sensor.core.repository.MemberRepository;
 
 import java.util.Optional;
+import java.util.function.Supplier;
 
 
 @Service
 @RequiredArgsConstructor
 public class MemberService {
+
     private final MemberRepository memberRepository;
     private final GeneratorService generateKeyPair;
 
@@ -62,5 +67,11 @@ public class MemberService {
 
     public boolean isMemberExistByMemberKey(String memberKey) {
         return memberRepository.existsByMemberKey(memberKey);
+    }
+
+    public Member loggedUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        UserDetails principal = (UserDetails) authentication.getPrincipal();
+        return memberRepository.findByEmail(principal.getUsername()).orElse(null);
     }
 }

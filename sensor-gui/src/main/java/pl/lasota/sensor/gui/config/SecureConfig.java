@@ -49,6 +49,7 @@ public class SecureConfig {
                             .authenticated();
                 })
                 .logout(AbstractHttpConfigurer::disable)
+
                 .oauth2Login(a -> a
                         .successHandler(sensorAuthenticationSuccessHandler))
                 .formLogin(AbstractHttpConfigurer::disable)

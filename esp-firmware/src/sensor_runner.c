@@ -47,19 +47,19 @@ static void readAnalog(void *pvParameters)
         }
     }
 }
-void lisening_output_pin(Message message)
+void lisening_output_pin(Message* message)
 {
-    if (message.message_type != CONFIG)
+    if (message->message_type != CONFIG)
     {
         return;
     }
     closeAllTasks();
 
-    for (int i = 0; i < message.outputSensor; i++)
+    for (int i = 0; i < message->outputSensor; i++)
     {
-        if (message.output[i].type == ANALOG)
+        if (message->output[i].type == ANALOG)
         {
-            OutputTask *outputTask = deepCopyMessageToOutputTask(&message, i);
+            OutputTask *outputTask = deepCopyMessageToOutputTask(message, i);
             if (outputTask)
             {
                 TaskHandle_t taskHandle;

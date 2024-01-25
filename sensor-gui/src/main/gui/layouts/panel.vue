@@ -18,65 +18,17 @@
           <div class="q-scrollarea" style="height: calc(100% - 204px); margin-top: 204px;">
             <div class="q-scrollarea__container scroll relative-position fit hide-scrollbar">
               <div class="q-scrollarea__content absolute"><!---->
-                <div class="q-item__label q-item__label--header">Right Drawer</div>
-                <div class="text-grey" style="padding: 25px 16px 16px;"><p><em>Right Drawer has intended scroll</em></p>
-                  <p><em>Right Drawer has intended scroll</em></p>
-                  <p><em>Right Drawer has intended scroll</em></p>
-                  <p><em>Right Drawer has intended scroll</em></p>
-                  <p><em>Right Drawer has intended scroll</em></p>
-                  <p><em>Right Drawer has intended scroll</em></p>
-                  <p><em>Right Drawer has intended scroll</em></p>
-                  <p><em>Right Drawer has intended scroll</em></p>
-                  <p><em>Right Drawer has intended scroll</em></p>
-                  <p><em>Right Drawer has intended scroll</em></p>
-                  <p><em>Right Drawer has intended scroll</em></p>
-                  <p><em>Right Drawer has intended scroll</em></p>
-                  <p><em>Right Drawer has intended scroll</em></p>
-                  <p><em>Right Drawer has intended scroll</em></p>
-                  <p><em>Right Drawer has intended scroll</em></p>
-                  <p><em>Right Drawer has intended scroll</em></p>
-                  <p><em>Right Drawer has intended scroll</em></p>
-                  <p><em>Right Drawer has intended scroll</em></p>
-                  <p><em>Right Drawer has intended scroll</em></p>
-                  <p><em>Right Drawer has intended scroll</em></p>
-                  <p><em>Right Drawer has intended scroll</em></p>
-                  <p><em>Right Drawer has intended scroll</em></p>
-                  <p><em>Right Drawer has intended scroll</em></p>
-                  <p><em>Right Drawer has intended scroll</em></p>
-                  <p><em>Right Drawer has intended scroll</em></p>
-                  <p><em>Right Drawer has intended scroll</em></p>
-                  <p><em>Right Drawer has intended scroll</em></p>
-                  <p><em>Right Drawer has intended scroll</em></p>
-                  <p><em>Right Drawer has intended scroll</em></p>
-                  <p><em>Right Drawer has intended scroll</em></p>
-                  <p><em>Right Drawer has intended scroll</em></p>
-                  <p><em>Right Drawer has intended scroll</em></p>
-                  <p><em>Right Drawer has intended scroll</em></p>
-                  <p><em>Right Drawer has intended scroll</em></p>
-                  <p><em>Right Drawer has intended scroll</em></p>
-                  <p><em>Right Drawer has intended scroll</em></p>
-                  <p><em>Right Drawer has intended scroll</em></p>
-                  <p><em>Right Drawer has intended scroll</em></p>
-                  <p><em>Right Drawer has intended scroll</em></p>
-                  <p><em>Right Drawer has intended scroll</em></p>
-                  <p><em>Right Drawer has intended scroll</em></p>
-                  <p><em>Right Drawer has intended scroll</em></p>
-                  <p><em>Right Drawer has intended scroll</em></p>
-                  <p><em>Right Drawer has intended scroll</em></p>
-                  <p><em>Right Drawer has intended scroll</em></p>
-                  <p><em>Right Drawer has intended scroll</em></p>
-                  <p><em>Right Drawer has intended scroll</em></p>
-                  <p><em>Right Drawer has intended scroll</em></p>
-                  <p><em>Right Drawer has intended scroll</em></p>
-                  <p><em>Right Drawer has intended scroll</em></p></div>
-              </div><!----></div><!---->
+                <div class="text-grey" style="padding: 25px 16px 16px;">
+                 <NuxtLink to="/device">Devices</NuxtLink>
+                </div>
+              </div>
+            </div>
           </div>
-
           <UserInfoPanel/>
         </div>
       </aside>
     </q-drawer>
-    <q-page-container>
+    <q-page-container style="margin: 20px">
       <NuxtPage></NuxtPage>
     </q-page-container>
   </q-layout>

@@ -5,6 +5,9 @@ server:
       cookie:
         name: "SENSOR_APP_COOKIES"
         max-age: 360000000
+        same-site: lax
+        http-only: false
+
 #logging:
 #    level:
 #      org: DEBUG

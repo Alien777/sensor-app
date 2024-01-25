@@ -19,7 +19,8 @@
 </template>
 
 <script setup lang="ts">
-const {isAuth, username, hasRole, logout} = authUtils();
+const runtimeConfig = useRuntimeConfig();
+const {isAuth, username, hasRole, logout} = authUtils(runtimeConfig);
 
-const {apiHost} = configUtils()
+const {apiHost} = configUtils(runtimeConfig)
 </script>

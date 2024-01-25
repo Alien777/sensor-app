@@ -1,5 +1,6 @@
 export default defineNuxtRouteMiddleware(async (to, from) => {
-    const {auth} = authUtils();
+    const runtimeConfig = useRuntimeConfig();
+    const {auth} = authUtils(runtimeConfig);
     const promise = await auth();
     if (promise != null) {
         return promise;

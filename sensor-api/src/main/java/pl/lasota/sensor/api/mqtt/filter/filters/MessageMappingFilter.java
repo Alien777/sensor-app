@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import pl.lasota.sensor.api.mqtt.filter.Chain;
+import pl.lasota.sensor.api.mqtt.filter.Context;
 import pl.lasota.sensor.api.mqtt.filter.Filter;
 import pl.lasota.sensor.core.models.mqtt.payload.MessageFrame;
 
@@ -15,7 +16,7 @@ import pl.lasota.sensor.core.models.mqtt.payload.MessageFrame;
 public class MessageMappingFilter implements Filter<String, MessageFrame> {
 
     @Override
-    public void execute(String request, Chain<MessageFrame> chain) {
+    public void execute(String request,  Context context, Chain<MessageFrame> chain) {
         ObjectMapper mapper = new ObjectMapper();
         try {
             MessageFrame messageFrame = mapper.readValue(request, MessageFrame.class);

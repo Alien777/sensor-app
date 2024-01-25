@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import pl.lasota.sensor.core.models.device.Device;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -17,4 +18,7 @@ public interface DeviceRepository extends JpaRepository<Device, Long> {
 
     @Query("SELECT s FROM Device s WHERE s.member.memberKey = :memberKey AND s.deviceKey = :deviceKey")
     Optional<Device> findSensorBy(@Param("memberKey") String memberKey, @Param("deviceKey") String deviceKey);
+
+    @Query("SELECT s FROM Device s WHERE s.member.memberKey = :memberKey")
+    List<Device> findAllForMember(@Param("memberKey") String memberKey);
 }

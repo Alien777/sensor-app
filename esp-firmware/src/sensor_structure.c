@@ -89,9 +89,9 @@ const char *convert_wifi_network_to_json(WifiNetwork *head)
     return jsonBuffer;
 }
 
-Message json_to_message(const char *j)
+esp_err_t json_to_message(const char *j, Message *msg)
 {
-    Message msg = {0};
+
     cJSON *json = cJSON_Parse(j);
     if (json == NULL)
     {
@@ -99,35 +99,54 @@ Message json_to_message(const char *j)
         if (error_ptr != NULL)
         {
         }
-        return msg;
+        msg = NULL;
+        return ESP_FAIL;
     }
 
     cJSON *member_key = cJSON_GetObjectItemCaseSensitive(json, MEMBER_KEY);
     if (member_key == NULL)
     {
         cJSON_Delete(json);
-        return msg;
+        return ESP_FAIL;
     }
     cJSON *device_key = cJSON_GetObjectItemCaseSensitive(json, DEVICE_KEY);
     if (device_key == NULL)
     {
         cJSON_Delete(json);
-        return msg;
+        return ESP_FAIL;
     }
     cJSON *msg_type = cJSON_GetObjectItemCaseSensitive(json, "message_type");
     if (msg_type == NULL)
     {
         cJSON_Delete(json);
-        return msg;
+        return ESP_FAIL;
     }
+
+    cJSON *version = cJSON_GetObjectItemCaseSensitive(json, "version");
+    if (version == NULL)
+    {
+        cJSON_Delete(json);
+        return ESP_FAIL;
+    }
+
+    if (cJSON_IsString(version) && (version->valuestring != NULL))
+    {
+        strncpy(msg->version, version->valuestring, sizeof(msg->version) - 1);
+    }
+    else
+    {
+        cJSON_Delete(json);
+        return ESP_FAIL;
+    }
+
     if (cJSON_IsString(member_key) && (member_key->valuestring != NULL))
     {
-        strncpy(msg.member_key, member_key->valuestring, sizeof(msg.member_key) - 1);
+        strncpy(msg->member_key, member_key->valuestring, sizeof(msg->member_key) - 1);
     }
 
     if (cJSON_IsString(device_key) && (device_key->valuestring != NULL))
     {
-        strncpy(msg.device_key, device_key->valuestring, sizeof(msg.device_key) - 1);
+        strncpy(msg->device_key, device_key->valuestring, sizeof(msg->device_key) - 1);
     }
 
     if (cJSON_IsString(msg_type) && (msg_type->valuestring != NULL))
@@ -136,25 +155,26 @@ Message json_to_message(const char *j)
         if (type == UNKNOWN)
         {
             cJSON_Delete(json);
-            return msg;
+            return ESP_FAIL;
         }
-        msg.message_type = type;
+        msg->message_type = type;
     }
-    if (msg.message_type == CONFIG)
+    ESP_LOGI("DSAD", "DSDA");
+    if (msg->message_type == CONFIG)
     {
 
         cJSON *payload_c = cJSON_GetObjectItem(json, "payload");
         if (payload_c == NULL)
         {
             cJSON_Delete(json);
-            return msg;
+            return ESP_FAIL;
         }
         cJSON *output_c = cJSON_GetObjectItemCaseSensitive(payload_c, "output");
         if (output_c != NULL && cJSON_IsArray(output_c))
         {
             int input_count = cJSON_GetArraySize(output_c);
-            msg.outputSensor = MIN(input_count, MAX_S);
-            for (int i = 0; i < msg.outputSensor; ++i)
+            msg->outputSensor = MIN(input_count, MAX_S);
+            for (int i = 0; i < msg->outputSensor; ++i)
             {
                 cJSON *output_item = cJSON_GetArrayItem(output_c, i);
                 if (output_item != NULL && cJSON_IsObject(output_item))
@@ -169,31 +189,31 @@ Message json_to_message(const char *j)
                     cJSON *max_adc_c = cJSON_GetObjectItemCaseSensitive(output_item, "max_adc");
                     if (type_c != NULL && cJSON_IsString(type_c))
                     {
-                        msg.output[i].type = chars_convert_to_input_type(type_c->valuestring);
+                        msg->output[i].type = chars_convert_to_input_type(type_c->valuestring);
                     }
                     if (pin_c != NULL && cJSON_IsNumber(pin_c))
                     {
-                        msg.output[i].pin = pin_c->valueint;
+                        msg->output[i].pin = pin_c->valueint;
                     }
                     if (width_c != NULL && cJSON_IsNumber(width_c))
                     {
-                        msg.output[i].width = width_c->valuedouble;
+                        msg->output[i].width = width_c->valuedouble;
                     }
                     if (atten_c != NULL && cJSON_IsNumber(atten_c))
                     {
-                        msg.output[i].atten = atten_c->valuedouble;
+                        msg->output[i].atten = atten_c->valuedouble;
                     }
                     if (sampling_c != NULL && cJSON_IsNumber(sampling_c))
                     {
-                        msg.output[i].sampling = sampling_c->valueint;
+                        msg->output[i].sampling = sampling_c->valueint;
                     }
                     if (min_adc_c != NULL && cJSON_IsNumber(min_adc_c))
                     {
-                        msg.output[i].min_adc = min_adc_c->valueint;
+                        msg->output[i].min_adc = min_adc_c->valueint;
                     }
                     if (max_adc_c != NULL && cJSON_IsNumber(max_adc_c))
                     {
-                        msg.output[i].max_adc = max_adc_c->valueint;
+                        msg->output[i].max_adc = max_adc_c->valueint;
                     }
                 }
             }
@@ -201,7 +221,7 @@ Message json_to_message(const char *j)
     }
 
     cJSON_Delete(json);
-    return msg;
+    return ESP_OK;
 }
 
 const char *topicSubscribe()

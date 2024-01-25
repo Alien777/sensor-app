@@ -7,6 +7,9 @@
 #define WIFI_PASS "wifi_pass"
 #define WIFI_SSID "wifi_ssid"
 #define PUBLISH_TOPIC "server"
+
+#define VERSION_FIRMWARE "1.0"
+
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 #define JSON_BUFFER_SIZE 512
 
@@ -17,6 +20,7 @@
 #include <cJSON.h>
 #include <stdbool.h>
 #include <esp_log.h>
+#include <esp_err.h>
 
 typedef struct WifiNetwork WifiNetwork;
 typedef struct OutputTask OutputTask;
@@ -60,6 +64,7 @@ struct Message
 {
     char member_key[17];
     char device_key[13];
+    char version[8];
     message_type message_type;
     Output output[MAX_S];
     int outputSensor;
@@ -87,5 +92,5 @@ const char *message_type_convert_to_chars(message_type state);
 const char *topicSubscribe();
 message_type chars_convert_to_message_type(const char *state);
 input_type chars_convert_to_input_type(const char *state);
-Message json_to_message(const char *j);
+esp_err_t json_to_message(const char *j, Message* msg);
 #endif

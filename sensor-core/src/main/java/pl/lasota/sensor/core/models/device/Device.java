@@ -28,12 +28,16 @@ public class Device {
     @Column(name = "name")
     private String name;
 
+    @Column(name = "version", nullable = false)
+    private String version;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", updatable = false)
     private Member member;
 
     @OneToMany(mappedBy = "device", fetch = FetchType.LAZY)
     private List<Sensor> sensor = new ArrayList<>();
+
 
 
     @Override

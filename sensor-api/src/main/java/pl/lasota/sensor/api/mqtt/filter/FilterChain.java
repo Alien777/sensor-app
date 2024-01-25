@@ -6,7 +6,9 @@ import java.util.List;
 
 public class FilterChain implements Chain<Object> {
     private final List<Filter> filters = new ArrayList<>();
+    private final Context context = new Context();
     private int index = 0;
+
 
     public FilterChain addFilter(Filter filter) {
         filters.add(filter);
@@ -17,7 +19,7 @@ public class FilterChain implements Chain<Object> {
     public void doFilter(Object request) {
         if (index < filters.size()) {
             Filter filter = filters.get(index++);
-            filter.execute(request, this);
+            filter.execute(request,context, this);
         }
     }
 }
