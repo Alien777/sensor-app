@@ -1,5 +1,7 @@
 package pl.lasota.sensor.api.mqtt.filter;
 
+import pl.lasota.sensor.core.exceptions.FilterExecuteException;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,10 +18,14 @@ public class FilterChain implements Chain<Object> {
     }
 
     @Override
-    public void doFilter(Object request) {
+    public void doFilter(Object request) throws FilterExecuteException {
         if (index < filters.size()) {
             Filter filter = filters.get(index++);
-            filter.execute(request,context, this);
+            try {
+                filter.execute(request, context, this);
+            } catch (Exception e) {
+                throw new FilterExecuteException("Index of chain " + index + " of " + filters.size(), e);
+            }
         }
     }
 }

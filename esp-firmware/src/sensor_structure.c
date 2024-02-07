@@ -122,8 +122,25 @@ esp_err_t json_to_message(const char *j, Message *msg)
         return ESP_FAIL;
     }
 
+    cJSON *config_id = cJSON_GetObjectItemCaseSensitive(json, "config_id");
+    if (config_id == NULL)
+    {
+        cJSON_Delete(json);
+        return ESP_FAIL;
+    }
+
     cJSON *version = cJSON_GetObjectItemCaseSensitive(json, "version");
     if (version == NULL)
+    {
+        cJSON_Delete(json);
+        return ESP_FAIL;
+    }
+
+    if (cJSON_IsNumber(config_id))
+    {
+        msg->config_id = config_id->valueint;
+    }
+    else
     {
         cJSON_Delete(json);
         return ESP_FAIL;
@@ -159,7 +176,6 @@ esp_err_t json_to_message(const char *j, Message *msg)
         }
         msg->message_type = type;
     }
-    ESP_LOGI("DSAD", "DSDA");
     if (msg->message_type == CONFIG)
     {
 

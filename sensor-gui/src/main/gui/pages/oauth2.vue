@@ -4,6 +4,6 @@
 
 <script setup lang="ts">
 definePageMeta({
-  middleware: "auth"
+  middleware: "oauth2-process"
 })
 </script>

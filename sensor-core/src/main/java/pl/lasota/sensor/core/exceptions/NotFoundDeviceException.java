@@ -1,9 +1,9 @@
 package pl.lasota.sensor.core.exceptions;
 
-public class UserExistingException extends SensorException {
+public class NotFoundDeviceException extends SensorException{
 
     @Override
     public String getCode() {
-        return "UE";
+        return "NFD";
     }
 }

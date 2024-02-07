@@ -22,7 +22,7 @@ public class IsExistMemberFilter implements Filter<MessageFrame, MessageFrame> {
     private final MemberService ms;
 
     @Override
-    public void execute(MessageFrame request, Context context, Chain<MessageFrame> chain) {
+    public void execute(MessageFrame request, Context context, Chain<MessageFrame> chain) throws Exception {
         if (request.getMemberKey().trim().isBlank() || request.getMemberKey().length() != MEMBER_KEY_SIZE) {
             log.info("Member key is wrong {}", request.getMemberKey());
             return;
@@ -34,7 +34,7 @@ public class IsExistMemberFilter implements Filter<MessageFrame, MessageFrame> {
         }
 
         if (request.getVersion().trim().isBlank()) {
-            log.info("Version of fzirmware is obligatory {} ", request.getDeviceKey());
+            log.info("Version of firmware is obligatory {} ", request.getDeviceKey());
             return;
         }
 

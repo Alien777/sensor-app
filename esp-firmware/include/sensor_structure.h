@@ -57,6 +57,7 @@ struct OutputTask
 {
     char member_key[17];
     char device_key[13];
+    int config_id;
     Output output;
 };
 
@@ -65,6 +66,7 @@ struct Message
     char member_key[17];
     char device_key[13];
     char version[8];
+    int config_id;
     message_type message_type;
     Output output[MAX_S];
     int outputSensor;

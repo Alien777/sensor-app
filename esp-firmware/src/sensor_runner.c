@@ -39,15 +39,14 @@ static void readAnalog(void *pvParameters)
             }
         }
 
-
-        publish(response, SINGLE_ADC_SIGNAL);
+        publish(outputTask->config_id, response, SINGLE_ADC_SIGNAL);
         if (output->sampling > 0)
         {
             vTaskDelay(pdMS_TO_TICKS(output->sampling));
         }
     }
 }
-void lisening_output_pin(Message* message)
+void lisening_output_pin(Message *message)
 {
     if (message->message_type != CONFIG)
     {
@@ -110,6 +109,7 @@ static OutputTask *deepCopyMessageToOutputTask(const Message *src, int outputInd
     {
         memcpy(copy->member_key, src->member_key, sizeof(copy->member_key));
         memcpy(copy->device_key, src->device_key, sizeof(copy->device_key));
+        copy->config_id=src->config_id;
         memcpy(&copy->output, &src->output[outputIndex], sizeof(Output));
     }
     return copy;

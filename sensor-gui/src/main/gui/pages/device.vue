@@ -9,37 +9,35 @@
           indicator-color="primary"
           align="justify"
       >
-        <q-tab name="drivers" label="Drivers" />
+        <q-tab name="devices-config" label="Device config"/>
       </q-tabs>
 
-      <q-separator />
+      <q-separator/>
 
       <q-tab-panels v-model="tab" animated>
-        <q-tab-panel name="drivers" class="q-pa-none">
+        <q-tab-panel name="devices-config" class="q-pa-none">
 
-          <q-splitter
-              v-model="splitterModel"
-          >
-
+          <q-splitter v-model="splitterModel">
             <template v-slot:before>
               <q-tabs
                   v-model="innerTab"
                   vertical
-                  class="text-teal"
-              >
-                <q-tab v-for="driver in data" :name="driver.id" icon="sensors" :label="driver.name" />
+                  class="text-teal">
+                <q-tab v-for="device in devices" :name="device.id" icon="sensors"
+                       :label="device.name?device.name:device.deviceKey"/>
               </q-tabs>
             </template>
 
             <template v-slot:after>
               <q-tab-panels
+                  swipeable
                   v-model="innerTab"
                   animated
+                  keep-alive
                   transition-prev="slide-down"
-                  transition-next="slide-up"
-              >
-                <q-tab-panel v-for="driver in data" :name="driver.id" icon="mail" :label="driver.name" >
-                  {{driver.id}}
+                  transition-next="slide-up">
+                <q-tab-panel v-for="device in devices" :name="device.id" icon="sensors" >
+                  <AdvencedConfigurationDevice :device="device"/>
                 </q-tab-panel>
               </q-tab-panels>
             </template>
@@ -52,21 +50,25 @@
 </template>
 
 <script setup lang="ts">
+import {deviceApi} from "~/composables/api/DeviceApi";
+import {ref} from 'vue'
 
-import { ref } from 'vue'
+const tab = ref('devices')
 
-const tab = ref('drivers')
 const innerTab = ref('1')
 const splitterModel = ref(20)
 
-import {api} from "~/composables/api";
 const runtimeConfig = useRuntimeConfig();
-const {getDrivers} = api(runtimeConfig);
+const {getAllDevice} = deviceApi(runtimeConfig);
 
-const {data, error} = await useAsyncData('drivers', getDrivers);
+const {data: devices} = useAsyncData('devices', getAllDevice);
 
 definePageMeta({
-  layout: "panel"
+  layout: "panel",
+  middleware: "page-any-roles"
 })
 
 </script>
+<style scoped lang="css">
+
+</style>

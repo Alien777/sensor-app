@@ -24,11 +24,6 @@
 
 ```json
 {
-  "input": [
-    {
-      "pin": 32
-    }
-  ],
   "output": [
     {
       "pin": 4,
@@ -45,7 +40,10 @@
 also send device_key, member_key.
 
 ## Esp panel
-![img.png](readme/img.png)
+![img.png](readme/esp-panel.png)
+
+## Gui panel
+![img.png](readme/gui-panel.png)
 
 ## TODO
 ### The list below will be updated

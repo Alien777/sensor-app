@@ -1,5 +1,6 @@
 package pl.lasota.sensor.gui.config;
 
+import jakarta.servlet.Filter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,10 +11,10 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
-import pl.lasota.sensor.gui.auth.ExceptionHandlingAuthentication;
 import pl.lasota.sensor.gui.auth.SensorAuthenticationSuccessHandler;
 import pl.lasota.sensor.gui.auth.filters.JwtOncePerRequestFilter;
 import pl.lasota.sensor.gui.config.properties.SensorProperties;
+import pl.lasota.sensor.gui.controller.GlobalExceptionHandler;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
@@ -24,9 +25,9 @@ import static org.springframework.security.config.Customizer.withDefaults;
 public class SecureConfig {
 
     private final JwtOncePerRequestFilter jwtOncePerRequestFilter;
-    private final SensorProperties properties;
-    private final ExceptionHandlingAuthentication authenticationEntryPoint;
+    private final GlobalExceptionHandler authenticationEntryPoint;
     private final SensorAuthenticationSuccessHandler sensorAuthenticationSuccessHandler;
+    private final SensorProperties properties;
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -54,7 +55,7 @@ public class SecureConfig {
                         .successHandler(sensorAuthenticationSuccessHandler))
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(withDefaults())
-                .addFilterBefore(jwtOncePerRequestFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore((Filter) jwtOncePerRequestFilter, (Class<? extends Filter>) UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 }

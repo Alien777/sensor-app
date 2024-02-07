@@ -19,7 +19,7 @@ static void mqttEventHandler(void *handler_args, esp_event_base_t base, int32_t 
     {
     case MQTT_EVENT_CONNECTED:
         ESP_LOGI(TAG_MQTT, "MQTT_EVENT_CONNECTED");
-        publish("{}", DEVICE_CONNECTED);
+        publish(-1, "{}", DEVICE_CONNECTED);
         esp_mqtt_client_subscribe(client, topicSubscribe(), 0); // Subscribe to the topic
         break;
     case MQTT_EVENT_DISCONNECTED:
@@ -56,7 +56,7 @@ static void mqttEventHandler(void *handler_args, esp_event_base_t base, int32_t 
     }
 }
 
-void publish(const char *message, message_type type)
+void publish(const int config_id, const char *message, message_type type)
 {
     ConfigEps config;
     if (load_config(&config) == ESP_FAIL)
@@ -67,7 +67,7 @@ void publish(const char *message, message_type type)
     const char *message_type = message_type_convert_to_chars(type);
 
     int requiredSize = snprintf(NULL, 0,
-                                "{\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"payload\":%s,\"message_type\":\"%s\"}", "version", VERSION_FIRMWARE,
+                                "{\"%s\":%d,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"payload\":%s,\"message_type\":\"%s\"}", "config_id", config_id, "version", VERSION_FIRMWARE,
                                 DEVICE_KEY, device_key, MEMBER_KEY, config.member_key, message, message_type) +
                        1;
 
@@ -76,7 +76,7 @@ void publish(const char *message, message_type type)
     if (json != NULL)
     {
         snprintf(json, requiredSize,
-                 "{\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"payload\":%s,\"message_type\":\"%s\"}", "version", VERSION_FIRMWARE,
+                 "{\"%s\":%d,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"payload\":%s,\"message_type\":\"%s\"}", "config_id", config_id, "version", VERSION_FIRMWARE,
                  DEVICE_KEY, device_key, MEMBER_KEY, config.member_key, message, message_type);
         esp_mqtt_client_publish(client, PUBLISH_TOPIC, json, 0, 2, 0);
         free(json);

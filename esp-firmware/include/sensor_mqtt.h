@@ -5,8 +5,7 @@
 #include <mqtt_client.h>
 #include "sensor_structure.h"
 
-
 void mqtt_initial();
-void publish(const char *message, message_type type);
+void publish(const int config_id, const char *message, message_type type);
 
 #endif

@@ -12,7 +12,7 @@
               src="https://cdn.quasar.dev/img/boy-avatar.png"></div>
         </div>
         <div class="text-weight-bold">{{ username() }}</div>
-        <q-btn @click="logout()" icon="logout" label="Wyloguj"/>
+        <q-btn @click="logout()" icon="logout" label="Logout"/>
       </div>
     </div>
   </div>

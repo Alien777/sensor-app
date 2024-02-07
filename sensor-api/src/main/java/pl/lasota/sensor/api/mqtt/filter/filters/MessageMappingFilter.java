@@ -1,6 +1,5 @@
 package pl.lasota.sensor.api.mqtt.filter.filters;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Scope;
@@ -16,14 +15,10 @@ import pl.lasota.sensor.core.models.mqtt.payload.MessageFrame;
 public class MessageMappingFilter implements Filter<String, MessageFrame> {
 
     @Override
-    public void execute(String request,  Context context, Chain<MessageFrame> chain) {
+    public void execute(String request, Context context, Chain<MessageFrame> chain) throws Exception {
         ObjectMapper mapper = new ObjectMapper();
-        try {
-            MessageFrame messageFrame = mapper.readValue(request, MessageFrame.class);
-            chain.doFilter(messageFrame);
-        } catch (JsonProcessingException e) {
-            log.error("Problem with parsing messageFrame {}", request, e);
-        }
+        MessageFrame messageFrame = mapper.readValue(request, MessageFrame.class);
+        chain.doFilter(messageFrame);
     }
 
 }

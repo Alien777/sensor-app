@@ -36,8 +36,8 @@ sensor:
   gui-url: http://localhost:3000
   redirect:
     login-success: http://localhost:3000/oauth2
-    logout: http://localhost:3000
-    auth-exception: http://localhost:3000/auth-error
   jwt:
     secret: Gkl3uP7ATJcLNka0p7+v4hY0OcTu9H08+QP1sFYE4PI=
     expiration: 1440
+  core:
+    firmware: bin

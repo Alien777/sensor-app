@@ -1,6 +1,7 @@
 import {defineNuxtConfig} from "nuxt/config";
 
 export default defineNuxtConfig({
+
     runtimeConfig: {
         public: {
             apiUrl: 'http://localhost:8080/api',
@@ -8,7 +9,9 @@ export default defineNuxtConfig({
         }
     },
     modules: [
+        'dayjs-nuxt',
+        'nuxt-monaco-editor',
         'nuxt-quasar-ui'
     ],
-    quasar: { /* */}
+    quasar: {plugins: ["Notify"]}
 })

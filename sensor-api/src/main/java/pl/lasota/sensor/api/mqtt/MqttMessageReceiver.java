@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import pl.lasota.sensor.api.mqtt.filter.FilterChain;
 import pl.lasota.sensor.api.mqtt.filter.filters.*;
 import pl.lasota.sensor.api.mqtt.model.MessagePayload;
+import pl.lasota.sensor.core.exceptions.FilterExecuteException;
 
 @Component
 @Slf4j
@@ -27,7 +28,10 @@ public class MqttMessageReceiver {
                 .addFilter(ac.getBean(LastStepFilter.class));
 
         log.info("Received messageFrame from {}, {}", messagePayload.topic(), messagePayload.messageFrame());
-        filterChain.doFilter(messagePayload.messageFrame());
+        try {
+            filterChain.doFilter(messagePayload.messageFrame());
+        } catch (FilterExecuteException e) {
+            log.error("Occurred problem with execute chain", e);
+        }
     }
-
 }

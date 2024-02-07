@@ -28,7 +28,7 @@ public class Device {
     @Column(name = "name")
     private String name;
 
-    @Column(name = "version", nullable = false)
+    @Column(name = "firmware_version", nullable = false)
     private String version;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -38,6 +38,9 @@ public class Device {
     @OneToMany(mappedBy = "device", fetch = FetchType.LAZY)
     private List<Sensor> sensor = new ArrayList<>();
 
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JoinColumn(name = "current_device_config_id", updatable = false)
+    private DeviceConfig currentDeviceConfig;
 
 
     @Override

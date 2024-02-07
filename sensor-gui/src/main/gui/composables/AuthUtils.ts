@@ -1,21 +1,19 @@
-import {storageUtils, type UserInfo} from "~/composables/storageUtils";
+import {storageUtils, type UserInfo} from "~/composables/StorageUtils";
+import {simpleAuth} from "~/composables/ClientLogout";
 
 export const authUtils = (runtimeConfig: any) => {
     let {fetchApi} = fetchUtils(runtimeConfig);
+    let {simpleLogout} = simpleAuth(runtimeConfig);
     const {setToken, setUser, clear, getToken, getUser, getCookieApp} = storageUtils(runtimeConfig);
 
     const logout = () => {
-        fetchApi('/auth/logout', {method: 'delete'}).finally(() => clear())
-            .then(() => {
-                navigateTo("/");
-            })
+        fetchApi('/auth/logout', {method: 'delete'}).finally(() => simpleLogout())
     }
 
-    const authNavigate = async () => {
+    const mainAuthProcess = async () => {
         const navigate = await authProcess();
         if (navigate) {
-
-            return navigate;
+            return  navigate;
         }
         return null;
     }
@@ -93,7 +91,7 @@ export const authUtils = (runtimeConfig: any) => {
 
 
     return {
-        auth: authNavigate,
+        auth: mainAuthProcess,
         hasRole,
         username,
         isAuth,

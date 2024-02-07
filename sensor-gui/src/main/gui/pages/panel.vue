@@ -5,6 +5,7 @@
 </template>
 <script setup lang="ts">
 definePageMeta({
-  layout: "panel"
+  layout: "panel",
+  middleware: "page-any-roles"
 })
 </script>

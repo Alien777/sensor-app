@@ -1,5 +1,3 @@
-import type {RuntimeConfig} from "nuxt/schema";
-
 export interface UserInfo {
     fullName: string
     id: number,

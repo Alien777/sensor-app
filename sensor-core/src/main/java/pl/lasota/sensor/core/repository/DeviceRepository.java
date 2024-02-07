@@ -14,11 +14,11 @@ import java.util.Optional;
 public interface DeviceRepository extends JpaRepository<Device, Long> {
 
     @Query("SELECT COUNT(s) > 0 FROM Device s WHERE s.member.memberKey = :memberKey AND s.deviceKey = :deviceKey")
-    boolean existsSensor(@Param("memberKey") String memberKey, @Param("deviceKey") String deviceKey);
+    boolean existsDevice(@Param("memberKey") String memberKey, @Param("deviceKey") String deviceKey);
 
     @Query("SELECT s FROM Device s WHERE s.member.memberKey = :memberKey AND s.deviceKey = :deviceKey")
-    Optional<Device> findSensorBy(@Param("memberKey") String memberKey, @Param("deviceKey") String deviceKey);
+    Optional<Device> findDeviceBy(@Param("memberKey") String memberKey, @Param("deviceKey") String deviceKey);
 
     @Query("SELECT s FROM Device s WHERE s.member.memberKey = :memberKey")
-    List<Device> findAllForMember(@Param("memberKey") String memberKey);
+    List<Device> findAllDevicesBy(@Param("memberKey") String memberKey);
 }

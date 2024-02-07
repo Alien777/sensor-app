@@ -1,22 +1,16 @@
 package pl.lasota.sensor.gui.controller;
 
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.authentication.logout.LogoutHandler;
-import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import pl.lasota.sensor.gui.auth.AuthService;
 import pl.lasota.sensor.gui.config.properties.SensorProperties;
-import pl.lasota.sensor.gui.exceptions.SensorException;
 import pl.lasota.sensor.gui.model.UserInfo;
 
 @Controller
@@ -35,10 +29,8 @@ public class AuthController {
 
     @DeleteMapping("/logout")
     @PreAuthorize("isAuthenticated()")
-    public String logout(HttpServletRequest request, HttpServletResponse response) throws SensorException {
+    public void logout(HttpServletRequest request, HttpServletResponse response) {
         authService.logout(request, response);
-        return "redirect:" + sensorProperties.getRedirect()
-                .logout();
     }
 
     @GetMapping("/user-details")

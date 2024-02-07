@@ -22,7 +22,7 @@ public class LastStepFilter implements Filter<MessageFrame, MessageFrame> {
     private final Utils utils;
 
     @Override
-    public void execute(MessageFrame request, Context context, Chain<MessageFrame> chain) {
+    public void execute(MessageFrame request, Context context, Chain<MessageFrame> chain) throws Exception {
         if (context.isShouldSendConfig()) {
             utils.sendConfig(request);
         }

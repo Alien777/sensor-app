@@ -21,4 +21,5 @@ sensor:
     max-reconnect-delay: 5000
     connection-timeout: 30000
     automatic-reconnect: true
-
+  core:
+    firmware: bin

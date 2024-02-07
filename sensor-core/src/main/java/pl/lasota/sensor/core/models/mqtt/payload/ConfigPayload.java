@@ -15,6 +15,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ConfigPayload {
+
     @JsonProperty("output")
     private List<OutputPayload> outputs = new ArrayList<>();
 

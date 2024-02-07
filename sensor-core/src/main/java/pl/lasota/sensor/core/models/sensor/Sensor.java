@@ -5,6 +5,7 @@ import lombok.*;
 import lombok.experimental.SuperBuilder;
 import pl.lasota.sensor.core.models.device.Device;
 import pl.lasota.sensor.core.models.MessageType;
+import pl.lasota.sensor.core.models.device.DeviceConfig;
 
 import java.time.OffsetDateTime;
 
@@ -31,5 +32,8 @@ public class Sensor {
 
     @Column(name = "time")
     private OffsetDateTime time;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    private DeviceConfig forConfig;
 
 }

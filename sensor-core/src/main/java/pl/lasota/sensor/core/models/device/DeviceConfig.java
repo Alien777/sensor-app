@@ -13,6 +13,7 @@ import java.time.OffsetDateTime;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@EqualsAndHashCode(of = "id")
 public class DeviceConfig {
 
     @Id
@@ -23,14 +24,15 @@ public class DeviceConfig {
     @JoinColumn(name = "device_id")
     private Device device;
 
-    @Column(name = "config", columnDefinition = "jsonb")
+    @Column(name = "config", columnDefinition = "jsonb", length = 2000)
     @Type(value = JsonBinaryType.class)
     private String config;
 
     @Column(name = "time")
     private OffsetDateTime time;
 
-    @Column(name = "for_version", nullable = false)
+    @Column(name = "for_firmware_version", nullable = false)
     private String forVersion;
+
 
 }

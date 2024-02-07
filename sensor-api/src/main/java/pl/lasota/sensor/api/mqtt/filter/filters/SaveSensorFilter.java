@@ -7,7 +7,6 @@ import org.springframework.stereotype.Component;
 import pl.lasota.sensor.api.mqtt.filter.Chain;
 import pl.lasota.sensor.api.mqtt.filter.Context;
 import pl.lasota.sensor.api.mqtt.filter.Filter;
-import pl.lasota.sensor.api.mqtt.Utils;
 import pl.lasota.sensor.core.models.mqtt.payload.MessageFrame;
 import pl.lasota.sensor.core.service.DeviceService;
 
@@ -20,15 +19,8 @@ public class SaveSensorFilter implements Filter<MessageFrame, MessageFrame> {
     private final DeviceService deviceService;
 
     @Override
-    public void execute(MessageFrame request, Context context, Chain<MessageFrame> chain) {
-
-        if (!deviceService.isDeviceExisting(request.getMemberKey(), request.getDeviceKey())) {
-            deviceService.insertDevice(request.getMemberKey(), request.getDeviceKey(), request.getVersion());
-            context.setShouldSendConfig(true);
-        } else if (deviceService.updateVersion(request.getMemberKey(), request.getDeviceKey(), request.getVersion())) {
-            context.setShouldSendConfig(true);
-        }
-
+    public void execute(MessageFrame request, Context context, Chain<MessageFrame> chain) throws Exception {
+        deviceService.insertNewDevice(request.getMemberKey(), request.getDeviceKey(), request.getVersion());
         chain.doFilter(request);
     }
 }

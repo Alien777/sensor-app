@@ -1,4 +1,4 @@
 package pl.lasota.sensor.gui.config.properties;
 
-public record RedirectProperties(String loginSuccess, String authException, String logout) {
+public record RedirectProperties(String loginSuccess) {
 }
