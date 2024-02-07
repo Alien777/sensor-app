@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "output": {
+      "type": "array",
+      "maxItems": 5,
+      "items": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "enum": [
+              "ANALOG"
+            ]
+          },
+          "pin": {
+            "enum": [
+              "0",
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7"
+            ],
+            "default": "1"
+          },
+          "width": {
+            "enum": [
+              "9",
+              "10",
+              "11",
+              "12"
+            ],
+            "default": "12"
+          },
+          "atten": {
+            "enum": [
+              "0",
+              "1",
+              "2",
+              "3"
+            ],
+            "default": "0"
+          },
+          "sampling": {
+            "type": "number",
+            "minimum": 10,
+            "maximum": 20000,
+            "default": 4000
+          },
+          "min_adc": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 5000,
+            "default": 0
+          },
+          "max_adc": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 5000,
+            "default": 0
+          }
+        },
+        "required": [
+          "pin",
+          "width",
+          "atten"
+        ]
+      }
+    }
+  },
+  "required": [
+    "output"
+  ]
+}
