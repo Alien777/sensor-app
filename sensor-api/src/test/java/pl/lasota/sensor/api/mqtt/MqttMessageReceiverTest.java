@@ -36,7 +36,8 @@ class MqttMessageReceiverTest {
 
         filterChain.doFilter(mfMock);
 
-        Mockito.verify(uMock, Mockito.times(1)).sendConfig(Mockito.same(mfMock));
+        Mockito.verify(uMock, Mockito.times(1)).sendConfig(Mockito.same("0123456789123456"),
+                Mockito.same("012345678912"));
 
     }
 
