@@ -39,7 +39,7 @@ public class Device {
     private List<Sensor> sensor = new ArrayList<>();
 
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    @JoinColumn(name = "current_device_config_id", updatable = false)
+    @JoinColumn(name = "current_device_config_id")
     private DeviceConfig currentDeviceConfig;
 
 

@@ -1,16 +1,25 @@
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: ${EUREKA_URI:http://localhost:8761/eureka}
+  instance:
+    preferIpAddress: true
 spring:
+  application:
+    name: "sensor-api"
   datasource:
     url: jdbc:postgresql://localhost:5432/sensor
     username: db
     password: db
   jpa:
     hibernate:
-      ddl-auto: update # Dostosuj tę wartość do swoich potrzeb
+      ddl-auto: update
     properties:
       hibernate:
         format_sql: true
     show-sql: false
     open-in-view: false
+
 sensor:
   mqtt:
     client-id: ${random.uuid}
@@ -23,3 +32,5 @@ sensor:
     automatic-reconnect: true
   core:
     firmware: bin
+server:
+  port: 9090

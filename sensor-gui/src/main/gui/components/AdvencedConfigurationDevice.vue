@@ -6,7 +6,7 @@ import {type DeviceConfigSaveT, type DeviceConfigT, type DeviceT, formatTime} fr
 const MonacoEditorCustom = defineAsyncComponent(() => import('./MonacoEditorCustom.vue'));
 
 const runtimeConfig = useRuntimeConfig();
-const {getDeviceConfig, saveDeviceConfig, getAllConfigs} = deviceApi(runtimeConfig);
+const {getDeviceConfig, saveDeviceConfig, getAllConfigs, activateConfig} = deviceApi(runtimeConfig);
 
 const splitterHigh = 70;
 const props = defineProps({
@@ -16,10 +16,11 @@ const props = defineProps({
   }
 });
 
-const currentConfig = await getDeviceConfig(props.device.id);
-const allDevicesConfigs = await getAllConfigs(props.device.id);
-
-const currentConfigEdit = ref(currentConfig);
+const currentConfigDownload = await getDeviceConfig(props.device.id);
+const allDevicesConfigsDownload = await getAllConfigs(props.device.id);
+const currentConfigDevice = ref(currentConfigDownload);
+const currentConfigEditRef = ref(currentConfigDownload);
+const allDevicesConfigsRef = ref(allDevicesConfigsDownload);
 
 const generateConfig: any = (currentConfig: DeviceConfigT) => {
   return {
@@ -31,29 +32,43 @@ const generateConfig: any = (currentConfig: DeviceConfigT) => {
     }]
   };
 }
-const saveConfigAction = () => {
+const saveConfigAction = async () => {
   const save: DeviceConfigSaveT = {
-    config: currentConfigEdit.value.config,
-    version: currentConfigEdit.value.forVersion
+    config: currentConfigEditRef.value.config,
+    version: currentConfigEditRef.value.forVersion
   };
-  saveDeviceConfig(props.device?.id, save)
-      .then(value => {
-        // console.log(value);
-      })
+  await saveDeviceConfig(props.device?.id, save);
+  getAllConfigs(props.device.id).then(v => {
+    allDevicesConfigsRef.value = v;
+  });
+}
+
+const activateConfigAction = async () => {
+  await activateConfig(props.device?.id, currentConfigEditRef.value.id);
+  await getDeviceConfig(props.device.id).then(value => {
+    currentConfigDevice.value = value;
+  })
+  getAllConfigs(props.device.id).then(v => {
+    allDevicesConfigsRef.value = v;
+  });
+
 }
 
 const selectConfig = (config: DeviceConfigT) => {
-  currentConfigEdit.value = config;
+  currentConfigEditRef.value = config;
 }
 
 </script>
 
 <template>
-  <p><strong>{{ device.name ? device.name : device.deviceKey }}</strong></p>
+  <p><strong>{{ device.name ? device.name : device.deviceKey }}</strong> You editing config
+    id:<strong>{{ currentConfigEditRef.id }}</strong></p>
   <q-splitter v-model="splitterHigh" style="height: 400px">
     <template v-slot:before>
       <ClientOnly>
-        <MonacoEditorCustom :jsonDefaultConfig="generateConfig(currentConfigEdit)" v-model="currentConfigEdit.config"
+
+        <MonacoEditorCustom :jsonDefaultConfig="generateConfig(currentConfigEditRef)"
+                            v-model="currentConfigEditRef.config"
                             lang="json"
                             class="editor">
           Loading...
@@ -64,25 +79,27 @@ const selectConfig = (config: DeviceConfigT) => {
       <div class="q-pa-md" style="max-width: 350px">
 
         <q-list separator padding>
-          <q-item v-for="config in allDevicesConfigs"
+          <q-item v-for="config in allDevicesConfigsRef"
                   clickable
                   v-ripple
                   @click="()=>selectConfig(config)"
-                  :active="currentConfigEdit.id===config.id">
-            <q-item-section>
+                  :active="currentConfigEditRef.id===config.id">
+
+            <q-item-section avatar>
+              <q-item-label>{{ `id: ${config.id}` }}</q-item-label>
               <s v-if="config.forVersion!==device.version">
-                <q-item-label>{{ `version: ${config.forVersion}` }}
+                <q-item-label>{{ `ID: ${config.forVersion}` }}
                   <q-tooltip>
                     This version of config is doesn't compatibility with device firmware version
                   </q-tooltip>
                 </q-item-label>
               </s>
-              <q-item-label v-else>{{ `version: ${config.forVersion}` }}</q-item-label>
+              <q-item-label v-else>{{ `ver.: ${config.forVersion}` }}</q-item-label>
             </q-item-section>
             <q-item-section side top>
               <q-item-label caption>{{ formatTime(config.time as Date) }}</q-item-label>
               <q-item-label>
-                <q-icon v-if="currentConfig.id===config.id" name="check" color="green">
+                <q-icon v-if="currentConfigDevice.id===config.id" name="check" color="green">
                   <q-tooltip>
                     Current activated. This configuration will be send to device.
                   </q-tooltip>
@@ -94,14 +111,17 @@ const selectConfig = (config: DeviceConfigT) => {
                 </q-icon>
               </q-item-label>
             </q-item-section>
-
           </q-item>
         </q-list>
       </div>
     </template>
   </q-splitter>
   <q-btn @click="saveConfigAction">Save as new config</q-btn>
-  <q-btn v-if="currentConfigEdit.forVersion===device.version" color="green" text-color="black">Activate config</q-btn>
+  <q-btn @click="activateConfigAction"
+         v-if="currentConfigEditRef.forVersion===device.version && currentConfigEditRef.id!==currentConfigDevice.id"
+         color="green"
+         text-color="black">Activate config
+  </q-btn>
 
 </template>
 

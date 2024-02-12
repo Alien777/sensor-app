@@ -12,7 +12,6 @@ import org.springframework.integration.annotation.IntegrationComponentScan;
 @EntityScan(value = {"pl.lasota.sensor.core.models"})
 @EnableJpaRepositories("pl.lasota.sensor.core.repository")
 public class SensorApi {
-
     public static void main(String[] args) {
         SpringApplication.run(SensorApi.class, args);
     }

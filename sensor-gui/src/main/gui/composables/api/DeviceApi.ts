@@ -1,4 +1,4 @@
-import {timeToDate, type DeviceConfigT, type DeviceT, type DeviceConfigSaveT} from "~/composables/api/StructureApp";
+import {type DeviceConfigSaveT, type DeviceConfigT, type DeviceT, timeToDate} from "~/composables/api/StructureApp";
 
 export const deviceApi = (runtimeConfig: any) => {
     let {fetchApiRequest} = fetchUtils(runtimeConfig);
@@ -27,9 +27,16 @@ export const deviceApi = (runtimeConfig: any) => {
         return value.data.value.map(value1 => timeToDate(value1));
     }
 
-    return {
-        getAllDevice, getDeviceConfig, saveDeviceConfig, getAllConfigs
+    const activateConfig = async (id: number, id_config: number): Promise<any> => {
+        return await fetchApiRequest<DeviceConfigT[]>(`/device/${id}/config/${id_config}/activate`,
+            {method: 'put'});
     }
+
+    return {
+        getAllDevice, getDeviceConfig, saveDeviceConfig, getAllConfigs, activateConfig
+    }
+
+
 }
 
 

@@ -7,11 +7,15 @@ server:
         max-age: 360000000
         same-site: lax
         http-only: false
-
-#logging:
-#    level:
-#      org: DEBUG
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: ${EUREKA_URI:http://localhost:8761/eureka}
+  instance:
+    preferIpAddress: true
 spring:
+  application:
+    name: "sensor-gui"
   config:
     import: file:/home/${USER}/Documents/container/sensor/oauth-config.yml
   security:
@@ -31,7 +35,7 @@ spring:
     properties:
       hibernate:
         format_sql: true
-    show-sql: true
+    show-sql: false
 sensor:
   gui-url: http://localhost:3000
   redirect:

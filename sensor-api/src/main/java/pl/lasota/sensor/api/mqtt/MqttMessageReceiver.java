@@ -24,8 +24,7 @@ public class MqttMessageReceiver {
                 .addFilter(ac.getBean(MessageMappingFilter.class))
                 .addFilter(ac.getBean(IsExistMemberFilter.class))
                 .addFilter(ac.getBean(SaveSensorFilter.class))
-                .addFilter(ac.getBean(SaveSensorValueFilter.class))
-                .addFilter(ac.getBean(LastStepFilter.class));
+                .addFilter(ac.getBean(SaveSensorValueFilter.class));
 
         log.info("Received messageFrame from {}, {}", messagePayload.topic(), messagePayload.messageFrame());
         try {

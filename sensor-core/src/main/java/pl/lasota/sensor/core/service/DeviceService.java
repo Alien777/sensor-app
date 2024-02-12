@@ -31,6 +31,8 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.zip.CRC32;
+import java.util.zip.Checksum;
 
 import static pl.lasota.sensor.core.models.MessageType.DEVICE_CONNECTED;
 
@@ -39,16 +41,12 @@ import static pl.lasota.sensor.core.models.MessageType.DEVICE_CONNECTED;
 @RequiredArgsConstructor
 @Slf4j
 public class DeviceService {
-    private final static String NAME_DEFAULT_CONFIG = "defaultConfig.json";
-    private final static String NAME_SCHEMA_CONFIG = "schema.json";
+
     private final DeviceRepository dr;
     private final SensorRecordingRepository srr;
     private final DeviceConfigRepository dcr;
     private final MemberRepository mr;
-
-    @Value("${sensor.core.firmware}")
-    private String firmwareFolder;
-
+    private final DeviceServiceUtils dsu;
 
     @Transactional(rollbackFor = SensorException.class)
     public void insertSensorReading(MessageFrame messageFrame) throws NotFoundDefaultConfigException {
@@ -68,7 +66,7 @@ public class DeviceService {
         if (sensorBuilder == null) {
             return;
         }
-        Optional<DeviceConfig> configOptional = dcr.getDevice(device.getDeviceKey(), messageFrame.getConfigId());
+        Optional<DeviceConfig> configOptional = dcr.getDeviceConfig(device.getDeviceKey(), messageFrame.getConfigId());
 
         if (configOptional.isEmpty() && !DEVICE_CONNECTED.equals(messageFrame.getMessageType())) {
             throw new NotFoundDefaultConfigException();
@@ -88,56 +86,46 @@ public class DeviceService {
     }
 
     @Transactional(rollbackFor = SensorException.class)
-    public void insertNewDevice(String memberKey, String deviceKey, String version) throws NotFoundDefaultConfigException {
+    public void insertNewDevice(String memberKey, String deviceKey, String version) throws NotFoundDefaultConfigException, NotFoundMemberException {
         if (dr.existsDevice(memberKey, deviceKey)) {
             return;
         }
 
-        Optional<Member> optionalMember = mr.findMemberByMemberKey(memberKey);
-        if (optionalMember.isPresent()) {
-            Member member = optionalMember.get();
+        Member member = mr.findMemberByMemberKey(memberKey).orElseThrow(NotFoundMemberException::new);
 
-            Device device = Device.builder()
-                    .member(member)
-                    .version(version)
-                    .deviceKey(deviceKey)
-                    .build();
+        Device device = Device.builder()
+                .member(member)
+                .version(version)
+                .deviceKey(deviceKey)
+                .build();
 
-            member.getDevices()
-                    .add(device);
+        member.getDevices()
+                .add(device);
 
+        DeviceConfig deviceConfig = dsu.createDefaultDeviceConfig(version, device);
+        device.setCurrentDeviceConfig(deviceConfig);
 
-            DeviceConfig deviceConfig = createDeviceConfig(version, device);
-            if (deviceConfig != null) {
-                device.setCurrentDeviceConfig(deviceConfig);
-            }
+        dr.save(device);
+        mr.save(member);
 
-            dr.save(device);
-            mr.save(member);
-
-        }
     }
 
     @Transactional
-    public DeviceConfig currentDeviceConfig(String deviceKey, String memberKey) throws NotFoundDeviceException, NotFoundDeviceConfigException {
-        return currentDeviceConfig(dr.findDeviceBy(memberKey, deviceKey).orElseThrow(NotFoundDeviceException::new).getId());
+    public DeviceConfig currentDeviceConfig(String memberKey, String deviceKey) throws NotFoundDeviceException, NotFoundDeviceConfigException {
+        Device device = dr.findDeviceBy(memberKey, deviceKey).orElseThrow(NotFoundDeviceException::new);
+        return dsu.currentDeviceConfigCheck(device);
     }
 
     @Transactional
-    public DeviceConfig currentDeviceConfig(Long deviceId) throws NotFoundDeviceException, NotFoundDeviceConfigException {
-        Device device = dr.findById(deviceId).orElseThrow(NotFoundDeviceException::new);
-        DeviceConfig currentDeviceConfig = device.getCurrentDeviceConfig();
-        if (currentDeviceConfig == null) {
-            throw new NotFoundDeviceConfigException();
-        }
-        return currentDeviceConfig;
+    public DeviceConfig currentDeviceConfig(Long memberId, Long deviceId) throws NotFoundDeviceException, NotFoundDeviceConfigException {
+        Device device = dr.findDeviceBy(memberId, deviceId).orElseThrow(NotFoundDeviceException::new);
+        return dsu.currentDeviceConfigCheck(device);
     }
 
     @Transactional
-    public List<DeviceConfig> getConfigForDevice(Long deviceId) throws NotFoundDeviceException {
-        Device device = dr.findById(deviceId).orElseThrow(NotFoundDeviceException::new);
-        List<DeviceConfig> allConfigBy = dcr.findAllConfigBy(device.getId());
-        //Always want to first config as activated
+    public List<DeviceConfig> getConfigForDevice(Long memberId, Long deviceId) throws NotFoundDeviceException {
+        Device device = dr.findDeviceBy(memberId, deviceId).orElseThrow(NotFoundDeviceException::new);
+        List<DeviceConfig> allConfigBy = dcr.findAllDeviceConfigBy(device.getId());
         if (device.getCurrentDeviceConfig() == null) {
             return allConfigBy;
         }
@@ -148,82 +136,52 @@ public class DeviceService {
 
 
     @Transactional
-    public DeviceConfig saveConfig(String config, String versionConfig, Long deviceId) throws NotFoundDeviceException, NotFoundSchemaConfigException, ConfigParserException {
+    public DeviceConfig saveConfig(Long memberId, String config, String versionConfig, Long deviceId) throws NotFoundDeviceException, NotFoundSchemaConfigException, ConfigParserException, ConfigCheckSumExistException {
         try {
-            testConfigWithSchema(config, schemaForVersion(versionConfig));
+            dsu.testConfigWithSchema(config, dsu.schemaForVersion(versionConfig));
         } catch (JsonProcessingException e) {
             throw new ConfigParserException(e);
         }
 
-        Device deviceOptional = dr.findById(deviceId).orElseThrow(NotFoundDeviceException::new);
+        Device deviceOptional = dr.findDeviceBy(memberId, deviceId).orElseThrow(NotFoundDeviceException::new);
+
+        long checkSum = dsu.checkSum(config + versionConfig);
+        Optional<DeviceConfig> existByCheckSum = dcr.getConfigByChecksum(checkSum);
+
+        if (existByCheckSum.isPresent()) {
+            throw new ConfigCheckSumExistException("All ready exist configuration " + existByCheckSum.get().getId());
+        }
+
         DeviceConfig build = DeviceConfig
                 .builder()
                 .device(deviceOptional)
                 .time(OffsetDateTime.now())
                 .forVersion(versionConfig)
-                .config(config).build();
+                .config(config)
+                .checksum(checkSum)
+                .build();
+
         return dcr.save(build);
     }
 
-    public List<Device> getAllDeviceBy(String memberKey) {
-        return dr.findAllDevicesBy(memberKey);
+    @Transactional
+    public void activateConfig(Long memberId, Long deviceId, Long configId) throws NotFoundDeviceException, NotFoundDefaultConfigException,
+            NotFoundSchemaConfigException, ConfigParserException, JsonProcessingException {
+
+        Device device = dr.findDeviceBy(memberId, deviceId).orElseThrow(NotFoundDeviceException::new);
+        DeviceConfig deviceConfig = dcr.getDeviceConfig(deviceId, configId).orElseThrow(NotFoundDefaultConfigException::new);
+        dsu.testConfigWithSchema(deviceConfig.getConfig(), dsu.schemaForVersion(deviceConfig.getForVersion()));
+        device.setCurrentDeviceConfig(deviceConfig);
+        dr.save(device);
+    }
+
+    public List<Device> getAllDeviceBy(Long id) {
+        return dr.findAllDevicesBy(id);
     }
 
     public boolean hasConfig(Long deviceId) {
         return dcr.existsDeviceConfigBy(deviceId);
     }
 
-
-    public String schemaForVersion(String schemaVersion) throws NotFoundSchemaConfigException {
-
-        try {
-            return Files.readString(Path.of(firmwareFolder, schemaVersion, NAME_SCHEMA_CONFIG));
-        } catch (Exception e) {
-            throw new NotFoundSchemaConfigException(e);
-        }
-
-    }
-
-    private DeviceConfig createDeviceConfig(String version, Device device) throws NotFoundDefaultConfigException {
-
-        if (device.getCurrentDeviceConfig() != null) {
-            return null;
-        }
-        String defaultConfig;
-
-        try {
-            defaultConfig = Files.readString(Path.of(firmwareFolder, version, NAME_DEFAULT_CONFIG));
-        } catch (Exception e) {
-            throw new NotFoundDefaultConfigException(e);
-        }
-
-        if (defaultConfig == null) {
-            throw new NotFoundDefaultConfigException();
-        }
-
-        return DeviceConfig
-                .builder()
-                .config(defaultConfig)
-                .forVersion(version)
-                .time(OffsetDateTime.now())
-                .device(device).build();
-
-    }
-
-    private void testConfigWithSchema(String jsonStr, String schemaStr) throws JsonParseException, JsonProcessingException, ConfigParserException {
-
-        ObjectMapper objectMapper = new ObjectMapper();
-        JsonNode json = objectMapper.readTree(jsonStr);
-        JsonNode jsonSchemaNode = objectMapper.readTree(schemaStr);
-
-        JsonSchemaFactory schemaFactory = JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V202012);
-        JsonSchema schema = schemaFactory.getSchema(jsonSchemaNode);
-
-        Set<ValidationMessage> validationResult = schema.validate(json);
-
-        if (!validationResult.isEmpty()) {
-            throw new ConfigParserException(validationResult);
-        }
-    }
 
 }

@@ -19,6 +19,10 @@ public interface DeviceRepository extends JpaRepository<Device, Long> {
     @Query("SELECT s FROM Device s WHERE s.member.memberKey = :memberKey AND s.deviceKey = :deviceKey")
     Optional<Device> findDeviceBy(@Param("memberKey") String memberKey, @Param("deviceKey") String deviceKey);
 
-    @Query("SELECT s FROM Device s WHERE s.member.memberKey = :memberKey")
-    List<Device> findAllDevicesBy(@Param("memberKey") String memberKey);
+    @Query("SELECT s FROM Device s WHERE s.member.id = :id")
+    List<Device> findAllDevicesBy(@Param("id") Long id);
+
+    @Query("SELECT s FROM Device s WHERE s.member.id = :idMember AND s.id = :deviceId")
+    Optional<Device> findDeviceBy(@Param("idMember") Long memberKey, @Param("deviceId") Long deviceId);
+
 }

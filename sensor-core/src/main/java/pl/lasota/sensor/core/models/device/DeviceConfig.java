@@ -6,6 +6,7 @@ import lombok.*;
 import org.hibernate.annotations.Type;
 
 import java.time.OffsetDateTime;
+import java.util.UUID;
 
 @Entity
 @Getter
@@ -33,6 +34,9 @@ public class DeviceConfig {
 
     @Column(name = "for_firmware_version", nullable = false)
     private String forVersion;
+
+    @Column(name = "checksum", nullable = false)
+    private long checksum;
 
 
 }
