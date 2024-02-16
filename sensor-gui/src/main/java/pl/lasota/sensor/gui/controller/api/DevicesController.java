@@ -2,11 +2,14 @@ package pl.lasota.sensor.gui.controller.api;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import pl.lasota.sensor.core.exceptions.*;
 import pl.lasota.sensor.core.models.Member;
 import pl.lasota.sensor.core.models.device.DeviceConfig;
+import pl.lasota.sensor.core.models.rest.SendConfigS;
+import pl.lasota.sensor.core.models.rest.SensorApiEndpoint;
 import pl.lasota.sensor.core.service.DeviceService;
 import pl.lasota.sensor.core.service.DeviceServiceUtils;
 import pl.lasota.sensor.core.service.MemberService;
@@ -21,7 +24,7 @@ import java.util.stream.Collectors;
 @RestController()
 @RequestMapping("/api/device")
 @RequiredArgsConstructor
-
+@Slf4j
 public class DevicesController {
 
     private final DeviceService ds;
@@ -29,6 +32,8 @@ public class DevicesController {
     private final DeviceServiceUtils dsu;
 
     private final MemberService ms;
+
+    private final SensorApiEndpoint sae;
 
     @GetMapping
     @PreAuthorize("isAuthenticated()")
@@ -46,6 +51,12 @@ public class DevicesController {
             NotFoundSchemaConfigException, NotFoundDefaultConfigException, ConfigParserException, JsonProcessingException {
         Member member = ms.loggedUser();
         ds.activateConfig(member.getId(), deviceId, configId);
+        try {
+            String deviceKey = ds.getDeviceKey(member.getId(), deviceId);
+            sae.setupConfig(new SendConfigS(member.getMemberKey(), deviceKey));
+        } catch (Exception e) {
+            log.error("Config sensor was save but not send to device", e);
+        }
     }
 
 

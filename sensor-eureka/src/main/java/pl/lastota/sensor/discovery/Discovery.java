@@ -1,13 +1,13 @@
-package pl.lastota.sensor.eureka;
+package pl.lastota.sensor.discovery;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.netflix.eureka.server.EnableEurekaServer;
 
-@EnableEurekaServer
 @SpringBootApplication
-public class Main {
+@EnableEurekaServer
+public class Discovery {
     public static void main(String[] args) {
-        SpringApplication.run(Main.class, args);
+        SpringApplication.run(Discovery.class, args);
     }
 }

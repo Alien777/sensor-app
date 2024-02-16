@@ -207,8 +207,10 @@ esp_err_t json_to_message(const char *j, Message *msg)
                     {
                         msg->output[i].type = chars_convert_to_input_type(type_c->valuestring);
                     }
+                
                     if (pin_c != NULL && cJSON_IsNumber(pin_c))
                     {
+                        ESP_LOGI("PIN READ ","PIN READ %d",pin_c->valueint);
                         msg->output[i].pin = pin_c->valueint;
                     }
                     if (width_c != NULL && cJSON_IsNumber(width_c))

@@ -18,6 +18,8 @@ import pl.lasota.sensor.core.models.Member;
 import pl.lasota.sensor.core.models.device.Device;
 import pl.lasota.sensor.core.models.device.DeviceConfig;
 import pl.lasota.sensor.core.models.mqtt.payload.MessageFrame;
+import pl.lasota.sensor.core.models.rest.SendConfigS;
+import pl.lasota.sensor.core.models.rest.SensorApiEndpoint;
 import pl.lasota.sensor.core.models.sensor.ConnectedDevice;
 import pl.lasota.sensor.core.models.sensor.Sensor;
 import pl.lasota.sensor.core.repository.DeviceConfigRepository;
@@ -173,6 +175,10 @@ public class DeviceService {
         dsu.testConfigWithSchema(deviceConfig.getConfig(), dsu.schemaForVersion(deviceConfig.getForVersion()));
         device.setCurrentDeviceConfig(deviceConfig);
         dr.save(device);
+    }
+
+    public String getDeviceKey(Long memberId,Long deviceId) throws NotFoundDeviceException {
+        return dr.findDeviceBy(memberId,deviceId).orElseThrow(NotFoundDeviceException::new).getDeviceKey();
     }
 
     public List<Device> getAllDeviceBy(Long id) {

@@ -36,6 +36,9 @@ spring:
       hibernate:
         format_sql: true
     show-sql: false
+  cloud:
+    config:
+      enabled: false
 sensor:
   gui-url: http://localhost:3000
   redirect:

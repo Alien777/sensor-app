@@ -23,27 +23,36 @@ static void readAnalog(void *pvParameters)
 
     while (1)
     {
+        if (output->sampling > 100)
+        {
+            vTaskDelay(pdMS_TO_TICKS(output->sampling));
+        }else{
+            vTaskDelay(pdMS_TO_TICKS(100));
+        }
+
         int analogValue = adc1_get_raw(output->pin);
         char response[100];
         snprintf(response, sizeof(response), "{\"adc_raw\":%d, \"pin\":%d}", analogValue, output->pin);
 
-        if (output->min_adc >= 0 && output->max_adc >= 0)
+        if(output->min_adc!=0)
         {
             if (analogValue < output->min_adc)
             {
                 continue;
             }
+        }
+
+        if(output->max_adc!=0)
+        {
             if (analogValue > output->max_adc)
             {
                 continue;
             }
         }
 
+
         publish(outputTask->config_id, response, SINGLE_ADC_SIGNAL);
-        if (output->sampling > 0)
-        {
-            vTaskDelay(pdMS_TO_TICKS(output->sampling));
-        }
+ 
     }
 }
 void lisening_output_pin(Message *message)
@@ -58,6 +67,8 @@ void lisening_output_pin(Message *message)
     {
         if (message->output[i].type == ANALOG)
         {
+            ESP_LOGE("PIN", "Read from pin %d %d",message->output[i].pin, message->output[i].sampling);
+       
             OutputTask *outputTask = deepCopyMessageToOutputTask(message, i);
             if (outputTask)
             {
