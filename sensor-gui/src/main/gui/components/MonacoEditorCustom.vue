@@ -1,7 +1,7 @@
 <template>
-  <div ref="editorElement" class="editor-container">
-    <slot v-if="isLoading"></slot>
-  </div>
+    <div ref="editorElement" class="editor-container">
+      <slot v-if="isLoading"></slot>
+    </div>
 </template>
 
 <script lang="ts">
@@ -47,49 +47,12 @@ export default defineComponent({
       if (editorElement.value) {
         const mergedOptions = {...defaultOptions, ...props.options};
         if (props.lang === 'json') {
-          Monaco.languages.json.jsonDefaults.setDiagnosticsOptions(
-              {
-                validate: true,
-                schemas: [{
-                  uri: "https://json-schema.org/draft/2020-12/schema",
-                  fileMatch: ['*'],
-                  schema: {
-                    "title": "DSADAS",
-                    "$schema": "https://json-schema.org/draft/2020-12/schema",
-                    "$id": "https://example.com/product.schema.json",
-                    "type": "object",
-                    "properties": {
-                      "pin": {
-                        "$comment": "TODO: add enum of countries",
-                        "enum": [
-                          0,
-                          1
-                        ],
-                        "enumDescriptions": [
-                          "SDSA",
-                          "SDSAASDSA",
-                        ]
-                      }
-                    }
-                  }
-
-                }]
-              }
-          );
-
-
+          Monaco.languages.json.jsonDefaults.setDiagnosticsOptions(props.jsonDefaultConfig);
         }
-        editor = Monaco.editor.create(editorElement.value, {
-          lineNumbers: "on",
-          language: "json",
-          columnSelection: true,
-          fontSize:15,
-          contextmenu: true,
-          showUnused: true
-        });
+        editor = Monaco.editor.create(editorElement.value, mergedOptions);
         model = Monaco.editor.createModel(props.modelValue, props.lang);
         editor.setModel(model);
-        Monaco.editor.AccessibilitySupport
+
         editor.onDidChangeModelContent(() => {
           emit('update:modelValue', editor.getValue());
         });
@@ -105,11 +68,11 @@ export default defineComponent({
       }
     });
 
-    // watch(() => props.jsonDefaultConfig, (newValue) => {
-    //   if (props.lang === 'json') {
-    //     Monaco.languages.json.jsonDefaults.setDiagnosticsOptions(newValue);
-    //   }
-    // });
+    watch(() => props.jsonDefaultConfig, (newValue) => {
+      if (props.lang === 'json') {
+        Monaco.languages.json.jsonDefaults.setDiagnosticsOptions(newValue);
+      }
+    });
 
     onBeforeUnmount(() => {
       editor?.dispose();

@@ -28,19 +28,7 @@ const generateConfig: any = (currentConfig: DeviceConfigT) => {
     schemas: [{
       uri: "http://myserver/schema.json",
       fileMatch: ['*'],
-      schema: JSON.parse("{\n" +
-          "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\",\n" +
-          "  \"$id\": \"https://example.com/product.schema.json\",\n" +
-          "  \"title\": \"Product\",\n" +
-          "  \"description\": \"A product from Acme's catalog\",\n" +
-          "  \"type\": \"object\",\n" +
-          "  \"properties\": {\n" +
-          "    \"productId\": {\n" +
-          "      \"description\": \"The unique identifier for a product\",\n" +
-          "      \"type\": \"integer\"\n" +
-          "    }\n" +
-          "  }\n" +
-          "}\n")
+      schema: JSON.parse(currentConfig.schema)
     }]
   };
 }
@@ -79,7 +67,7 @@ const selectConfig = (config: DeviceConfigT) => {
     <template v-slot:before>
       <ClientOnly>
 
-        <MonacoEditorCustom
+        <MonacoEditorCustom :jsonDefaultConfig="generateConfig(currentConfigEditRef)"
                             v-model="currentConfigEditRef.config"
                             lang="json"
                             class="editor">

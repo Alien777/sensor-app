@@ -8,15 +8,15 @@
     "start": "nuxi preview"
   },
   "dependencies": {
-    "@quasar/extras": "1.16.7",
-    "nuxt": "3.8.1",
-    "quasar": "^2.13.0",
-    "sass": "1.69.5"
+    "@quasar/extras": "1.16.9",
+    "nuxt": "3.10.2",
+    "quasar": "2.14.4",
+    "sass": "1.71.0"
   },
   "devDependencies": {
-    "dayjs-nuxt": "^2.1.9",
-    "monaco-editor": "^0.45.0",
-    "nuxt-monaco-editor": "^1.2.7",
-    "nuxt-quasar-ui": "2.0.6"
+    "dayjs-nuxt": "2.1.9",
+    "monaco-editor": "0.46.0",
+    "nuxt-monaco-editor": "1.2.7",
+    "nuxt-quasar-ui": "2.0.7"
   }
 }
