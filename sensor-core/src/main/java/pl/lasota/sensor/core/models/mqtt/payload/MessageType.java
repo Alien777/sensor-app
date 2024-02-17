@@ -1,4 +1,4 @@
-package pl.lasota.sensor.core.models;
+package pl.lasota.sensor.core.models.mqtt.payload;
 
 public enum MessageType {
 
@@ -13,8 +13,13 @@ public enum MessageType {
     CONFIG,
 
     /**
-     * When ESP send simple ADC value
+     * When ESP send simple Analog value
      **/
-    SINGLE_ADC_SIGNAL
+    SINGLE_ADC_SIGNAL,
+
+    /**
+     *  PWM message to esp
+     **/
+    PWM
 
 }

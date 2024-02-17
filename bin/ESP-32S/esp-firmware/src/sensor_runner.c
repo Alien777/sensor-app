@@ -3,20 +3,20 @@
 #define MAX_TASKS 10
 
 static void readAnalog(void *pvParameters);
-static OutputTask *deepCopyMessageToOutputTask(const Message *src, int outputIndex);
-static void freeOutputTask(OutputTask *task);
+static AnalogReaderTask *deepCopyMessageToOutputTask(const Message *src, int outputIndex);
+static void freeOutputTask(AnalogReaderTask *task);
 static void closeAllTasks();
-static void addTask(TaskHandle_t task, OutputTask *outputTask);
+static void addTask(TaskHandle_t task, AnalogReaderTask *outputTask);
 
 TaskHandle_t tasks[MAX_TASKS];
-OutputTask *outputDataTask[MAX_TASKS];
+AnalogReaderTask *outputDataTask[MAX_TASKS];
 int taskCount = 0;
 
 static void readAnalog(void *pvParameters)
 {
-    OutputTask *outputTask = (OutputTask *)pvParameters;
+    AnalogReaderTask *outputTask = (AnalogReaderTask *)pvParameters;
 
-    Output *output = &(outputTask->output);
+    AnalogConfig *output = &(outputTask->analog_reader);
 
     adc1_config_channel_atten(output->pin, output->atten);
     adc1_config_width(output->width);
@@ -26,7 +26,9 @@ static void readAnalog(void *pvParameters)
         if (output->sampling > 100)
         {
             vTaskDelay(pdMS_TO_TICKS(output->sampling));
-        }else{
+        }
+        else
+        {
             vTaskDelay(pdMS_TO_TICKS(100));
         }
 
@@ -34,7 +36,7 @@ static void readAnalog(void *pvParameters)
         char response[100];
         snprintf(response, sizeof(response), "{\"adc_raw\":%d, \"pin\":%d}", analogValue, output->pin);
 
-        if(output->min_adc!=0)
+        if (output->min_adc != 0)
         {
             if (analogValue < output->min_adc)
             {
@@ -42,7 +44,7 @@ static void readAnalog(void *pvParameters)
             }
         }
 
-        if(output->max_adc!=0)
+        if (output->max_adc != 0)
         {
             if (analogValue > output->max_adc)
             {
@@ -50,9 +52,7 @@ static void readAnalog(void *pvParameters)
             }
         }
 
-
         publish(outputTask->config_id, response, SINGLE_ADC_SIGNAL);
- 
     }
 }
 void lisening_output_pin(Message *message)
@@ -63,24 +63,22 @@ void lisening_output_pin(Message *message)
     }
     closeAllTasks();
 
-    for (int i = 0; i < message->outputSensor; i++)
+    for (int i = 0; i < message->analog_reader_size; i++)
     {
-        if (message->output[i].type == ANALOG)
+
+        ESP_LOGE("PIN", "Read from pin %d %d", message->analog_reader[i].pin, message->analog_reader[i].sampling);
+
+        AnalogReaderTask *outputTask = deepCopyMessageToOutputTask(message, i);
+        if (outputTask)
         {
-            ESP_LOGE("PIN", "Read from pin %d %d",message->output[i].pin, message->output[i].sampling);
-       
-            OutputTask *outputTask = deepCopyMessageToOutputTask(message, i);
-            if (outputTask)
-            {
-                TaskHandle_t taskHandle;
-                xTaskCreate(&readAnalog, "readAnalogTask", 2048, outputTask, 5, &taskHandle);
-                addTask(taskHandle, outputTask);
-            }
+            TaskHandle_t taskHandle;
+            xTaskCreate(&readAnalog, "readAnalogTask", 2048, outputTask, 5, &taskHandle);
+            addTask(taskHandle, outputTask);
         }
     }
 }
 
-static void addTask(TaskHandle_t task, OutputTask *outputTask)
+static void addTask(TaskHandle_t task, AnalogReaderTask *outputTask)
 {
     if (taskCount < MAX_TASKS)
     {
@@ -108,25 +106,25 @@ static void closeAllTasks()
     taskCount = 0;
 }
 
-static OutputTask *deepCopyMessageToOutputTask(const Message *src, int outputIndex)
+static AnalogReaderTask *deepCopyMessageToOutputTask(const Message *src, int outputIndex)
 {
-    if (outputIndex < 0 || outputIndex >= src->outputSensor)
+    if (outputIndex < 0 || outputIndex >= src->analog_reader_size)
     {
         return NULL;
     }
 
-    OutputTask *copy = malloc(sizeof(OutputTask));
+    AnalogReaderTask *copy = malloc(sizeof(AnalogReaderTask));
     if (copy)
     {
         memcpy(copy->member_key, src->member_key, sizeof(copy->member_key));
         memcpy(copy->device_key, src->device_key, sizeof(copy->device_key));
-        copy->config_id=src->config_id;
-        memcpy(&copy->output, &src->output[outputIndex], sizeof(Output));
+        copy->config_id = src->config_id;
+        memcpy(&copy->analog_reader, &src->analog_reader[outputIndex], sizeof(AnalogConfig));
     }
     return copy;
 }
 
-static void freeOutputTask(OutputTask *task)
+static void freeOutputTask(AnalogReaderTask *task)
 {
     if (task)
     {

@@ -2,17 +2,12 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "type": "object",
   "properties": {
-    "output": {
+    "analog_reader": {
       "type": "array",
       "maxItems": 5,
       "items": {
         "type": "object",
         "properties": {
-          "type": {
-            "enum": [
-              "ANALOG"
-            ]
-          },
           "pin": {
             "enum": [
               0,
@@ -42,7 +37,7 @@
               2,
               3
             ],
-            "default": "0"
+            "default": 0
           },
           "sampling": {
             "type": "number",
@@ -72,6 +67,6 @@
     }
   },
   "required": [
-    "output"
+    "analog_reader"
   ]
 }

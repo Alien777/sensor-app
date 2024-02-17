@@ -1,20 +1,23 @@
-package pl.lasota.sensor.core.models.mqtt.payload;
+package pl.lasota.sensor.core.models.mqtt.payload.to;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
+/**
+ * Contract describing configure analog pin
+ */
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
-public class OutputPayload {
+public class AnalogConfigReader {
+
+
+    /**
+     * @hidden
+     */
+    public AnalogConfigReader() {
+    }
 
     @JsonProperty("pin")
     public int pin;
-
-    @JsonProperty("type")
-    public TypePayload type;
 
     @JsonProperty("atten")
     public int atten;

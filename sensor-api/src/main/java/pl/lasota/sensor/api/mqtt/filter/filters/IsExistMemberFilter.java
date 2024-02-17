@@ -33,7 +33,7 @@ public class IsExistMemberFilter implements Filter<MessageFrame, MessageFrame> {
             return;
         }
 
-        if (request.getVersion().trim().isBlank()) {
+        if (request.getVersionFirmware().trim().isBlank()) {
             log.info("Version of firmware is obligatory {} ", request.getDeviceKey());
             return;
         }

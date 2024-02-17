@@ -5,7 +5,7 @@ import org.mockito.Mockito;
 import pl.lasota.sensor.api.mqtt.filter.FilterChain;
 import pl.lasota.sensor.api.mqtt.filter.filters.IsExistMemberFilter;
 import pl.lasota.sensor.api.mqtt.filter.filters.SaveSensorValueFilter;
-import pl.lasota.sensor.core.models.MessageType;
+import pl.lasota.sensor.core.models.mqtt.payload.MessageType;
 import pl.lasota.sensor.core.models.mqtt.payload.MessageFrame;
 import pl.lasota.sensor.core.service.DeviceService;
 import pl.lasota.sensor.core.service.MemberService;
@@ -18,11 +18,11 @@ class MqttMessageReceiverTest {
         MessageFrame mfMock = Mockito.mock(MessageFrame.class);
         MemberService msMock = Mockito.mock(MemberService.class);
         DeviceService dsMock = Mockito.mock(DeviceService.class);
-        Utils uMock = Mockito.mock(Utils.class);
+        MqttPreSendLayout uMock = Mockito.mock(MqttPreSendLayout.class);
 
         Mockito.when(mfMock.getMemberKey()).thenReturn("0123456789123456");
         Mockito.when(mfMock.getDeviceKey()).thenReturn("012345678912");
-        Mockito.when(mfMock.getVersion()).thenReturn("1.0");
+        Mockito.when(mfMock.getVersionFirmware()).thenReturn("1.0");
         Mockito.when(mfMock.getMessageType()).thenReturn(MessageType.DEVICE_CONNECTED);
         Mockito.when(msMock.isMemberExistByMemberKey(Mockito.same("0123456789123456"))).thenReturn(true);
 

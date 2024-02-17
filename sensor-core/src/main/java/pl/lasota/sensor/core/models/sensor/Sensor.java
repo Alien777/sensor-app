@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import pl.lasota.sensor.core.models.device.Device;
-import pl.lasota.sensor.core.models.MessageType;
+import pl.lasota.sensor.core.models.mqtt.payload.MessageType;
 import pl.lasota.sensor.core.models.device.DeviceConfig;
 
 import java.time.OffsetDateTime;

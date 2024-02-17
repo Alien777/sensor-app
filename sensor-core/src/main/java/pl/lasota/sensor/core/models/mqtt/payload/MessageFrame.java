@@ -5,30 +5,27 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-import pl.lasota.sensor.core.models.MessageType;
+import pl.lasota.sensor.core.models.mqtt.payload.from.AnalogValuePayload;
+import pl.lasota.sensor.core.models.mqtt.payload.from.ConnectDevicePayload;
+import pl.lasota.sensor.core.models.mqtt.payload.to.PwmPayload;
 import pl.lasota.sensor.core.models.sensor.Sensor;
-import pl.lasota.sensor.core.models.sensor.SingleAdcSignal;
 
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
 public class MessageFrame {
+
+
+    /**
+     * @hidden
+     */
     @JsonIgnore
     private static final ObjectMapper om = new ObjectMapper();
-    @JsonIgnore
-    private static final String ADC_RAW = "adc_raw";
-    @JsonIgnore
-    private static final String PIN = "pin";
 
+    @JsonProperty("config_identifier")
+    private Long configIdentifier;
 
-    @JsonProperty("config_id")
-    private Long configId;
-
-    @JsonProperty("version")
-    private String version;
+    @JsonProperty("version_firmware")
+    private String versionFirmware;
 
     @JsonProperty("device_key")
     private String deviceKey;
@@ -43,29 +40,57 @@ public class MessageFrame {
     private JsonNode payload;
 
 
-    @JsonIgnore
-    public String toJson() throws JsonProcessingException {
+    /**
+     * @hidden
+     */
+    public MessageFrame(Long configId, String version, String deviceKey, String memberKey, MessageType messageType, JsonNode payload) {
+        this.configIdentifier = configId;
+        this.versionFirmware = version;
+        this.deviceKey = deviceKey;
+        this.memberKey = memberKey;
+        this.messageType = messageType;
+        this.payload = payload;
+    }
 
+    /**
+     * @hidden
+     */
+    @JsonIgnore
+    public String makePayloadForDevice() throws JsonProcessingException {
         return switch (messageType) {
             case DEVICE_CONNECTED, SINGLE_ADC_SIGNAL -> throw new UnsupportedOperationException();
-            case CONFIG -> om.writeValueAsString(this);
+            case CONFIG, PWM -> om.writeValueAsString(this);
         };
     }
 
+    /**
+     * @hidden
+     */
     @JsonIgnore
-    public static MessageFrame createConfigPayload(Long configId, String version, String deviceKey, String memberKey, String payload) throws JsonProcessingException {
-        return new MessageFrame(configId, version, deviceKey, memberKey, MessageType.CONFIG, om.readTree(payload));
+    public Sensor.SensorBuilder getPayloadFromDriver() {
+        return switch (messageType) {
+            case DEVICE_CONNECTED -> new ConnectDevicePayload().parse(this);
+            case CONFIG, PWM -> throw new UnsupportedOperationException();
+            case SINGLE_ADC_SIGNAL -> new AnalogValuePayload().parse(this);
+        };
     }
 
+    /**
+     * @hidden
+     */
     @JsonIgnore
-    public Sensor.SensorBuilder getSingleAdcSignal() {
-        double adcRaw = this.getPayload().findValue(ADC_RAW).asDouble();
-        int pin = this.getPayload().findValue(PIN).asInt();
-
-        return SingleAdcSignal.builder()
-                .pin(pin)
-                .adcRaw(adcRaw);
+    public static MessageFrame factoryConfigPayload(Long configId, String version, String deviceKey, String memberKey, String config) throws JsonProcessingException {
+        String json = om.writeValueAsString(config);
+        return new MessageFrame(configId, version, deviceKey, memberKey, MessageType.CONFIG, om.readTree(json));
     }
 
+    /**
+     * @hidden
+     */
+    @JsonIgnore
+    public static MessageFrame factoryPwmPayload(Long configId, String version, String deviceKey, String memberKey, PwmPayload pwmPayload) throws JsonProcessingException {
+        String json = om.writeValueAsString(pwmPayload);
+        return new MessageFrame(configId, version, deviceKey, memberKey, MessageType.PWM, om.readTree(json));
+    }
 
 }

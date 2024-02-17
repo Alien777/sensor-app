@@ -1,16 +1,8 @@
 package pl.lasota.sensor.core.service;
 
-import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.networknt.schema.JsonSchema;
-import com.networknt.schema.JsonSchemaFactory;
-import com.networknt.schema.SpecVersion;
-import com.networknt.schema.ValidationMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pl.lasota.sensor.core.exceptions.*;
@@ -18,25 +10,17 @@ import pl.lasota.sensor.core.models.Member;
 import pl.lasota.sensor.core.models.device.Device;
 import pl.lasota.sensor.core.models.device.DeviceConfig;
 import pl.lasota.sensor.core.models.mqtt.payload.MessageFrame;
-import pl.lasota.sensor.core.models.rest.SendConfigS;
-import pl.lasota.sensor.core.models.rest.SensorApiEndpoint;
-import pl.lasota.sensor.core.models.sensor.ConnectedDevice;
 import pl.lasota.sensor.core.models.sensor.Sensor;
 import pl.lasota.sensor.core.repository.DeviceConfigRepository;
 import pl.lasota.sensor.core.repository.DeviceRepository;
 import pl.lasota.sensor.core.repository.MemberRepository;
 import pl.lasota.sensor.core.repository.SensorRecordingRepository;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
-import java.util.zip.CRC32;
-import java.util.zip.Checksum;
 
-import static pl.lasota.sensor.core.models.MessageType.DEVICE_CONNECTED;
+import static pl.lasota.sensor.core.models.mqtt.payload.MessageType.DEVICE_CONNECTED;
 
 
 @Service
@@ -59,16 +43,11 @@ public class DeviceService {
         }
         Device device = deviceOptional.get();
 
-        var sensorBuilder = switch (messageFrame.getMessageType()) {
-            case DEVICE_CONNECTED -> ConnectedDevice.builder();
-            case CONFIG -> null;
-            case SINGLE_ADC_SIGNAL -> messageFrame.getSingleAdcSignal();
-        };
-
+        var sensorBuilder = messageFrame.getPayloadFromDriver();
         if (sensorBuilder == null) {
             return;
         }
-        Optional<DeviceConfig> configOptional = dcr.getDeviceConfig(device.getDeviceKey(), messageFrame.getConfigId());
+        Optional<DeviceConfig> configOptional = dcr.getDeviceConfig(device.getDeviceKey(), messageFrame.getConfigIdentifier());
 
         if (configOptional.isEmpty() && !DEVICE_CONNECTED.equals(messageFrame.getMessageType())) {
             throw new NotFoundDefaultConfigException();
@@ -177,8 +156,8 @@ public class DeviceService {
         dr.save(device);
     }
 
-    public String getDeviceKey(Long memberId,Long deviceId) throws NotFoundDeviceException {
-        return dr.findDeviceBy(memberId,deviceId).orElseThrow(NotFoundDeviceException::new).getDeviceKey();
+    public String getDeviceKey(Long memberId, Long deviceId) throws NotFoundDeviceException {
+        return dr.findDeviceBy(memberId, deviceId).orElseThrow(NotFoundDeviceException::new).getDeviceKey();
     }
 
     public List<Device> getAllDeviceBy(Long id) {

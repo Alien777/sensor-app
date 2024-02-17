@@ -67,7 +67,7 @@ void publish(const int config_id, const char *message, message_type type)
     const char *message_type = message_type_convert_to_chars(type);
 
     int requiredSize = snprintf(NULL, 0,
-                                "{\"%s\":%d,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"payload\":%s,\"message_type\":\"%s\"}", "config_id", config_id, "version", VERSION_FIRMWARE,
+                                "{\"%s\":%d,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"payload\":%s,\"message_type\":\"%s\"}", "config_identify", config_id, "version_firmware", VERSION_FIRMWARE,
                                 DEVICE_KEY, device_key, MEMBER_KEY, config.member_key, message, message_type) +
                        1;
 
@@ -76,7 +76,7 @@ void publish(const int config_id, const char *message, message_type type)
     if (json != NULL)
     {
         snprintf(json, requiredSize,
-                 "{\"%s\":%d,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"payload\":%s,\"message_type\":\"%s\"}", "config_id", config_id, "version", VERSION_FIRMWARE,
+                 "{\"%s\":%d,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"payload\":%s,\"message_type\":\"%s\"}", "config_identify", config_id, "version_firmware", VERSION_FIRMWARE,
                  DEVICE_KEY, device_key, MEMBER_KEY, config.member_key, message, message_type);
         esp_mqtt_client_publish(client, PUBLISH_TOPIC, json, 0, 2, 0);
         free(json);

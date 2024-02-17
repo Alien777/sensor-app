@@ -8,7 +8,7 @@
 #define WIFI_SSID "wifi_ssid"
 #define PUBLISH_TOPIC "server"
 
-#define VERSION_FIRMWARE "1.0"
+#define VERSION_FIRMWARE "ESP-32S"
 
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 #define JSON_BUFFER_SIZE 512
@@ -23,9 +23,9 @@
 #include <esp_err.h>
 
 typedef struct WifiNetwork WifiNetwork;
-typedef struct OutputTask OutputTask;
+typedef struct AnalogReaderTask AnalogReaderTask;
 typedef struct Message Message;
-typedef struct Output Output;
+typedef struct AnalogConfig AnalogConfig;
 typedef struct ConfigEps ConfigEps;
 typedef enum
 {
@@ -35,16 +35,10 @@ typedef enum
     UNKNOWN,
 } message_type;
 
-typedef enum
-{
-    ANALOG,
-    DIGITAL,
-    UNKNOWN_INPUT
-} input_type;
 
-struct Output
+
+struct AnalogConfig
 {
-    input_type type;
     int pin;
     int width;
     int atten;
@@ -53,12 +47,12 @@ struct Output
     int max_adc;
 };
 
-struct OutputTask
+struct AnalogReaderTask
 {
     char member_key[17];
     char device_key[13];
     int config_id;
-    Output output;
+    AnalogConfig analog_reader;
 };
 
 struct Message
@@ -68,8 +62,8 @@ struct Message
     char version[8];
     int config_id;
     message_type message_type;
-    Output output[MAX_S];
-    int outputSensor;
+    AnalogConfig analog_reader[MAX_S];
+    int analog_reader_size;
 };
 
 struct WifiNetwork
@@ -93,6 +87,5 @@ const char *convert_wifi_network_to_json(WifiNetwork *head);
 const char *message_type_convert_to_chars(message_type state);
 const char *topicSubscribe();
 message_type chars_convert_to_message_type(const char *state);
-input_type chars_convert_to_input_type(const char *state);
 esp_err_t json_to_message(const char *j, Message* msg);
 #endif
