@@ -22,7 +22,6 @@ I want to create a simple system for remote management of devices like ESP and o
   - `schema.json` contains the specification based on the API payload documentation for firmware.
   - [payload](bin/payload/README.md) contains API payload between device and sensor-api.
 
-Also, send device_key, member_key.
 
 ### Esp Panel GUI
 
