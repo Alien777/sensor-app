@@ -57,16 +57,18 @@ static void readAnalog(void *pvParameters)
 }
 void lisening_output_pin(Message *message)
 {
+       ESP_LOGI("TASK", "Analog reader %d", message->analog_reader_size);
     if (message->message_type != CONFIG)
     {
+        ESP_LOGI("TASK", "Not found config message");
         return;
     }
     closeAllTasks();
-
+ 
     for (int i = 0; i < message->analog_reader_size; i++)
     {
 
-        ESP_LOGE("PIN", "Read from pin %d %d", message->analog_reader[i].pin, message->analog_reader[i].sampling);
+        ESP_LOGI("TASK", "Read from pin %d %d", message->analog_reader[i].pin, message->analog_reader[i].sampling);
 
         AnalogReaderTask *outputTask = deepCopyMessageToOutputTask(message, i);
         if (outputTask)
@@ -103,6 +105,7 @@ static void closeAllTasks()
             outputDataTask[i] = NULL;
         }
     }
+    ESP_LOGI("TASK", "Cleared all tasks");
     taskCount = 0;
 }
 

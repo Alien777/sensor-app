@@ -14,6 +14,11 @@ import pl.lasota.sensor.core.models.sensor.Sensor;
 @Data
 public class MessageFrame {
 
+    /**
+     * @hidden
+     */
+    public MessageFrame() {
+    }
 
     /**
      * @hidden
@@ -80,8 +85,7 @@ public class MessageFrame {
      */
     @JsonIgnore
     public static MessageFrame factoryConfigPayload(Long configId, String version, String deviceKey, String memberKey, String config) throws JsonProcessingException {
-        String json = om.writeValueAsString(config);
-        return new MessageFrame(configId, version, deviceKey, memberKey, MessageType.CONFIG, om.readTree(json));
+        return new MessageFrame(configId, version, deviceKey, memberKey, MessageType.CONFIG, om.readTree(config));
     }
 
     /**

@@ -26,7 +26,6 @@ const char *message_type_convert_to_chars(message_type state)
     }
 }
 
-
 message_type chars_convert_to_message_type(const char *state)
 {
     if (strcmp(state, "DEVICE_CONNECTED") == 0)
@@ -171,16 +170,17 @@ esp_err_t json_to_message(const char *j, Message *msg)
         }
         msg->message_type = type;
     }
-
+    ESP_LOGI("MSG", "Type of message %d", msg->message_type);
     if (msg->message_type == CONFIG)
     {
-
+        ESP_LOGI("CONFIG", "Parse config analog");
         cJSON *payload_c = cJSON_GetObjectItem(json, "payload");
         if (payload_c == NULL)
         {
             cJSON_Delete(json);
             return ESP_FAIL;
         }
+        ESP_LOGI("CONFIG", "Read analog form congig");
         cJSON *analog_reader_c = cJSON_GetObjectItemCaseSensitive(payload_c, "analog_reader");
         analog_read_json(analog_reader_c, msg);
     }
@@ -201,14 +201,12 @@ void analog_read_json(cJSON *analog_reader_c, Message *msg)
             if (output_item != NULL && cJSON_IsObject(output_item))
             {
 
-              
                 cJSON *pin_c = cJSON_GetObjectItemCaseSensitive(output_item, "pin");
                 cJSON *width_c = cJSON_GetObjectItemCaseSensitive(output_item, "width");
                 cJSON *atten_c = cJSON_GetObjectItemCaseSensitive(output_item, "atten");
                 cJSON *sampling_c = cJSON_GetObjectItemCaseSensitive(output_item, "sampling");
                 cJSON *min_adc_c = cJSON_GetObjectItemCaseSensitive(output_item, "min_adc");
                 cJSON *max_adc_c = cJSON_GetObjectItemCaseSensitive(output_item, "max_adc");
-        
 
                 if (pin_c != NULL && cJSON_IsNumber(pin_c))
                 {
