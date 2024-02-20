@@ -1,6 +1,7 @@
 package pl.lasota.sensor.core.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -10,6 +11,7 @@ import pl.lasota.sensor.core.models.Member;
 import pl.lasota.sensor.core.models.device.Device;
 import pl.lasota.sensor.core.models.device.DeviceConfig;
 import pl.lasota.sensor.core.models.mqtt.payload.MessageFrame;
+import pl.lasota.sensor.core.models.mqtt.payload.to.ConfigPayload;
 import pl.lasota.sensor.core.models.sensor.Sensor;
 import pl.lasota.sensor.core.repository.DeviceConfigRepository;
 import pl.lasota.sensor.core.repository.DeviceRepository;
@@ -118,6 +120,14 @@ public class DeviceService {
 
     @Transactional
     public DeviceConfig saveConfig(Long memberId, String config, String versionConfig, Long deviceId) throws NotFoundDeviceException, NotFoundSchemaConfigException, ConfigParserException, ConfigCheckSumExistException {
+        ConfigPayload configPayload;
+        ObjectMapper om = new ObjectMapper();
+        try {
+            configPayload = om.readValue(config, ConfigPayload.class);
+        } catch (JsonProcessingException e) {
+            throw new ConfigParserException(e);
+        }
+
         try {
             dsu.testConfigWithSchema(config, dsu.schemaForVersion(versionConfig));
         } catch (JsonProcessingException e) {
@@ -138,7 +148,7 @@ public class DeviceService {
                 .device(deviceOptional)
                 .time(OffsetDateTime.now())
                 .forVersion(versionConfig)
-                .config(config)
+                .config(configPayload)
                 .checksum(checkSum)
                 .build();
 
@@ -146,12 +156,9 @@ public class DeviceService {
     }
 
     @Transactional
-    public void activateConfig(Long memberId, Long deviceId, Long configId) throws NotFoundDeviceException, NotFoundDefaultConfigException,
-            NotFoundSchemaConfigException, ConfigParserException, JsonProcessingException {
-
+    public void activateConfig(Long memberId, Long deviceId, Long configId) throws NotFoundDeviceException, NotFoundDefaultConfigException {
         Device device = dr.findDeviceBy(memberId, deviceId).orElseThrow(NotFoundDeviceException::new);
         DeviceConfig deviceConfig = dcr.getDeviceConfig(deviceId, configId).orElseThrow(NotFoundDefaultConfigException::new);
-        dsu.testConfigWithSchema(deviceConfig.getConfig(), dsu.schemaForVersion(deviceConfig.getForVersion()));
         device.setCurrentDeviceConfig(deviceConfig);
         dr.save(device);
     }

@@ -15,6 +15,7 @@ import pl.lasota.sensor.core.exceptions.NotFoundDeviceConfigException;
 import pl.lasota.sensor.core.exceptions.NotFoundSchemaConfigException;
 import pl.lasota.sensor.core.models.device.Device;
 import pl.lasota.sensor.core.models.device.DeviceConfig;
+import pl.lasota.sensor.core.models.mqtt.payload.to.ConfigPayload;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -46,10 +47,11 @@ public class DeviceServiceUtils {
 
     public DeviceConfig createDefaultDeviceConfig(String version, Device device) throws NotFoundDefaultConfigException {
 
-        String defaultConfig;
-
+        ConfigPayload defaultConfig;
+        String config;
         try {
-            defaultConfig = Files.readString(Path.of(firmwareFolder, version, NAME_DEFAULT_CONFIG));
+            config = Files.readString(Path.of(firmwareFolder, version, NAME_DEFAULT_CONFIG));
+            defaultConfig = new ObjectMapper().readValue(config, ConfigPayload.class);
         } catch (Exception e) {
             throw new NotFoundDefaultConfigException(e);
         }
@@ -61,7 +63,7 @@ public class DeviceServiceUtils {
         return DeviceConfig
                 .builder()
                 .config(defaultConfig)
-                .checksum(checkSum(defaultConfig + version))
+                .checksum(checkSum(config + version))
                 .forVersion(version)
                 .time(OffsetDateTime.now())
                 .device(device).build();

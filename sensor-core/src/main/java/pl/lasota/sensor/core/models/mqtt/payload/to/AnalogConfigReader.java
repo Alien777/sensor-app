@@ -1,5 +1,6 @@
 package pl.lasota.sensor.core.models.mqtt.payload.to;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
@@ -7,6 +8,7 @@ import lombok.Data;
  * Contract describing configure analog pin
  */
 @Data
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class AnalogConfigReader {
 
 
@@ -19,19 +21,19 @@ public class AnalogConfigReader {
     @JsonProperty("pin")
     public int pin;
 
-    @JsonProperty("atten")
-    public int atten;
-
     @JsonProperty("width")
     public int width;
 
+    @JsonProperty("atten")
+    public Integer atten;
+
     @JsonProperty("max_adc")
-    public int maxAdc;
+    public Integer maxAdc;
 
     @JsonProperty("min_adc")
-    public int minAdc;
+    public Integer minAdc;
 
     @JsonProperty("sampling")
-    public int sampling;
+    public Integer sampling;
 
 }

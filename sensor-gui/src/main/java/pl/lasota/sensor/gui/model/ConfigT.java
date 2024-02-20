@@ -1,5 +1,7 @@
 package pl.lasota.sensor.gui.model;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Data;
 import pl.lasota.sensor.core.models.device.DeviceConfig;
 
@@ -14,10 +16,15 @@ public class ConfigT {
     private OffsetDateTime time;
 
     public static ConfigT map(DeviceConfig dc, String schema) {
-
+        ObjectMapper om = new ObjectMapper();
         ConfigT configT = new ConfigT();
         configT.id = dc.getId();
-        configT.config = dc.getConfig();
+        try {
+            configT.config = om.writeValueAsString(dc.getConfig());
+        } catch (JsonProcessingException e) {
+            configT.config = "";
+        }
+
         configT.forVersion = dc.getForVersion();
         configT.time = dc.getTime();
         configT.schema = schema;

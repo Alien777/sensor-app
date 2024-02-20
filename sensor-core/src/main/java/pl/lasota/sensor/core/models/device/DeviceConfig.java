@@ -4,9 +4,9 @@ import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.Type;
+import pl.lasota.sensor.core.models.mqtt.payload.to.ConfigPayload;
 
 import java.time.OffsetDateTime;
-import java.util.UUID;
 
 @Entity
 @Getter
@@ -27,7 +27,7 @@ public class DeviceConfig {
 
     @Column(name = "config", columnDefinition = "jsonb", length = 2000)
     @Type(value = JsonBinaryType.class)
-    private String config;
+    private ConfigPayload config;
 
     @Column(name = "time")
     private OffsetDateTime time;

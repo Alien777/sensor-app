@@ -40,19 +40,19 @@
             "default": 0
           },
           "sampling": {
-            "type": "number",
+            "type": ["integer", "null"],
             "minimum": 10,
             "maximum": 20000,
             "default": 4000
           },
           "min_adc": {
-            "type": "number",
+            "type": ["integer", "null"],
             "minimum": 0,
             "maximum": 5000,
             "default": 0
           },
           "max_adc": {
-            "type": "number",
+            "type": ["integer", "null"],
             "minimum": 0,
             "maximum": 5000,
             "default": 0
