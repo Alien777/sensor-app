@@ -61,14 +61,14 @@ void memory_initial()
     {
         ESP_LOGI("MEMORY", "Initialing memory");
 
-        //initiation memory if run first time.
+        // initiation memory if run first time.
         save_wifi_credentials("none", "none");
         save_member_key("none");
         save_server_ip("none");
         save_initial();
-
-
-    }else{
+    }
+    else
+    {
         ESP_LOGI("MEMORY", "Was initialized");
     }
 }
@@ -130,7 +130,7 @@ void save_member_key(const char *member_key)
         handle_error(err);
         return;
     }
-    
+
     ESP_LOGI("MEMORY", "Save member key");
 }
 
@@ -151,7 +151,7 @@ void save_server_ip(const char *server_ip)
         handle_error(err);
         return;
     }
-    
+
     ESP_LOGI("MEMORY", "Save server ip");
 }
 
@@ -166,11 +166,11 @@ static void save_initial()
 
     config.inited = true;
     esp_err_t err = save_config(&config);
-  if (err != ESP_OK)
+    if (err != ESP_OK)
     {
         handle_error(err);
         return;
     }
-    
+
     ESP_LOGI("MEMORY", "Save sinitied");
 }

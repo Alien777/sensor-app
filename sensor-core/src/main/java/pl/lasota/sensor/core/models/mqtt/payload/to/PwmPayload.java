@@ -12,9 +12,10 @@ import java.util.List;
  * A model describing the contract for sending data to the device to set the pwm value
  */
 @Data
+@AllArgsConstructor
 public class PwmPayload {
 
-    /**
+    /**z
      * @hidden
      */
     public PwmPayload() {
@@ -23,7 +24,7 @@ public class PwmPayload {
     @JsonProperty("pin")
     private int pin;
 
-    @JsonProperty("value")
-    private long value;
+    @JsonProperty("duty")
+    private long duty;
 
 }

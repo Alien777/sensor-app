@@ -185,8 +185,7 @@ static esp_err_t saveHandle(httpd_req_t *req)
         save_server_ip(server_ip);
     }
 
-    
-    if (strlen(ssid) > 0 && strlen(password) > 0)
+        if (strlen(ssid) > 0 && strlen(password) > 0)
     {
         connect(ssid, password);
     }

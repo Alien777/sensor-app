@@ -1,4 +1,3 @@
-
 #ifndef SENSOR_STRUCTURE_H
 #define SENSOR_STRUCTURE_H
 
@@ -23,19 +22,30 @@
 #include <esp_err.h>
 
 typedef struct WifiNetwork WifiNetwork;
-typedef struct AnalogReaderTask AnalogReaderTask;
+typedef struct AnalogTask AnalogTask;
+typedef struct PwmTask PwmTask;
 typedef struct Message Message;
 typedef struct AnalogConfig AnalogConfig;
+typedef struct PwmConfig PwmConfig;
 typedef struct ConfigEps ConfigEps;
+typedef struct PwmSetup PwmSetup;
+
 typedef enum
 {
     DEVICE_CONNECTED,
     SINGLE_ADC_SIGNAL,
+    PWM,
     CONFIG,
     UNKNOWN,
 } message_type;
 
-
+struct PwmConfig
+{
+    int resolution;
+    int freq;
+    int channel;
+    int pin;
+};
 
 struct AnalogConfig
 {
@@ -47,13 +57,28 @@ struct AnalogConfig
     int max_adc;
 };
 
-struct AnalogReaderTask
+struct PwmTask
 {
     char member_key[17];
     char device_key[13];
     int config_id;
-    AnalogConfig analog_reader;
+    PwmConfig pwm_config;
 };
+
+struct AnalogTask
+{
+    char member_key[17];
+    char device_key[13];
+    int config_id;
+    AnalogConfig analog_config;
+};
+
+struct PwmSetup
+{
+    int pin;
+    int duty;
+};
+
 
 struct Message
 {
@@ -62,8 +87,13 @@ struct Message
     char version[8];
     int config_id;
     message_type message_type;
-    AnalogConfig analog_reader[MAX_S];
-    int analog_reader_size;
+
+    PwmConfig pwm_configs[MAX_S];
+    AnalogConfig analog_configs[MAX_S];
+    PwmSetup pwn_setup;
+
+    int analog_configs_size;
+    int pwm_configs_size;
 };
 
 struct WifiNetwork
@@ -83,9 +113,10 @@ struct ConfigEps
     bool inited;
 };
 
+
 const char *convert_wifi_network_to_json(WifiNetwork *head);
 const char *message_type_convert_to_chars(message_type state);
 const char *topicSubscribe();
 message_type chars_convert_to_message_type(const char *state);
-esp_err_t json_to_message(const char *j, Message* msg);
+esp_err_t json_to_message(const char *j, Message *msg);
 #endif

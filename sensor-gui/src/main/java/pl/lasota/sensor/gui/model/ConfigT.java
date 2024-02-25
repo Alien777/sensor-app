@@ -16,15 +16,9 @@ public class ConfigT {
     private OffsetDateTime time;
 
     public static ConfigT map(DeviceConfig dc, String schema) {
-        ObjectMapper om = new ObjectMapper();
         ConfigT configT = new ConfigT();
         configT.id = dc.getId();
-        try {
-            configT.config = om.writeValueAsString(dc.getConfig());
-        } catch (JsonProcessingException e) {
-            configT.config = "";
-        }
-
+        configT.config = dc.getConfig();
         configT.forVersion = dc.getForVersion();
         configT.time = dc.getTime();
         configT.schema = schema;

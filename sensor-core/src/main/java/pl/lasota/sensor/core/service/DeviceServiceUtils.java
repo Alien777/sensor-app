@@ -47,22 +47,18 @@ public class DeviceServiceUtils {
 
     public DeviceConfig createDefaultDeviceConfig(String version, Device device) throws NotFoundDefaultConfigException {
 
-        ConfigPayload defaultConfig;
+
         String config;
         try {
             config = Files.readString(Path.of(firmwareFolder, version, NAME_DEFAULT_CONFIG));
-            defaultConfig = new ObjectMapper().readValue(config, ConfigPayload.class);
+            new ObjectMapper().readValue(config, ConfigPayload.class);
         } catch (Exception e) {
             throw new NotFoundDefaultConfigException(e);
         }
 
-        if (defaultConfig == null) {
-            throw new NotFoundDefaultConfigException();
-        }
-
         return DeviceConfig
                 .builder()
-                .config(defaultConfig)
+                .config(config)
                 .checksum(checkSum(config + version))
                 .forVersion(version)
                 .time(OffsetDateTime.now())

@@ -9,31 +9,21 @@ import lombok.Data;
  */
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class AnalogConfigReader {
-
+public class PwmConfig {
 
     /**
      * @hidden
      */
-    public AnalogConfigReader() {
+    public PwmConfig() {
     }
 
     @JsonProperty("pin")
     public int pin;
 
-    @JsonProperty("width")
-    public int width;
+    @JsonProperty("freq")
+    public int freq;
 
-    @JsonProperty("atten")
-    public Integer atten;
-
-    @JsonProperty("max_adc")
-    public Integer maxAdc;
-
-    @JsonProperty("min_adc")
-    public Integer minAdc;
-
-    @JsonProperty("sampling")
-    public Integer sampling;
+    @JsonProperty("resolution")
+    public int resolution;
 
 }

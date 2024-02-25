@@ -2,9 +2,59 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "type": "object",
   "properties": {
-    "analog_reader": {
+    "pwm_configs": {
       "type": "array",
-      "maxItems": 5,
+      "maxItems": 4,
+      "items": {
+        "type": "object",
+        "properties": {
+          "pin": {
+            "enum": [
+              32,
+              33,
+              25,
+              26,
+              27,
+              14,
+              12,
+              13,
+              23,
+              22,
+              1,
+              3,
+              21,
+              19,
+              18,
+              5,
+              17,
+              16,
+              4,
+              2,
+              15
+            ]
+          },
+          "freq": {
+            "type": [
+              "integer"
+            ],
+            "minimum": 1,
+            "maximum": 48000,
+            "default": 5000
+          },
+          "resolution": {
+            "type": [
+              "integer"
+            ],
+            "minimum": 1,
+            "maximum": 14,
+            "default": 10
+          }
+        }
+      }
+    },
+    "analog_configs": {
+      "type": "array",
+      "maxItems": 4,
       "items": {
         "type": "object",
         "properties": {
@@ -16,8 +66,16 @@
               3,
               4,
               5,
-              6,
-              7
+              6
+            ],
+            "enumDescriptions": [
+              "GPIO36",
+              "GPIO37",
+              "GPIO38",
+              "GPIO39",
+              "GPIO32",
+              "GPIO34",
+              "GPIO35"
             ],
             "default": 1
           },
@@ -40,19 +98,28 @@
             "default": 0
           },
           "sampling": {
-            "type": ["integer", "null"],
+            "type": [
+              "integer",
+              "null"
+            ],
             "minimum": 10,
             "maximum": 20000,
             "default": 4000
           },
           "min_adc": {
-            "type": ["integer", "null"],
+            "type": [
+              "integer",
+              "null"
+            ],
             "minimum": 0,
             "maximum": 5000,
             "default": 0
           },
           "max_adc": {
-            "type": ["integer", "null"],
+            "type": [
+              "integer",
+              "null"
+            ],
             "minimum": 0,
             "maximum": 5000,
             "default": 0
@@ -65,8 +132,5 @@
         ]
       }
     }
-  },
-  "required": [
-    "analog_reader"
-  ]
+  }
 }

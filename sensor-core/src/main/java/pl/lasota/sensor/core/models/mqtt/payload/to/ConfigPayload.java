@@ -18,7 +18,10 @@ public class ConfigPayload {
     public ConfigPayload() {
     }
 
-    @JsonProperty("analog_reader")
-    private List<AnalogConfigReader> analogReader = new ArrayList<>();
+    @JsonProperty("analog_configs")
+    private List<AnalogConfig> analogReader = new ArrayList<>();
+
+    @JsonProperty("pwm_configs")
+    private List<PwmConfig> pwmConfig = new ArrayList<>();
 
 }

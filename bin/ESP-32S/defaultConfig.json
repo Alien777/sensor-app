@@ -1,3 +1,4 @@
 {
-  "analog_reader": []
+  "analog_configs": [],
+  "pwm_configs": []
 }

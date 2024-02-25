@@ -42,9 +42,11 @@ void file_system_initial()
     }
 }
 
-esp_err_t process_file(const char *filePath, esp_err_t (*process_func)(FILE *, void *), void *arg) {
+esp_err_t process_file(const char *filePath, esp_err_t (*process_func)(FILE *, void *), void *arg)
+{
     FILE *file = fopen(filePath, "r");
-    if (file == NULL) {
+    if (file == NULL)
+    {
         ESP_LOGE(TAG_VFS, "Failed to read file");
         return ESP_FAIL;
     }

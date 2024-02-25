@@ -32,9 +32,9 @@ I want to create a simple system for remote management of devices like ESP and o
 ![img.png](readme/gui-panel.png)
 
 ### My Plan
-
+#### ESP32:
 * ~~Support ANALOG~~
-* Support PWM
+* ~~Support PWM~~
 * Support UART
 * Support I2C
 * Support SPI

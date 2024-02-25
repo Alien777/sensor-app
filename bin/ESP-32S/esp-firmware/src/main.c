@@ -3,7 +3,8 @@
 #include "sensor_memory.h"
 #include "sensor_mqtt.h"
 #include "sensor_server.h"
-
+#include "driver/ledc.h"
+#include "esp_err.h"
 void start()
 {
   file_system_initial();

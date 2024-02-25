@@ -120,10 +120,8 @@ public class DeviceService {
 
     @Transactional
     public DeviceConfig saveConfig(Long memberId, String config, String versionConfig, Long deviceId) throws NotFoundDeviceException, NotFoundSchemaConfigException, ConfigParserException, ConfigCheckSumExistException {
-        ConfigPayload configPayload;
-        ObjectMapper om = new ObjectMapper();
         try {
-            configPayload = om.readValue(config, ConfigPayload.class);
+            new ObjectMapper().readValue(config, ConfigPayload.class);
         } catch (JsonProcessingException e) {
             throw new ConfigParserException(e);
         }
@@ -148,7 +146,7 @@ public class DeviceService {
                 .device(deviceOptional)
                 .time(OffsetDateTime.now())
                 .forVersion(versionConfig)
-                .config(configPayload)
+                .config(config)
                 .checksum(checkSum)
                 .build();
 
@@ -156,9 +154,10 @@ public class DeviceService {
     }
 
     @Transactional
-    public void activateConfig(Long memberId, Long deviceId, Long configId) throws NotFoundDeviceException, NotFoundDefaultConfigException {
+    public void activateConfig(Long memberId, Long deviceId, Long configId) throws NotFoundDeviceException, NotFoundDefaultConfigException, NotFoundSchemaConfigException, ConfigParserException, JsonProcessingException {
         Device device = dr.findDeviceBy(memberId, deviceId).orElseThrow(NotFoundDeviceException::new);
         DeviceConfig deviceConfig = dcr.getDeviceConfig(deviceId, configId).orElseThrow(NotFoundDefaultConfigException::new);
+        dsu.testConfigWithSchema(deviceConfig.getConfig(), dsu.schemaForVersion(device.getVersion()));
         device.setCurrentDeviceConfig(deviceConfig);
         dr.save(device);
     }

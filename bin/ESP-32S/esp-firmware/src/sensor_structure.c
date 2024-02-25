@@ -1,15 +1,16 @@
 #include "sensor_structure.h"
 #include "sensor_wifi.h"
 #include "sensor_memory.h"
-static char topic[50] = {0};
-static void analog_read_json(cJSON *analog_reader_c, Message *msg);
-
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "driver/ledc.h"
 #include "esp_err.h"
 #include "math.h"
 #include "esp_log.h"
+
+static char topic[50] = {0};
+static void analog_read_json(cJSON *analog_reader_c, Message *msg);
+static void pwm_read_json(cJSON *pwm_configs_c, Message *msg);
 
 const char *message_type_convert_to_chars(message_type state)
 {
@@ -21,6 +22,8 @@ const char *message_type_convert_to_chars(message_type state)
         return "SINGLE_ADC_SIGNAL";
     case CONFIG:
         return "CONFIG";
+    case PWM:
+        return "PWM";
     default:
         return "UNKNOWN";
     }
@@ -39,6 +42,10 @@ message_type chars_convert_to_message_type(const char *state)
     else if (strcmp(state, "CONFIG") == 0)
     {
         return CONFIG;
+    }
+    else if (strcmp(state, "PWM") == 0)
+    {
+        return PWM;
     }
     else
     {
@@ -99,68 +106,34 @@ esp_err_t json_to_message(const char *j, Message *msg)
     }
 
     cJSON *member_key = cJSON_GetObjectItemCaseSensitive(json, MEMBER_KEY);
-    if (member_key == NULL)
+    if (member_key == NULL || !cJSON_IsString(member_key) || (member_key->valuestring == NULL))
     {
         cJSON_Delete(json);
         return ESP_FAIL;
-    }
-    cJSON *device_key = cJSON_GetObjectItemCaseSensitive(json, DEVICE_KEY);
-    if (device_key == NULL)
-    {
-        cJSON_Delete(json);
-        return ESP_FAIL;
-    }
-    cJSON *msg_type = cJSON_GetObjectItemCaseSensitive(json, "message_type");
-    if (msg_type == NULL)
-    {
-        cJSON_Delete(json);
-        return ESP_FAIL;
-    }
-
-    cJSON *config_id = cJSON_GetObjectItemCaseSensitive(json, "config_identifier");
-    if (config_id == NULL)
-    {
-        cJSON_Delete(json);
-        return ESP_FAIL;
-    }
-
-    cJSON *version = cJSON_GetObjectItemCaseSensitive(json, "version_firmware");
-    if (version == NULL)
-    {
-        cJSON_Delete(json);
-        return ESP_FAIL;
-    }
-
-    if (cJSON_IsNumber(config_id))
-    {
-        msg->config_id = config_id->valueint;
     }
     else
-    {
-        cJSON_Delete(json);
-        return ESP_FAIL;
-    }
-
-    if (cJSON_IsString(version) && (version->valuestring != NULL))
-    {
-        strncpy(msg->version, version->valuestring, sizeof(msg->version) - 1);
-    }
-    else
-    {
-        cJSON_Delete(json);
-        return ESP_FAIL;
-    }
-
-    if (cJSON_IsString(member_key) && (member_key->valuestring != NULL))
     {
         strncpy(msg->member_key, member_key->valuestring, sizeof(msg->member_key) - 1);
     }
 
-    if (cJSON_IsString(device_key) && (device_key->valuestring != NULL))
+    cJSON *device_key = cJSON_GetObjectItemCaseSensitive(json, DEVICE_KEY);
+    if (device_key == NULL || !cJSON_IsString(device_key) || (device_key->valuestring == NULL))
+    {
+        cJSON_Delete(json);
+        return ESP_FAIL;
+    }
+    else
     {
         strncpy(msg->device_key, device_key->valuestring, sizeof(msg->device_key) - 1);
     }
-    if (cJSON_IsString(msg_type) && (msg_type->valuestring != NULL))
+
+    cJSON *msg_type = cJSON_GetObjectItemCaseSensitive(json, "message_type");
+    if (msg_type == NULL || !cJSON_IsString(msg_type) || (msg_type->valuestring == NULL))
+    {
+        cJSON_Delete(json);
+        return ESP_FAIL;
+    }
+    else
     {
         message_type type = chars_convert_to_message_type(msg_type->valuestring);
         if (type == UNKNOWN)
@@ -170,34 +143,106 @@ esp_err_t json_to_message(const char *j, Message *msg)
         }
         msg->message_type = type;
     }
-    ESP_LOGI("MSG", "Type of message %d", msg->message_type);
+
+    cJSON *config_id = cJSON_GetObjectItemCaseSensitive(json, "config_identifier");
+    if (config_id == NULL || !cJSON_IsNumber(config_id))
+    {
+        cJSON_Delete(json);
+        return ESP_FAIL;
+    }
+    else
+    {
+        msg->config_id = config_id->valueint;
+    }
+
+    cJSON *version = cJSON_GetObjectItemCaseSensitive(json, "version_firmware");
+    if (version == NULL || !cJSON_IsString(version) || (version->valuestring == NULL))
+    {
+        cJSON_Delete(json);
+        return ESP_FAIL;
+    }
+    else
+    {
+        strncpy(msg->version, version->valuestring, sizeof(msg->version) - 1);
+    }
+
+    ESP_LOGI("RECIVED", "Type message of received %d", msg->message_type);
+    cJSON *payload_c = cJSON_GetObjectItem(json, "payload");
+    if (payload_c == NULL)
+    {
+        cJSON_Delete(json);
+        return ESP_FAIL;
+    }
     if (msg->message_type == CONFIG)
     {
-        ESP_LOGI("CONFIG", "Parse config analog");
-        cJSON *payload_c = cJSON_GetObjectItem(json, "payload");
-        if (payload_c == NULL)
+
+        cJSON *analog_configs_c = cJSON_GetObjectItemCaseSensitive(payload_c, "analog_configs");
+        analog_read_json(analog_configs_c, msg);
+
+        cJSON *pwm_reader_c = cJSON_GetObjectItemCaseSensitive(payload_c, "pwm_configs");
+        pwm_read_json(pwm_reader_c, msg);
+    }
+    else if (msg->message_type == PWM)
+    {
+        cJSON *pin_pwm_c = cJSON_GetObjectItemCaseSensitive(payload_c, "pin");
+        cJSON *duty_pwm_c = cJSON_GetObjectItemCaseSensitive(payload_c, "duty");
+
+        if (pin_pwm_c != NULL && cJSON_IsNumber(pin_pwm_c))
         {
-            cJSON_Delete(json);
-            return ESP_FAIL;
+            msg->pwn_setup.pin = pin_pwm_c->valueint;
         }
-        ESP_LOGI("CONFIG", "Read analog form congig");
-        cJSON *analog_reader_c = cJSON_GetObjectItemCaseSensitive(payload_c, "analog_reader");
-        analog_read_json(analog_reader_c, msg);
+        if (duty_pwm_c != NULL && cJSON_IsNumber(duty_pwm_c))
+        {
+            msg->pwn_setup.duty = duty_pwm_c->valueint;
+        }
     }
 
     cJSON_Delete(json);
     return ESP_OK;
 }
 
-void analog_read_json(cJSON *analog_reader_c, Message *msg)
+void pwm_read_json(cJSON *pwm_configs_c, Message *msg)
 {
-    if (analog_reader_c != NULL && cJSON_IsArray(analog_reader_c))
+    if (pwm_configs_c != NULL && cJSON_IsArray(pwm_configs_c))
     {
-        int input_count = cJSON_GetArraySize(analog_reader_c);
-        msg->analog_reader_size = MIN(input_count, MAX_S);
-        for (int i = 0; i < msg->analog_reader_size; ++i)
+        int input_count = cJSON_GetArraySize(pwm_configs_c);
+        msg->pwm_configs_size = MIN(input_count, MAX_S);
+        for (int i = 0; i < msg->analog_configs_size; ++i)
         {
-            cJSON *output_item = cJSON_GetArrayItem(analog_reader_c, i);
+            cJSON *output_item = cJSON_GetArrayItem(pwm_configs_c, i);
+            if (output_item != NULL && cJSON_IsObject(output_item))
+            {
+
+                cJSON *pin_c = cJSON_GetObjectItemCaseSensitive(output_item, "pin");
+                cJSON *wfreq_c = cJSON_GetObjectItemCaseSensitive(output_item, "freq");
+                cJSON *resolution_c = cJSON_GetObjectItemCaseSensitive(output_item, "resolution");
+
+                if (pin_c != NULL && cJSON_IsNumber(pin_c))
+                {
+                    msg->pwm_configs[i].pin = pin_c->valueint;
+                }
+                if (wfreq_c != NULL && cJSON_IsNumber(wfreq_c))
+                {
+                    msg->pwm_configs[i].freq = wfreq_c->valueint;
+                }
+                if (resolution_c != NULL && cJSON_IsNumber(resolution_c))
+                {
+                    msg->pwm_configs[i].resolution = resolution_c->valueint;
+                }
+            }
+        }
+    }
+}
+
+void analog_read_json(cJSON *analog_configs_c, Message *msg)
+{
+    if (analog_configs_c != NULL && cJSON_IsArray(analog_configs_c))
+    {
+        int input_count = cJSON_GetArraySize(analog_configs_c);
+        msg->analog_configs_size = MIN(input_count, MAX_S);
+        for (int i = 0; i < msg->analog_configs_size; ++i)
+        {
+            cJSON *output_item = cJSON_GetArrayItem(analog_configs_c, i);
             if (output_item != NULL && cJSON_IsObject(output_item))
             {
 
@@ -210,28 +255,41 @@ void analog_read_json(cJSON *analog_reader_c, Message *msg)
 
                 if (pin_c != NULL && cJSON_IsNumber(pin_c))
                 {
-                    ESP_LOGI("PIN READ ", "PIN READ %d", pin_c->valueint);
-                    msg->analog_reader[i].pin = pin_c->valueint;
+                    msg->analog_configs[i].pin = pin_c->valueint;
                 }
                 if (width_c != NULL && cJSON_IsNumber(width_c))
                 {
-                    msg->analog_reader[i].width = width_c->valuedouble;
+                    msg->analog_configs[i].width = width_c->valueint;
                 }
                 if (atten_c != NULL && cJSON_IsNumber(atten_c))
                 {
-                    msg->analog_reader[i].atten = atten_c->valuedouble;
+                    msg->analog_configs[i].atten = atten_c->valueint;
+                }else{
+                     msg->analog_configs[i].atten=3;
                 }
                 if (sampling_c != NULL && cJSON_IsNumber(sampling_c))
                 {
-                    msg->analog_reader[i].sampling = sampling_c->valueint;
+                    msg->analog_configs[i].sampling = sampling_c->valueint;
+                }
+                else
+                {
+                    msg->analog_configs[i].sampling = 0;
                 }
                 if (min_adc_c != NULL && cJSON_IsNumber(min_adc_c))
                 {
-                    msg->analog_reader[i].min_adc = min_adc_c->valueint;
+                    msg->analog_configs[i].min_adc = min_adc_c->valueint;
+                }
+                else
+                {
+                    msg->analog_configs[i].min_adc = 0;
                 }
                 if (max_adc_c != NULL && cJSON_IsNumber(max_adc_c))
                 {
-                    msg->analog_reader[i].max_adc = max_adc_c->valueint;
+                    msg->analog_configs[i].max_adc = max_adc_c->valueint;
+                }
+                else
+                {
+                    msg->analog_configs[i].max_adc = 0;
                 }
             }
         }

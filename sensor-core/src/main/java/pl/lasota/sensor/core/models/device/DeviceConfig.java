@@ -27,7 +27,7 @@ public class DeviceConfig {
 
     @Column(name = "config", columnDefinition = "jsonb", length = 2000)
     @Type(value = JsonBinaryType.class)
-    private ConfigPayload config;
+    private String config;
 
     @Column(name = "time")
     private OffsetDateTime time;

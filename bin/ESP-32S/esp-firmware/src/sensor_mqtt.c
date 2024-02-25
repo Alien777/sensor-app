@@ -37,15 +37,24 @@ static void mqttEventHandler(void *handler_args, esp_event_base_t base, int32_t 
     case MQTT_EVENT_DATA:
         if (strncmp(event->topic, topicSubscribe(), event->topic_len) == 0)
         {
-            ESP_LOGI(TAG_MQTT, "Received data: %s", event->data);
-            Message message = {0};
-            esp_err_t err = json_to_message(event->data, &message);
+            ESP_LOGI(TAG_MQTT, "Received data: %s length %d", event->data, event->data_len);
+            Message *message = (Message *)malloc(sizeof(Message));
+            ESP_LOGI(TAG_MQTT, "Alocated message");
+            if (message == NULL)
+            {
+                ESP_LOGE(TAG_MQTT, "Failed to allocate memory for message");
+                return;
+            }
+            esp_err_t err = json_to_message(event->data, message);
             if (err == ESP_FAIL)
             {
+                free(message);
                 ESP_LOGE(TAG_MQTT, "Problem with convert message");
                 break;
             }
-            lisening_output_pin(&message);
+            config_json(message);
+            set_pwm(message);
+            free(message);
         }
         break;
     case MQTT_EVENT_ERROR:

@@ -48,7 +48,7 @@ public class DevicesController {
     @PutMapping("/{id}/config/{id_config}/activate")
     @PreAuthorize("isAuthenticated()")
     public void activateConfig(@PathVariable("id") Long deviceId, @PathVariable("id_config") Long configId) throws NotFoundDeviceException,
-            NotFoundSchemaConfigException, NotFoundDefaultConfigException, ConfigParserException, JsonProcessingException {
+            NotFoundDefaultConfigException, ConfigParserException, NotFoundSchemaConfigException, JsonProcessingException {
         Member member = ms.loggedUser();
         ds.activateConfig(member.getId(), deviceId, configId);
         try {

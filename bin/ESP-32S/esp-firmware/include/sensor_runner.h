@@ -8,5 +8,8 @@
 #include "sensor_mqtt.h"
 #include "sensor_structure.h"
 
-void lisening_output_pin(Message* message);
+void config_json(Message* message);
+
+void set_pwm(Message *message);
+
 #endif

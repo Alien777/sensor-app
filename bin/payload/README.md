@@ -60,9 +60,12 @@ ESP-32S schema reduces it to values 0, 1, 2, 3
 
 ### ConfigPayload (`CONFIG`)
 
-- `analog_reader`:
-    - **Type**: Array<AnalogConfigReader>
+- `analog_configs`:
+    - **Type**: Array<AnalogConfigReader>, Optional
     - **Description**: Configuration of analog reader.
+- `pwm_configs`:
+    - **Type**: Array<AnalogConfigReader>, Optional
+    - **Description**: Configuration of PWM.
 
 ### AnalogConfigReader (`CONFIG`)
 
@@ -70,7 +73,6 @@ ESP-32S schema reduces it to values 0, 1, 2, 3
     - **Type**: Integer
     - **Description**: The pin number on the microcontroller that is configured for analog reading. It specifies which
       analog input pin is being used.
-
 
 - `width`:
     - **Type**: Integer
@@ -81,7 +83,6 @@ ESP-32S schema reduces it to values 0, 1, 2, 3
     - **Type**: Integer, Optional, Null
     - **Description**: Attenuation setting for the analog pin. This refers to the reduction of the signal's amplitude,
       affecting the range of voltage the pin can read.
-
 
 - `min_adc`:
     - **Type**: Integer, Optional, Null

@@ -23,7 +23,7 @@ public class SensorApiController implements SensorApiEndpoint {
 
     @Override
     public void pwmValue(SendPwmS configS) throws Exception {
-        mqttPreSendLayout.sendPwm(configS.deviceKey(), configS.memberKey(), configS.pin(), configS.value());
+        mqttPreSendLayout.sendPwm(configS.memberKey(), configS.deviceKey(), configS.pin(), configS.value());
     }
 
 }
