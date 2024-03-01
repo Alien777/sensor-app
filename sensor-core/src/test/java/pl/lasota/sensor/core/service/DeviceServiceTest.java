@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
+import pl.lasota.sensor.core.configs.CoreProperties;
 import pl.lasota.sensor.core.exceptions.*;
 import pl.lasota.sensor.core.models.Member;
 import pl.lasota.sensor.core.models.device.Device;
@@ -28,7 +29,7 @@ class DeviceServiceTest {
         SensorRecordingRepository srrMock = Mockito.mock(SensorRecordingRepository.class);
         DeviceConfigRepository dcMock = Mockito.mock(DeviceConfigRepository.class);
         MemberRepository mrMock = Mockito.mock(MemberRepository.class);
-        DeviceServiceUtils dsuMock = Mockito.mock(DeviceServiceUtils.class);
+        DeviceUtilsService dsuMock = Mockito.mock(DeviceUtilsService.class);
 
         Mockito.when(drMock.existsDevice(Mockito.same("0123456789123456"), Mockito.same("012345678912"))).thenReturn(true);
 
@@ -46,7 +47,7 @@ class DeviceServiceTest {
         SensorRecordingRepository srrMock = Mockito.mock(SensorRecordingRepository.class);
         DeviceConfigRepository dcMock = Mockito.mock(DeviceConfigRepository.class);
         MemberRepository mrMock = Mockito.mock(MemberRepository.class);
-        DeviceServiceUtils dsuMock = Mockito.mock(DeviceServiceUtils.class);
+        DeviceUtilsService dsuMock = Mockito.mock(DeviceUtilsService.class);
 
         Mockito.when(drMock.existsDevice(Mockito.same("0123456789123456"), Mockito.same("012345678912"))).thenReturn(false);
         Mockito.when(mrMock.findMemberByMemberKey(Mockito.same("0123456789123456"))).thenReturn(Optional.of(member));
@@ -70,15 +71,15 @@ class DeviceServiceTest {
 
     @Test
     public void validate_config_test() throws ConfigCheckSumExistException, ConfigParserException, NotFoundSchemaConfigException, NotFoundDeviceException, IOException {
-
         Device device = Mockito.mock(Device.class);
         DeviceRepository drMock = Mockito.mock(DeviceRepository.class);
+        CoreProperties cpMock = Mockito.mock(CoreProperties.class);
         SensorRecordingRepository srrMock = Mockito.mock(SensorRecordingRepository.class);
         DeviceConfigRepository dcrMock = Mockito.mock(DeviceConfigRepository.class);
         MemberRepository mrMock = Mockito.mock(MemberRepository.class);
-
+        Mockito.when(cpMock.getFirmwareFolder()).thenReturn("/");
         Mockito.when(drMock.findDeviceBy(Mockito.same(1L), Mockito.same(1L))).thenReturn(Optional.of(device));
-        DeviceService deviceService = new DeviceService(drMock, srrMock, dcrMock, mrMock, new DeviceServiceUtils("/"));
+        DeviceService deviceService = new DeviceService(drMock, srrMock, dcrMock, mrMock, new DeviceUtilsService(cpMock));
 
         String config = "{\"analog_configs\": []}";
         validOk(deviceService, dcrMock, config);

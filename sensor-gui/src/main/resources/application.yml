@@ -15,7 +15,7 @@ eureka:
     preferIpAddress: true
 spring:
   application:
-    name: "sensor-gui"
+    name: sensor-gui
   config:
     import: file:/home/${USER}/Documents/container/sensor/oauth-config.yml
   security:
@@ -47,4 +47,5 @@ sensor:
     secret: Gkl3uP7ATJcLNka0p7+v4hY0OcTu9H08+QP1sFYE4PI=
     expiration: 1440
   core:
-    firmware: bin
+    sensor-flows-name: sensor-flows
+    firmware-folder: bin

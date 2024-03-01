@@ -12,7 +12,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 @ComponentScan(value = {"pl.lasota.sensor.core", "pl.lasota.sensor.gui"})
 @EntityScan(value = {"pl.lasota.sensor.core.models"})
 @EnableJpaRepositories("pl.lasota.sensor.core.repository")
-@EnableFeignClients(basePackages = {"pl.lasota.sensor.core.models.rest"})
+@EnableFeignClients(basePackages = {"pl.lasota.sensor.core.restapi"})
 @EnableDiscoveryClient
 public class SensorGui {
     public static void main(String[] args) {

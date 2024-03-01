@@ -2,9 +2,11 @@ package pl.lasota.sensor.api.mqtt;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import pl.lasota.sensor.api.mqtt.filter.FilterChain;
-import pl.lasota.sensor.api.mqtt.filter.filters.IsExistMemberFilter;
-import pl.lasota.sensor.api.mqtt.filter.filters.SaveSensorValueFilter;
+import pl.lasota.sensor.api.filter.FilterChain;
+import pl.lasota.sensor.api.filter.filters.IsExistMemberFilter;
+import pl.lasota.sensor.api.filter.filters.SaveSensorValueFilter;
+import pl.lasota.sensor.core.restapi.SensorFlowsHelper;
+import pl.lasota.sensor.core.configs.CoreProperties;
 import pl.lasota.sensor.core.models.mqtt.payload.MessageType;
 import pl.lasota.sensor.core.models.mqtt.payload.MessageFrame;
 import pl.lasota.sensor.core.service.DeviceService;
@@ -19,6 +21,8 @@ class MqttMessageReceiverTest {
         MemberService msMock = Mockito.mock(MemberService.class);
         DeviceService dsMock = Mockito.mock(DeviceService.class);
         MqttPreSendLayout uMock = Mockito.mock(MqttPreSendLayout.class);
+        SensorFlowsHelper crtMock = Mockito.mock(SensorFlowsHelper.class);
+
 
         Mockito.when(mfMock.getMemberKey()).thenReturn("0123456789123456");
         Mockito.when(mfMock.getDeviceKey()).thenReturn("012345678912");
@@ -29,7 +33,7 @@ class MqttMessageReceiverTest {
 
         FilterChain filterChain = new FilterChain();
         IsExistMemberFilter isExistMemberFilter = new IsExistMemberFilter(msMock);
-        SaveSensorValueFilter saveSensorValueFilter = new SaveSensorValueFilter(dsMock, uMock);
+        SaveSensorValueFilter saveSensorValueFilter = new SaveSensorValueFilter(dsMock, uMock, crtMock);
         filterChain
                 .addFilter(isExistMemberFilter)
                 .addFilter(saveSensorValueFilter);

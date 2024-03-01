@@ -9,7 +9,7 @@ import org.eclipse.paho.mqttv5.common.MqttMessage;
 import org.eclipse.paho.mqttv5.common.packet.MqttProperties;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
-import pl.lasota.sensor.api.mqtt.model.MessagePayload;
+import pl.lasota.sensor.api.model.MessagePayload;
 
 @Component
 @Slf4j

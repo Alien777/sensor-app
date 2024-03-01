@@ -9,9 +9,9 @@ import pl.lasota.sensor.core.exceptions.*;
 import pl.lasota.sensor.core.models.Member;
 import pl.lasota.sensor.core.models.device.DeviceConfig;
 import pl.lasota.sensor.core.models.rest.SendConfigS;
-import pl.lasota.sensor.core.models.rest.SensorApiEndpoint;
+import pl.lasota.sensor.core.restapi.SensorApiEndpoint;
 import pl.lasota.sensor.core.service.DeviceService;
-import pl.lasota.sensor.core.service.DeviceServiceUtils;
+import pl.lasota.sensor.core.service.DeviceUtilsService;
 import pl.lasota.sensor.core.service.MemberService;
 import pl.lasota.sensor.gui.model.ConfigSaveT;
 import pl.lasota.sensor.gui.model.ConfigT;
@@ -29,7 +29,7 @@ public class DevicesController {
 
     private final DeviceService ds;
 
-    private final DeviceServiceUtils dsu;
+    private final DeviceUtilsService dsu;
 
     private final MemberService ms;
 

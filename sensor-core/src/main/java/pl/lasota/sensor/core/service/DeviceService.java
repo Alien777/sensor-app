@@ -34,20 +34,20 @@ public class DeviceService {
     private final SensorRecordingRepository srr;
     private final DeviceConfigRepository dcr;
     private final MemberRepository mr;
-    private final DeviceServiceUtils dsu;
+    private final DeviceUtilsService dsu;
 
     @Transactional(rollbackFor = SensorException.class)
-    public void insertSensorReading(MessageFrame messageFrame) throws NotFoundDefaultConfigException {
+    public Sensor insertSensorReading(MessageFrame messageFrame) throws NotFoundDefaultConfigException {
         Optional<Device> deviceOptional = dr.findDeviceBy(messageFrame.getMemberKey(), messageFrame.getDeviceKey());
 
         if (deviceOptional.isEmpty()) {
-            return;
+            return null;
         }
         Device device = deviceOptional.get();
 
         var sensorBuilder = messageFrame.getPayloadFromDriver();
         if (sensorBuilder == null) {
-            return;
+            return null;
         }
         Optional<DeviceConfig> configOptional = dcr.getDeviceConfig(device.getDeviceKey(), messageFrame.getConfigIdentifier());
 
@@ -65,6 +65,8 @@ public class DeviceService {
 
         srr.save(sensor);
         dr.save(device);
+
+        return sensor;
 
     }
 

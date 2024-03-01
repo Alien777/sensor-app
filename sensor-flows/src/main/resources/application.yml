@@ -6,7 +6,7 @@ eureka:
     preferIpAddress: true
 spring:
   application:
-    name: sensor-api
+    name: sensor-flows
   datasource:
     url: jdbc:postgresql://localhost:5432/sensor
     username: db
@@ -22,17 +22,7 @@ spring:
   cloud:
     config:
       enabled: false
-
 sensor:
-  mqtt:
-    client-id: ${random.uuid}
-    url: tcp://127.0.0.1:1883
-    topic: $share/mygroup/server
-    username: mqttUserServer
-    password: mqtt
-    max-reconnect-delay: 5000
-    connection-timeout: 30000
-    automatic-reconnect: true
   core:
     sensor-flows-name: sensor-flows
     firmware-folder: bin

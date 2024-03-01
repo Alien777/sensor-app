@@ -44,6 +44,5 @@ public class Member {
     private Role role;
 
     @OneToMany(mappedBy = "member", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private Set<Device> devices = new HashSet<>();
-
+    private Set<Device> devices;
 }

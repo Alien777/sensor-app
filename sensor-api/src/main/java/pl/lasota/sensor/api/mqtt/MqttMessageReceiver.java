@@ -5,9 +5,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContext;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
-import pl.lasota.sensor.api.mqtt.filter.FilterChain;
-import pl.lasota.sensor.api.mqtt.filter.filters.*;
-import pl.lasota.sensor.api.mqtt.model.MessagePayload;
+import pl.lasota.sensor.api.filter.FilterChain;
+import pl.lasota.sensor.api.filter.filters.IsExistMemberFilter;
+import pl.lasota.sensor.api.filter.filters.MessageMappingFilter;
+import pl.lasota.sensor.api.filter.filters.SaveSensorFilter;
+import pl.lasota.sensor.api.filter.filters.SaveSensorValueFilter;
+import pl.lasota.sensor.api.model.MessagePayload;
 import pl.lasota.sensor.core.exceptions.FilterExecuteException;
 
 @Component
