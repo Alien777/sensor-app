@@ -16,7 +16,7 @@ public class SensorFlowsController implements SensorFlowsEndpoint {
     private final ManagerFlows managerFlows;
     @Override
     public void startFlows(Integer id) throws Exception {
-
+        managerFlows.startFlow(id);
     }
 
     @Override

@@ -168,6 +168,10 @@ public class DeviceService {
         return dr.findDeviceBy(memberId, deviceId).orElseThrow(NotFoundDeviceException::new).getDeviceKey();
     }
 
+    public boolean isDeviceExist(String memberKey, String deviceKey) {
+        return dr.existsDevice(memberKey, deviceKey);
+    }
+
     public List<Device> getAllDeviceBy(Long id) {
         return dr.findAllDevicesBy(id);
     }

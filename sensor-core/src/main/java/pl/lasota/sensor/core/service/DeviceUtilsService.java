@@ -97,4 +97,8 @@ public class DeviceUtilsService {
         }
         return currentDeviceConfig;
     }
+
+    public ConfigPayload mapConfigToObject(String config) throws JsonProcessingException {
+        return new ObjectMapper().readValue(config, ConfigPayload.class);
+    }
 }
