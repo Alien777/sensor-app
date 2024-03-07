@@ -17,7 +17,7 @@ public class CronNode extends Node {
 
     private long executedTimes;
 
-    public CronNode(PrivateContext privateContext, TaskScheduler taskScheduler, boolean fastInitialization,  String cron, String executeTimesKey) {
+    public CronNode(PrivateContext privateContext, TaskScheduler taskScheduler, String cron, String timesExecuteVariableName) {
         super(privateContext);
         ScheduledFuture<?> newSchedule = taskScheduler.schedule(() -> {
             try {
@@ -26,7 +26,7 @@ public class CronNode extends Node {
                 throw new RuntimeException(e);
             } finally {
                 executedTimes++;
-                long howManyTimes = (long) privateContext.getVariable(executeTimesKey, -1L);
+                long howManyTimes = (long) privateContext.getVariable(timesExecuteVariableName, -1L);
                 if (howManyTimes != -1 && executedTimes > howManyTimes) {
                     privateContext.getSchedules().get(id).cancel(true);
                     privateContext.getSchedules().remove(id);

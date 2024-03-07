@@ -29,7 +29,6 @@ public abstract class Node {
             }
             log.info("Execute node {} from {} to {}", id, this.getClass().getName(), node.getClass().getName());
             node.execute();
-
         }
     }
 
@@ -43,8 +42,12 @@ public abstract class Node {
         }
     }
 
-    public void addNode(Node node) {
+    public void add(Node node) {
         nodes.add(node);
+    }
+
+    public void addFirst(Node node) {
+        nodes.addFirst(node);
     }
 
 }

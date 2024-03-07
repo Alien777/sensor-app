@@ -5,17 +5,16 @@ import org.graalvm.polyglot.Value;
 import pl.lasota.sensor.flows.nodes.utils.PrivateContext;
 
 import java.util.Map;
-import java.util.Set;
 
 
 @FlowNode
 public class ExecuteCodeNode extends Node {
 
-    private final String condition;
+    private final String code;
 
-    public ExecuteCodeNode(PrivateContext privateContext, String condition) {
+    public ExecuteCodeNode(PrivateContext privateContext, String code) {
         super(privateContext);
-        this.condition = condition;
+        this.code = code;
     }
 
     @Override
@@ -26,7 +25,7 @@ public class ExecuteCodeNode extends Node {
                 context.getBindings("js").putMember(entry.getKey(), entry.getValue());
             }
 
-            String codeToExecute = String.format("%s", condition);
+            String codeToExecute = String.format("%s", code);
             Context result = context.eval("js", codeToExecute).getContext();
             privateContext.getVariables().forEach((s, o) -> {
                 Value value = result.getBindings("js").getMember(s);

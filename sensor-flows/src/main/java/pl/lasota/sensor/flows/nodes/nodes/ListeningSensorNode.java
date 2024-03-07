@@ -11,10 +11,10 @@ public class ListeningSensorNode extends Node {
     private final KeySensor keySensor;
 
 
-    public ListeningSensorNode(PrivateContext privateContext, String deviceId, SensorListeningManager slm) {
+    public ListeningSensorNode(PrivateContext privateContext, String deviceKey, SensorListeningManager slm) {
         super(privateContext);
         this.slm = slm;
-        keySensor = new KeySensor(deviceId, id);
+        keySensor = new KeySensor(deviceKey, id);
         slm.addClient(keySensor, sensor -> super.execute());
     }
 

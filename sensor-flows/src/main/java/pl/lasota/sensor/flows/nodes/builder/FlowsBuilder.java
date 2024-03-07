@@ -15,10 +15,19 @@ public class FlowsBuilder {
         return new FlowsBuilder(root);
     }
 
+
+    public FlowsBuilder addFirst(Node parent, Node child) {
+        Node isFoundNode = findNode(root, parent);
+        if (isFoundNode != null) {
+            isFoundNode.addFirst(child);
+        }
+        return this;
+    }
+
     public FlowsBuilder add(Node parent, Node child) {
         Node isFoundNode = findNode(root, parent);
         if (isFoundNode != null) {
-            isFoundNode.addNode(child);
+            isFoundNode.add(child);
         }
         return this;
     }
@@ -32,8 +41,7 @@ public class FlowsBuilder {
 
         while (!nodes.isEmpty()) {
             Node node = nodes.poll();
-            if(node.getNodes()!=null)
-            {
+            if (node.getNodes() != null) {
                 nodes.addAll(node.getNodes());
             }
             if (node.equals(lookingFor)) {
