@@ -9,7 +9,6 @@ import java.util.concurrent.ConcurrentHashMap;
 public class SensorListeningManager {
     private final ConcurrentHashMap<KeySensor, SensorListening> client = new ConcurrentHashMap<>();
 
-
     public void removeClient(KeySensor id) {
         client.remove(id);
     }
@@ -18,10 +17,9 @@ public class SensorListeningManager {
         client.put(id, sensorListening);
     }
 
-
     public void broadcast(Sensor sensor) {
         client.forEach((keySensor, sensorListening) -> {
-            if (keySensor.getDeviceId().equals(sensor.getDevice().getDeviceKey())) {
+            if (keySensor.getDeviceId().equals(sensor.getDevice().getId())) {
                 try {
                     sensorListening.onReceiving(sensor);
                 } catch (Exception e) {

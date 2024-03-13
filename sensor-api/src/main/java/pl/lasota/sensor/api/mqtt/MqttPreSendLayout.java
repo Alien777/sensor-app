@@ -17,23 +17,21 @@ public class MqttPreSendLayout {
     private final MqttMessagePublish mqttMessagePublish;
     private final DeviceService deviceService;
 
-    public void sendConfig(String memberKey, String deviceKey) throws Exception {
-        DeviceConfig lastDeviceConfig = deviceService.currentDeviceConfig(memberKey, deviceKey);
-
+    public void sendConfig(String memberKey, String deviceId) throws Exception {
+        DeviceConfig lastDeviceConfig = deviceService.currentDeviceConfig(memberKey, deviceId);
         MessageFrame mf = MessageFrame.factoryConfigPayload(lastDeviceConfig.getId(),
                 lastDeviceConfig.getForVersion(),
-                deviceKey,
+                deviceId,
                 memberKey,
                 lastDeviceConfig.getConfig());
-
         mqttMessagePublish.publish(mf);
     }
 
-    public void sendPwm(String memberKey, String deviceKey, int pin, long value) throws Exception {
-        DeviceConfig lastDeviceConfig = deviceService.currentDeviceConfig(memberKey, deviceKey);
+    public void sendPwm(String memberKey, String deviceId, int pin, long value) throws Exception {
+        DeviceConfig lastDeviceConfig = deviceService.currentDeviceConfig(memberKey, deviceId);
         MessageFrame mf = MessageFrame.factoryPwmPayload(lastDeviceConfig.getId(),
                 lastDeviceConfig.getForVersion(),
-                deviceKey,
+                deviceId,
                 memberKey,
                 new PwmPayload(pin, value));
         mqttMessagePublish.publish(mf);

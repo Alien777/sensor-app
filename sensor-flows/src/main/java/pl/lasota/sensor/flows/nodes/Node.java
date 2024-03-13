@@ -1,10 +1,11 @@
-package pl.lasota.sensor.flows.nodes.nodes;
+package pl.lasota.sensor.flows.nodes;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import pl.lasota.sensor.flows.nodes.utils.PrivateContext;
+import pl.lasota.sensor.flows.nodes.utils.GlobalContext;
+import pl.lasota.sensor.flows.nodes.utils.LocalContext;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,18 +18,18 @@ public abstract class Node {
     @Getter
     private final List<Node> nodes = new ArrayList<>();
 
-    protected final String id = UUID.randomUUID().toString();
+    protected final String id;
 
-    protected final PrivateContext privateContext;
+    protected final GlobalContext globalContext;
 
-    public void execute() throws Exception {
+    public void execute(LocalContext localContext) throws Exception {
         for (Node node : nodes) {
             if (Thread.currentThread().isInterrupted()) {
                 log.info("Thread was interrupted, stopping execution.");
                 return;
             }
             log.info("Execute node {} from {} to {}", id, this.getClass().getName(), node.getClass().getName());
-            node.execute();
+            node.execute(localContext);
         }
     }
 

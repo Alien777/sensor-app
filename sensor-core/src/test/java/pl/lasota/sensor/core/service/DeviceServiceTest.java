@@ -78,7 +78,7 @@ class DeviceServiceTest {
         DeviceConfigRepository dcrMock = Mockito.mock(DeviceConfigRepository.class);
         MemberRepository mrMock = Mockito.mock(MemberRepository.class);
         Mockito.when(cpMock.getFirmwareFolder()).thenReturn("/");
-        Mockito.when(drMock.findDeviceBy(Mockito.same(1L), Mockito.same(1L))).thenReturn(Optional.of(device));
+        Mockito.when(drMock.findDeviceBy(Mockito.same(1L), Mockito.same("1L"))).thenReturn(Optional.of(device));
         DeviceService deviceService = new DeviceService(drMock, srrMock, dcrMock, mrMock, new DeviceUtilsService(cpMock));
 
         String config = "{\"analog_configs\": []}";
@@ -93,14 +93,14 @@ class DeviceServiceTest {
 
     private void validOk(DeviceService deviceService, DeviceConfigRepository dcrMock, String config) throws ConfigCheckSumExistException, ConfigParserException, NotFoundSchemaConfigException, NotFoundDeviceException {
         Mockito.reset(dcrMock);
-        deviceService.saveConfig(1L, config, resourceDirectory, 1L);
+        deviceService.saveConfig(1L, config, resourceDirectory, "1L");
         Mockito.verify(dcrMock, Mockito.times(1)).save(Mockito.any());
     }
 
     private void validNoOk(DeviceService deviceService, DeviceConfigRepository dcrMock, String config) {
         Mockito.reset(dcrMock);
         Assertions.assertThrowsExactly(ConfigParserException.class, () ->
-                deviceService.saveConfig(1L, config, resourceDirectory, 1L));
+                deviceService.saveConfig(1L, config, resourceDirectory, "1L"));
 
         Mockito.verify(dcrMock, Mockito.times(0)).save(Mockito.any());
     }

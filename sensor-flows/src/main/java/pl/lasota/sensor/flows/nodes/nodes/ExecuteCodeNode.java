@@ -1,10 +1,15 @@
 package pl.lasota.sensor.flows.nodes.nodes;
 
 import org.graalvm.polyglot.Context;
+import org.graalvm.polyglot.EnvironmentAccess;
+import org.graalvm.polyglot.HostAccess;
 import org.graalvm.polyglot.Value;
-import pl.lasota.sensor.flows.nodes.utils.PrivateContext;
+import pl.lasota.sensor.flows.nodes.FlowNode;
+import pl.lasota.sensor.flows.nodes.Node;
+import pl.lasota.sensor.flows.nodes.utils.GlobalContext;
+import pl.lasota.sensor.flows.nodes.utils.LocalContext;
 
-import java.util.Map;
+import static pl.lasota.sensor.flows.nodes.utils.NodeUtils.*;
 
 
 @FlowNode
@@ -12,30 +17,22 @@ public class ExecuteCodeNode extends Node {
 
     private final String code;
 
-    public ExecuteCodeNode(PrivateContext privateContext, String code) {
-        super(privateContext);
+    public ExecuteCodeNode(String id, GlobalContext globalContext, String code) {
+        super(id, globalContext);
         this.code = code;
     }
 
     @Override
-    public void execute() throws Exception {
-        try (Context context = Context.newBuilder().allowAllAccess(true).build()) {
-
-            for (Map.Entry<String, Object> entry : privateContext.getVariables().entrySet()) {
-                context.getBindings("js").putMember(entry.getKey(), entry.getValue());
-            }
-
+    public void execute(LocalContext localContext) throws Exception {
+        try (Context context = buildContext(LanguageId.JS)) {
+            updateLangContext(LanguageId.JS, localContext, globalContext, context);
             String codeToExecute = String.format("%s", code);
-            Context result = context.eval("js", codeToExecute).getContext();
-            privateContext.getVariables().forEach((s, o) -> {
-                Value value = result.getBindings("js").getMember(s);
-                if (value != null) {
-                    Object javaValue = value.as(Object.class);
-                    privateContext.getVariables().put(s, javaValue);
-                }
-            });
-
-            super.execute();
+            Context c = context.eval(LanguageId.JS.getLang(), codeToExecute).getContext();
+            Value result = c.getBindings(LanguageId.JS.getLang()).getMember(RESULT_NAME);
+            updateFlowContext(LanguageId.JS, c, localContext, globalContext);
+            if (result != null && result.isBoolean() && result.asBoolean()) {
+                super.execute(localContext);
+            }
         }
     }
 }

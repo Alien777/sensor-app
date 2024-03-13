@@ -37,7 +37,7 @@ public class DevicesController {
 
     @GetMapping
     @PreAuthorize("isAuthenticated()")
-    public List<DeviceT> devices() {
+    public List<DeviceT> devices() throws NotFoundMemberException {
         Member member = ms.loggedUser();
         return ds.getAllDeviceBy(member.getId()).parallelStream()
                 .map(device -> DeviceT.map(device, ds.hasConfig(device.getId())))
@@ -47,13 +47,12 @@ public class DevicesController {
 
     @PutMapping("/{id}/config/{id_config}/activate")
     @PreAuthorize("isAuthenticated()")
-    public void activateConfig(@PathVariable("id") Long deviceId, @PathVariable("id_config") Long configId) throws NotFoundDeviceException,
-            NotFoundDefaultConfigException, ConfigParserException, NotFoundSchemaConfigException, JsonProcessingException {
+    public void activateConfig(@PathVariable("id") String deviceId, @PathVariable("id_config") Long configId) throws NotFoundDeviceException,
+            NotFoundDefaultConfigException, ConfigParserException, NotFoundSchemaConfigException, JsonProcessingException, NotFoundMemberException {
         Member member = ms.loggedUser();
         ds.activateConfig(member.getId(), deviceId, configId);
         try {
-            String deviceKey = ds.getDeviceKey(member.getId(), deviceId);
-            sae.setupConfig(new SendConfigS(member.getMemberKey(), deviceKey));
+            sae.sendConfigToDevice(new SendConfigS(member.getMemberKey(), deviceId));
         } catch (Exception e) {
             log.error("Config sensor was save but not send to device", e);
         }
@@ -62,7 +61,7 @@ public class DevicesController {
 
     @GetMapping("/{id}/config/version")
     @PreAuthorize("isAuthenticated()")
-    public List<ConfigT> allConfigs(@PathVariable("id") Long deviceId) throws NotFoundDeviceException, NotFoundSchemaConfigException {
+    public List<ConfigT> allConfigs(@PathVariable("id") String deviceId) throws NotFoundDeviceException, NotFoundSchemaConfigException, NotFoundMemberException {
         Member member = ms.loggedUser();
         List<ConfigT> configTS = new ArrayList<>();
         for (DeviceConfig d : ds.getConfigForDevice(member.getId(), deviceId)) {
@@ -73,15 +72,15 @@ public class DevicesController {
 
     @GetMapping("/{id}/config")
     @PreAuthorize("isAuthenticated()")
-    public ConfigT currentConfig(@PathVariable("id") Integer deviceId) throws NotFoundDeviceException, NotFoundDeviceConfigException, NotFoundSchemaConfigException {
+    public ConfigT currentConfig(@PathVariable("id") String deviceId) throws NotFoundDeviceException, NotFoundDeviceConfigException, NotFoundSchemaConfigException, NotFoundMemberException {
         Member member = ms.loggedUser();
-        DeviceConfig deviceConfig = ds.currentDeviceConfig(member.getId(), Long.valueOf(deviceId));
+        DeviceConfig deviceConfig = ds.currentDeviceConfig(member.getId(), deviceId);
         return ConfigT.map(deviceConfig, dsu.schemaForVersion(deviceConfig.getForVersion()));
     }
 
     @PostMapping("/{id}/config")
     @PreAuthorize("isAuthenticated()")
-    public ConfigT saveConfig(@RequestBody ConfigSaveT config, @PathVariable("id") Long deviceId) throws NotFoundDeviceException, NotFoundSchemaConfigException, ConfigParserException, ConfigCheckSumExistException {
+    public ConfigT saveConfig(@RequestBody ConfigSaveT config, @PathVariable("id") String deviceId) throws NotFoundDeviceException, NotFoundSchemaConfigException, ConfigParserException, ConfigCheckSumExistException, NotFoundMemberException {
         Member member = ms.loggedUser();
         DeviceConfig deviceConfig = ds.saveConfig(member.getId(), config.getConfig(), config.getVersion(), deviceId);
         return ConfigT.map(deviceConfig, dsu.schemaForVersion(deviceConfig.getForVersion()));

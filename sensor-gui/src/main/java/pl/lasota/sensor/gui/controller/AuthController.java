@@ -19,7 +19,6 @@ import pl.lasota.sensor.gui.model.UserInfo;
 public class AuthController {
 
     private final AuthService authService;
-    private final SensorProperties sensorProperties;
 
     @GetMapping("/token")
     public ResponseEntity<String> getToken() {

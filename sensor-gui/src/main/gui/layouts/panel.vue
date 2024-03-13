@@ -18,8 +18,11 @@
           <div class="q-scrollarea" style="height: calc(100% - 204px); margin-top: 204px;">
             <div class="q-scrollarea__container scroll relative-position fit hide-scrollbar">
               <div class="q-scrollarea__content absolute"><!---->
-                <div class="text-grey" style="padding: 25px 16px 16px;">
-                 <NuxtLink to="/device">Devices</NuxtLink>
+                <div class="text-grey" style="padding: 15px 6px 6px;">
+                  <NuxtLink to="/device">Devices</NuxtLink>
+                </div>
+                <div class="text-grey" style="padding: 15px 6px 6px;">
+                  <NuxtLink to="/flows">Flows</NuxtLink>
                 </div>
               </div>
             </div>

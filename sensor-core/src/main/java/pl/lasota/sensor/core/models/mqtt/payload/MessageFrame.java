@@ -8,7 +8,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Data;
 import pl.lasota.sensor.core.models.mqtt.payload.from.AnalogValuePayload;
 import pl.lasota.sensor.core.models.mqtt.payload.from.ConnectDevicePayload;
-import pl.lasota.sensor.core.models.mqtt.payload.to.ConfigPayload;
 import pl.lasota.sensor.core.models.mqtt.payload.to.PwmPayload;
 import pl.lasota.sensor.core.models.sensor.Sensor;
 
@@ -34,7 +33,7 @@ public class MessageFrame {
     private String versionFirmware;
 
     @JsonProperty("device_key")
-    private String deviceKey;
+    private String deviceId;
 
     @JsonProperty("member_key")
     private String memberKey;
@@ -45,14 +44,17 @@ public class MessageFrame {
     @JsonProperty("payload")
     private JsonNode payload;
 
+    public String getDeviceId() {
+        return deviceId.toUpperCase();
+    }
 
     /**
      * @hidden
      */
-    public MessageFrame(Long configId, String version, String deviceKey, String memberKey, MessageType messageType, JsonNode payload) {
+    public MessageFrame(Long configId, String version, String deviceId, String memberKey, MessageType messageType, JsonNode payload) {
         this.configIdentifier = configId;
         this.versionFirmware = version;
-        this.deviceKey = deviceKey;
+        this.deviceId = deviceId;
         this.memberKey = memberKey;
         this.messageType = messageType;
         this.payload = payload;
@@ -85,17 +87,17 @@ public class MessageFrame {
      * @hidden
      */
     @JsonIgnore
-    public static MessageFrame factoryConfigPayload(Long configId, String version, String deviceKey, String memberKey, String config) throws JsonProcessingException {
-        return new MessageFrame(configId, version, deviceKey, memberKey, MessageType.CONFIG, om.readTree(config));
+    public static MessageFrame factoryConfigPayload(Long configId, String version, String deviceId, String memberKey, String config) throws JsonProcessingException {
+        return new MessageFrame(configId, version, deviceId, memberKey, MessageType.CONFIG, om.readTree(config));
     }
 
     /**
      * @hidden
      */
     @JsonIgnore
-    public static MessageFrame factoryPwmPayload(Long configId, String version, String deviceKey, String memberKey, PwmPayload pwmPayload) throws JsonProcessingException {
+    public static MessageFrame factoryPwmPayload(Long configId, String version, String deviceId, String memberKey, PwmPayload pwmPayload) throws JsonProcessingException {
         String json = om.writeValueAsString(pwmPayload);
-        return new MessageFrame(configId, version, deviceKey, memberKey, MessageType.PWM, om.readTree(json));
+        return new MessageFrame(configId, version, deviceId, memberKey, MessageType.PWM, om.readTree(json));
     }
 
 }

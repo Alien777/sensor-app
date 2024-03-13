@@ -19,11 +19,8 @@ import java.util.Objects;
 public class Device {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @Column(name = "device_key", unique = true, updatable = false, length = 12)
-    private String deviceKey;
+    @Column(name = "id", unique = true, updatable = false, length = 12)
+    private String id;
 
     @Column(name = "name")
     private String name;
@@ -41,7 +38,6 @@ public class Device {
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinColumn(name = "current_device_config_id")
     private DeviceConfig currentDeviceConfig;
-
 
     @Override
     public boolean equals(Object o) {

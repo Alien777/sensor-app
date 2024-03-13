@@ -4,20 +4,24 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Service;
+import pl.lasota.sensor.core.exceptions.FlowException;
 import pl.lasota.sensor.core.exceptions.NotFoundDeviceConfigException;
 import pl.lasota.sensor.core.exceptions.NotFoundDeviceException;
 import pl.lasota.sensor.core.exceptions.NotFoundPinException;
 import pl.lasota.sensor.core.models.device.DeviceConfig;
+import pl.lasota.sensor.core.models.mqtt.payload.MessageType;
 import pl.lasota.sensor.core.models.mqtt.payload.to.ConfigPayload;
 import pl.lasota.sensor.core.restapi.SensorApiEndpoint;
 import pl.lasota.sensor.core.service.DeviceService;
 import pl.lasota.sensor.core.service.DeviceUtilsService;
+import pl.lasota.sensor.flows.nodes.Node;
 import pl.lasota.sensor.flows.nodes.nodes.*;
-import pl.lasota.sensor.flows.nodes.nodes.threads.AsyncNode;
-import pl.lasota.sensor.flows.nodes.nodes.threads.CronNode;
-import pl.lasota.sensor.flows.nodes.nodes.threads.SleepNode;
-import pl.lasota.sensor.flows.nodes.nodes.threads.WaitNode;
-import pl.lasota.sensor.flows.nodes.utils.PrivateContext;
+import pl.lasota.sensor.flows.nodes.nodes.start.ListeningSensorNode;
+import pl.lasota.sensor.flows.nodes.nodes.AsyncNode;
+import pl.lasota.sensor.flows.nodes.nodes.start.CronNode;
+import pl.lasota.sensor.flows.nodes.nodes.SleepNode;
+import pl.lasota.sensor.flows.nodes.nodes.WaitNode;
+import pl.lasota.sensor.flows.nodes.utils.GlobalContext;
 import pl.lasota.sensor.flows.nodes.utils.SensorListeningManager;
 
 import java.util.Map;
@@ -33,73 +37,64 @@ public class NodeCreatorFactory {
     private final DeviceUtilsService dus;
 
     public Factory create() {
-        return new Factory(new PrivateContext());
+        return new Factory(new GlobalContext());
     }
 
-    public Factory create(PrivateContext privateContext) {
-        return new Factory(privateContext);
+    public Factory create(GlobalContext globalContext) {
+        return new Factory(globalContext);
     }
 
     public class Factory {
-        private final PrivateContext privateContext;
+        private final GlobalContext globalContext;
 
-        private Factory(PrivateContext privateContext) {
-            this.privateContext = privateContext;
+        private Factory(GlobalContext globalContext) {
+            this.globalContext = globalContext;
         }
 
-        public final Node asyncNodeCreator() {
-            return new AsyncNode(privateContext);
+        public final Node asyncNodeCreator(String id) {
+            return new AsyncNode(id, globalContext);
         }
 
-        public final Node waitNode(String waitForThread, long second) {
-            return new WaitNode(privateContext, waitForThread, second);
+        public final Node waitNode(String id, String waitForThread, long second) {
+            return new WaitNode(id, globalContext, waitForThread, second);
         }
 
-        public final Node executeCodeNode(String code) {
-            return new ExecuteCodeNode(privateContext, code);
+        public final Node executeCodeNode(String id, String code) {
+            return new ExecuteCodeNode(id, globalContext, code);
         }
 
-        public final Node variableNode(boolean byCreateInitialization, Map<String, Object> variables) {
-            return new VariableNode(privateContext, byCreateInitialization, variables);
+
+        public final Node sleepNode(String id, long second) {
+            return new SleepNode(id, globalContext, second);
         }
 
-        public final Node sleepNode(long second) {
-            return new SleepNode(privateContext, second);
+
+        public final Node cronNode(String id, String cron) {
+            return new CronNode(id, globalContext, taskScheduler, cron);
         }
 
-        public final Node cronNode(String cron) {
-            return cronNode(cron, null);
-        }
 
-        public final Node cronNode(String cron, String timesExecuteVariableName) {
-            return new CronNode(privateContext, taskScheduler, cron, timesExecuteVariableName);
-        }
-
-        public final Node executeIfNode(String condition) {
-            return new ExecuteIfNode(privateContext, condition);
-        }
-
-        public final Node listeningSensorNode(String memberKey, String deviceKey) throws NotFoundDeviceException {
-            boolean deviceExist = ds.isDeviceExist(memberKey, deviceKey);
+        public final Node listeningSensorNode(String id, String memberKey, ListeningSensorNode.Data data) throws NotFoundDeviceException, FlowException {
+            boolean deviceExist = ds.isDeviceExist(memberKey, data.getDeviceId());
             if (deviceExist) {
-                return new ListeningSensorNode(privateContext, deviceKey, slm);
+                return new ListeningSensorNode(id, globalContext, data, slm);
             }
             throw new NotFoundDeviceException();
         }
 
-        public final Node sendPwmValueNode(String memberKey, String deviceKey, int pin, String valueVariableName) throws NotFoundDeviceException, NotFoundDeviceConfigException, JsonProcessingException, NotFoundPinException {
-            boolean deviceExist = ds.isDeviceExist(memberKey, deviceKey);
+        public final Node sendPwmValueNode(String id, SendPwmValueNode.Data data) throws NotFoundDeviceException, NotFoundDeviceConfigException, JsonProcessingException, NotFoundPinException {
+            boolean deviceExist = ds.isDeviceExist(data.getMemberKey(), data.getDeviceId());
             if (!deviceExist) {
                 throw new NotFoundDeviceException();
             }
-            DeviceConfig deviceConfig = ds.currentDeviceConfig(memberKey, deviceKey);
+            DeviceConfig deviceConfig = ds.currentDeviceConfig(data.getMemberKey(), data.getDeviceId());
             ConfigPayload configPayload = dus.mapConfigToObject(deviceConfig.getConfig());
-            boolean b = configPayload.getPwmConfig().stream().anyMatch(pwmConfig -> pwmConfig.getPin() == pin);
+            boolean b = configPayload.getPwmConfig().stream().anyMatch(pwmConfig -> pwmConfig.getPin() == data.getPin());
             if (!b) {
                 throw new NotFoundPinException();
             }
 
-            return new SendPwmValueNode(privateContext, memberKey, deviceKey, pin, valueVariableName, sae);
+            return new SendPwmValueNode(id, globalContext, data, sae);
 
         }
     }

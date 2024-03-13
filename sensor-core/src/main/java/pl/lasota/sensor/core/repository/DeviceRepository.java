@@ -11,18 +11,18 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface DeviceRepository extends JpaRepository<Device, Long> {
+public interface DeviceRepository extends JpaRepository<Device, String> {
 
-    @Query("SELECT COUNT(s) > 0 FROM Device s WHERE s.member.memberKey = :memberKey AND s.deviceKey = :deviceKey")
-    boolean existsDevice(@Param("memberKey") String memberKey, @Param("deviceKey") String deviceKey);
+    @Query("SELECT COUNT(s) > 0 FROM Device s WHERE s.member.memberKey = :memberKey AND s.id = :deviceId")
+    boolean existsDevice(@Param("memberKey") String memberKey, @Param("deviceId") String deviceId);
 
-    @Query("SELECT s FROM Device s WHERE s.member.memberKey = :memberKey AND s.deviceKey = :deviceKey")
-    Optional<Device> findDeviceBy(@Param("memberKey") String memberKey, @Param("deviceKey") String deviceKey);
+    @Query("SELECT s FROM Device s WHERE s.member.memberKey = :memberKey AND s.id = :deviceId")
+    Optional<Device> findDeviceBy(@Param("memberKey") String memberKey, @Param("deviceId") String deviceId);
 
-    @Query("SELECT s FROM Device s WHERE s.member.id = :id")
-    List<Device> findAllDevicesBy(@Param("id") Long id);
+    @Query("SELECT s FROM Device s WHERE s.member.id = :memberId")
+    List<Device> findAllDevicesBy(@Param("memberId") Long memberId);
 
-    @Query("SELECT s FROM Device s WHERE s.member.id = :idMember AND s.id = :deviceId")
-    Optional<Device> findDeviceBy(@Param("idMember") Long memberKey, @Param("deviceId") Long deviceId);
+    @Query("SELECT s FROM Device s WHERE s.member.id = :memberId AND s.id = :deviceId")
+    Optional<Device> findDeviceBy(@Param("memberId") Long memberId, @Param("deviceId") String deviceId);
 
 }

@@ -24,7 +24,7 @@
                   vertical
                   class="text-teal">
                 <q-tab v-for="device in devices" :name="device.id" icon="sensors"
-                       :label="device.name?device.name:device.deviceKey"/>
+                       :label="device.name?device.name:device.id"/>
               </q-tabs>
             </template>
 
@@ -36,7 +36,7 @@
                   keep-alive
                   transition-prev="slide-down"
                   transition-next="slide-up">
-                <q-tab-panel v-for="device in devices" :name="device.id" icon="sensors" >
+                <q-tab-panel v-for="device in devices" :name="device.id" icon="sensors">
                   <AdvencedConfigurationDevice :device="device"/>
                 </q-tab-panel>
               </q-tab-panels>

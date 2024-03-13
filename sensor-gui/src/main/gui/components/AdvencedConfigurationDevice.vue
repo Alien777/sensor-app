@@ -61,7 +61,7 @@ const selectConfig = (config: DeviceConfigT) => {
 </script>
 
 <template>
-  <p><strong>{{ device.name ? device.name : device.deviceKey }}</strong> You editing config
+  <p><strong>{{ device.name ? device.name : device.id }}</strong> You editing config
     id:<strong>{{ currentConfigEditRef.id }}</strong></p>
   <q-splitter v-model="splitterHigh" style="height: 400px">
     <template v-slot:before>

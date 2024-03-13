@@ -1,10 +1,10 @@
 package pl.lasota.sensor.core.models.device;
 
-import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
+
+import io.hypersistence.utils.hibernate.type.json.JsonBinaryType;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.Type;
-import pl.lasota.sensor.core.models.mqtt.payload.to.ConfigPayload;
 
 import java.time.OffsetDateTime;
 

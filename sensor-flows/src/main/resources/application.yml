@@ -26,5 +26,9 @@ sensor:
   core:
     sensor-flows-name: sensor-flows
     firmware-folder: bin
+  graalvm:
+    host-access:
+
+
 server:
   port: 0

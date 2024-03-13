@@ -6,6 +6,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import pl.lasota.sensor.core.exceptions.NotFoundMemberException;
 import pl.lasota.sensor.core.exceptions.SaveMemberException;
 import pl.lasota.sensor.core.exceptions.UserExistingException;
 import pl.lasota.sensor.core.exceptions.UserNotExistingException;
@@ -69,9 +70,9 @@ public class MemberService {
         return memberRepository.existsByMemberKey(memberKey);
     }
 
-    public Member loggedUser() {
+    public Member loggedUser() throws NotFoundMemberException {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         UserDetails principal = (UserDetails) authentication.getPrincipal();
-        return memberRepository.findByEmail(principal.getUsername()).orElse(null);
+        return memberRepository.findByEmail(principal.getUsername()).orElseThrow(NotFoundMemberException::new);
     }
 }

@@ -13,17 +13,14 @@ import java.util.Optional;
 @Repository
 public interface DeviceConfigRepository extends JpaRepository<DeviceConfig, Long> {
 
-    @Query("SELECT s FROM DeviceConfig s WHERE s.device.deviceKey = :deviceKey AND s.id = :configId ORDER BY s.time DESC LIMIT 1")
-    Optional<DeviceConfig> getDeviceConfig(@Param("deviceKey") String deviceKey, @Param("configId") Long configId);
-
     @Query("SELECT s FROM DeviceConfig s WHERE s.device.id = :deviceId AND s.id = :configId ORDER BY s.time DESC LIMIT 1")
-    Optional<DeviceConfig> getDeviceConfig(@Param("deviceId") Long deviceId, @Param("configId") Long configId);
+    Optional<DeviceConfig> getDeviceConfig(@Param("deviceId") String deviceId, @Param("configId") Long configId);
 
     @Query("SELECT COUNT(s) > 0 FROM DeviceConfig s WHERE s.device.id = :deviceId")
-    boolean existsDeviceConfigBy(@Param("deviceId") Long id);
+    boolean existsDeviceConfigBy(@Param("deviceId") String deviceId);
 
     @Query("SELECT s FROM DeviceConfig s WHERE s.device.id = :deviceId ORDER BY s.time DESC ")
-    List<DeviceConfig> findAllDeviceConfigBy(@Param("deviceId") Long deviceId);
+    List<DeviceConfig> findAllDeviceConfigBy(@Param("deviceId") String deviceId);
 
     @Query("SELECT s FROM DeviceConfig s WHERE s.checksum = :checksum")
     Optional<DeviceConfig> getConfigByChecksum(@Param("checksum") Long checksum);

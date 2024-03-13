@@ -1,6 +1,6 @@
 package pl.lasota.sensor.flows.nodes.builder;
 
-import pl.lasota.sensor.flows.nodes.nodes.Node;
+import pl.lasota.sensor.flows.nodes.Node;
 
 import java.util.LinkedList;
 
@@ -14,7 +14,6 @@ public class FlowsBuilder {
     public static FlowsBuilder root(Node root) {
         return new FlowsBuilder(root);
     }
-
 
     public FlowsBuilder addFirst(Node parent, Node child) {
         Node isFoundNode = findNode(root, parent);

@@ -20,7 +20,7 @@ public class SaveSensorFilter implements Filter<MessageFrame, MessageFrame> {
 
     @Override
     public void execute(MessageFrame request, Context context, Chain<MessageFrame> chain) throws Exception {
-        deviceService.insertNewDevice(request.getMemberKey(), request.getDeviceKey(), request.getVersionFirmware());
+        deviceService.insertNewDevice(request.getMemberKey(), request.getDeviceId(), request.getVersionFirmware());
         chain.doFilter(request);
     }
 }

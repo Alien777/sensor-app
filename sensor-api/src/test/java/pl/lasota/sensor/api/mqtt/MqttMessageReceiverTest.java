@@ -6,7 +6,6 @@ import pl.lasota.sensor.api.filter.FilterChain;
 import pl.lasota.sensor.api.filter.filters.IsExistMemberFilter;
 import pl.lasota.sensor.api.filter.filters.SaveSensorValueFilter;
 import pl.lasota.sensor.core.restapi.SensorFlowsHelper;
-import pl.lasota.sensor.core.configs.CoreProperties;
 import pl.lasota.sensor.core.models.mqtt.payload.MessageType;
 import pl.lasota.sensor.core.models.mqtt.payload.MessageFrame;
 import pl.lasota.sensor.core.service.DeviceService;
@@ -25,7 +24,7 @@ class MqttMessageReceiverTest {
 
 
         Mockito.when(mfMock.getMemberKey()).thenReturn("0123456789123456");
-        Mockito.when(mfMock.getDeviceKey()).thenReturn("012345678912");
+        Mockito.when(mfMock.getDeviceId()).thenReturn("012345678912");
         Mockito.when(mfMock.getVersionFirmware()).thenReturn("1.0");
         Mockito.when(mfMock.getMessageType()).thenReturn(MessageType.DEVICE_CONNECTED);
         Mockito.when(msMock.isMemberExistByMemberKey(Mockito.same("0123456789123456"))).thenReturn(true);

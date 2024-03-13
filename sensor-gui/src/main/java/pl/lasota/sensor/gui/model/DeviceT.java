@@ -6,9 +6,8 @@ import pl.lasota.sensor.core.models.device.Device;
 @Data
 public class DeviceT {
 
-    private Long id;
+    private String id;
     private String version;
-    private String deviceKey;
     private String name;
     private boolean hasConfig;
 
@@ -17,7 +16,6 @@ public class DeviceT {
         DeviceT deviceT = new DeviceT();
         deviceT.id = device.getId();
         deviceT.version = device.getVersion();
-        deviceT.deviceKey = device.getDeviceKey();
         deviceT.name = device.getName();
         deviceT.hasConfig = hasConfig;
         return deviceT;

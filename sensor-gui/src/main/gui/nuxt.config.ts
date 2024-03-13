@@ -8,6 +8,10 @@ export default defineNuxtConfig({
             apiHost: 'http://localhost:8080',
         }
     },
+    css: [
+        "@vue-flow/core/dist/style.css",
+        "@vue-flow/core/dist/theme-default.css",
+    ],
     modules: [
         'dayjs-nuxt',
         'nuxt-monaco-editor',

@@ -1,25 +1,31 @@
 package pl.lasota.sensor.core.models.mqtt.payload;
 
+import java.util.List;
+
 public enum MessageType {
 
     /**
-     * When device ESP connected to mqtt
+     * During connected ESP to Mqtt
      **/
     DEVICE_CONNECTED,
 
     /**
-     * When ESP received config
+     * During send config to Device
      **/
     CONFIG,
 
     /**
-     * When ESP send simple Analog value
+     * During received analog value from Device
      **/
     SINGLE_ADC_SIGNAL,
 
     /**
-     *  PWM message to esp
+     * During Host send pwm value to Device
      **/
-    PWM
+    PWM;
 
+
+    public static boolean isFromEsp(MessageType messageType) {
+        return List.of(DEVICE_CONNECTED, SINGLE_ADC_SIGNAL).contains(messageType);
+    }
 }

@@ -1,5 +1,9 @@
 import dayjs from "dayjs";
 
+export interface NodeDraggable{
+    name: string;
+    type: string;
+}
 export interface ErrorT {
     code: string;
     message: string;
@@ -7,12 +11,10 @@ export interface ErrorT {
 }
 
 export interface DeviceT {
-    id: number;
+    id: string;
     name: string;
-    deviceKey: string;
     version: string;
     hasConfig: boolean
-
 }
 
 export interface DeviceConfigT {

@@ -34,12 +34,12 @@ public class SaveSensorValueFilter implements Filter<MessageFrame, MessageFrame>
     @Override
     public void postExecute(MessageFrame request, Context context) throws Exception {
         if (request.getMessageType().equals(MessageType.DEVICE_CONNECTED)) {
-            mqttPreSendLayout.sendConfig(request.getMemberKey(), request.getDeviceKey());
+            mqttPreSendLayout.sendConfig(request.getMemberKey(), request.getDeviceId());
         }
 
         Sensor sensor = context.getSensor();
         if (sensor != null) {
-            sensorFlowsHelper.sensorValueAllInstances(sensor);
+            sensorFlowsHelper.receivedSensorValueAllInstances(sensor);
         }
     }
 }

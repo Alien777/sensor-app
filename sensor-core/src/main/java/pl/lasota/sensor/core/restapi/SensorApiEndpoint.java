@@ -8,9 +8,9 @@ import pl.lasota.sensor.core.models.rest.SendPwmS;
 @FeignClient("sensor-api")
 public interface SensorApiEndpoint {
     @RequestMapping(method = RequestMethod.POST, value = "/api/sensor/send/config")
-    void setupConfig(@RequestBody SendConfigS configS) throws Exception;
+    void sendConfigToDevice(@RequestBody SendConfigS configS) throws Exception;
 
     @RequestMapping(method = RequestMethod.POST, value = "/api/sensor/send/pwm")
-    void pwmValue(@RequestBody SendPwmS configS) throws Exception;
+    void sendPwmValueToDevice(@RequestBody SendPwmS configS) throws Exception;
 
 }

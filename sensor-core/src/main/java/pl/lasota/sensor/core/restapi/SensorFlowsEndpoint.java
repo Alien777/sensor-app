@@ -8,15 +8,16 @@ import pl.lasota.sensor.core.models.sensor.Sensor;
 @FeignClient("sensor-flows")
 public interface SensorFlowsEndpoint {
     String SENSOR_VALUE_ENDPOINT_PATH = "/api/flows/running";
+    String STOP_ENDPOINT_PATH = "/api/flows/stop/{id}";
 
     @RequestMapping(method = RequestMethod.POST, value = "/api/flows/start/{id}")
-    void startFlows(@PathVariable(value = "id") Integer id) throws Exception;
+    boolean startFlows(@PathVariable(value = "id") Long id, @RequestBody String config) throws Exception;
 
-    @RequestMapping(method = RequestMethod.DELETE, value = "/api/flows/stop/{id}")
-    void stopFlows(@PathVariable(value = "id") Integer id) throws Exception;
+    @RequestMapping(method = RequestMethod.DELETE, value = STOP_ENDPOINT_PATH)
+    boolean stopFlows(@PathVariable(value = "id") Long id) throws Exception;
 
     @RequestMapping(method = RequestMethod.PUT, value = SENSOR_VALUE_ENDPOINT_PATH)
     @Async
-    void sensorValue(@RequestBody Sensor sensor) throws Exception;
+    void receivedSensorValue(@RequestBody Sensor sensor) throws Exception;
 
 }

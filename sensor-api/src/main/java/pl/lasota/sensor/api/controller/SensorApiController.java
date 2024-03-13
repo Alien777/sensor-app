@@ -17,13 +17,13 @@ public class SensorApiController implements SensorApiEndpoint {
     }
 
     @Override
-    public void setupConfig(SendConfigS configS) throws Exception {
-        mqttPreSendLayout.sendConfig(configS.memberKey(), configS.deviceKey());
+    public void sendConfigToDevice(SendConfigS configS) throws Exception {
+        mqttPreSendLayout.sendConfig(configS.memberKey(), configS.deviceId());
     }
 
     @Override
-    public void pwmValue(SendPwmS configS) throws Exception {
-        mqttPreSendLayout.sendPwm(configS.memberKey(), configS.deviceKey(), configS.pin(), configS.value());
+    public void sendPwmValueToDevice(SendPwmS configS) throws Exception {
+        mqttPreSendLayout.sendPwm(configS.memberKey(), configS.deviceId(), configS.pin(), configS.value());
     }
 
 }

@@ -28,13 +28,13 @@ public class IsExistMemberFilter implements Filter<MessageFrame, MessageFrame> {
             return;
         }
 
-        if (request.getDeviceKey().trim().isBlank() || request.getDeviceKey().length() != MAC_SIZE) {
-            log.info("Device key is wrong {} ", request.getDeviceKey());
+        if (request.getDeviceId().trim().isBlank() || request.getDeviceId().length() != MAC_SIZE) {
+            log.info("Device key is wrong {} ", request.getDeviceId());
             return;
         }
 
         if (request.getVersionFirmware().trim().isBlank()) {
-            log.info("Version of firmware is obligatory {} ", request.getDeviceKey());
+            log.info("Version of firmware is obligatory {} ", request.getDeviceId());
             return;
         }
 
