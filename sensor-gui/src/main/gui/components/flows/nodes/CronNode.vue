@@ -16,7 +16,11 @@ watch(cron, () => {
 })
 
 function handleUpdate() {
-  updateNode(props.id, {"sensor": cron})
+  updateNode(props.id, {
+    sensor: {
+      cron: cron
+    }
+  })
 }
 </script>
 

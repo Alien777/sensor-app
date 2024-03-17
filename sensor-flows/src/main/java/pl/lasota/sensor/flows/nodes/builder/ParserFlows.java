@@ -14,16 +14,19 @@ import pl.lasota.sensor.core.models.mqtt.payload.MessageType;
 import pl.lasota.sensor.flows.nodes.Node;
 import pl.lasota.sensor.flows.nodes.nodes.AsyncNode;
 import pl.lasota.sensor.flows.nodes.nodes.SendPwmValueNode;
-import pl.lasota.sensor.flows.nodes.nodes.start.ListeningSensorNode;
+import pl.lasota.sensor.flows.nodes.nodes.ListeningSensorNode;
 
 import java.util.*;
+import java.util.stream.Collectors;
+
+import static pl.lasota.sensor.flows.nodes.utils.NodeUtils.isRoot;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class ParserFlows {
 
-    public Node flows(String flowsJson, NodeCreatorFactory.Factory factory) throws JsonProcessingException, NotFoundPinException, NotFoundDeviceConfigException, NotFoundDeviceException, FlowException {
+    public List<Node> flows(String flowsJson, NodeCreatorFactory.Factory factory) throws JsonProcessingException, NotFoundPinException, NotFoundDeviceConfigException, NotFoundDeviceException, FlowException {
         log.info("Parse flow to node {} ", flowsJson);
         final Map<String, RawNode> nodesRaw = new HashMap<>();
         ObjectMapper om = new ObjectMapper();
@@ -31,63 +34,57 @@ public class ParserFlows {
         for (JsonNode node : jsonNode) {
             String ref = ref(node);
             String name = name(node);
-            boolean isRoot = isRoot(node);
             List<String> childed = childed(node);
-
             Node n = parseNode(ref, name, node, factory);
-            RawNode rawNode = new RawNode(n, childed, ref, isRoot);
+            RawNode rawNode = new RawNode(n, childed, ref);
             nodesRaw.put(ref, rawNode);
         }
-
-
         return createStructured(nodesRaw);
     }
 
-    private Node createStructured(Map<String, RawNode> nodesRaw) {
+    private List<Node> createStructured(Map<String, RawNode> nodesRaw) {
 
-        List<Map.Entry<String, RawNode>> roots = nodesRaw.entrySet().stream().filter(n -> n.getValue().isRoot).toList();
-        if (roots.size() != 1) {
-            return null;
-        }
-        Map.Entry<String, RawNode> root = roots.getFirst();
-        RawNode rootRaw = root.getValue();
-        FlowsBuilder fb = FlowsBuilder.root(rootRaw.node);
+        List<Map.Entry<String, RawNode>> roots = nodesRaw.entrySet().stream().filter(n -> isRoot(n.getValue().node)).toList();
 
-        LinkedList<RawNode> currentProcess = new LinkedList<>();
-        currentProcess.add(rootRaw);
+        return roots.stream().map(root -> {
 
+            RawNode rootRaw = root.getValue();
+            FlowsBuilder fb = FlowsBuilder.root(rootRaw.node);
 
-        while (!currentProcess.isEmpty()) {
-            RawNode node = currentProcess.poll();
-            String parentRef = node.ref;
-            log.info("Process node: {}, {} ", parentRef, node.node.getClass().getSimpleName());
-            for (String childRef : node.childrenRef) {
-                RawNode childNodeRaw = nodesRaw.get(childRef);
-                RawNode parentNodeRaw = nodesRaw.get(parentRef);
-                log.info("Parent is: {}, {} and has child: {}, {} ", parentNodeRaw.ref, parentNodeRaw.node.getClass().getSimpleName(),
-                        childNodeRaw.ref, childNodeRaw.node.getClass().getSimpleName());
-                addNode(parentNodeRaw.node, childNodeRaw.node, fb);
+            LinkedList<RawNode> currentProcess = new LinkedList<>();
+            currentProcess.add(rootRaw);
+            while (!currentProcess.isEmpty()) {
+                RawNode node = currentProcess.poll();
+                String parentRef = node.ref;
+                log.info("Process node: {}, {} ", parentRef, node.node.getClass().getSimpleName());
+                for (String childRef : node.childrenRef) {
+                    RawNode childNodeRaw = nodesRaw.get(childRef);
+                    RawNode parentNodeRaw = nodesRaw.get(parentRef);
+                    log.info("Parent is: {}, {} and has child: {}, {} ", parentNodeRaw.ref, parentNodeRaw.node.getClass().getSimpleName(),
+                            childNodeRaw.ref, childNodeRaw.node.getClass().getSimpleName());
+                    addNode(parentNodeRaw.node, childNodeRaw.node, fb);
 
-                currentProcess.addFirst(childNodeRaw);
+                    currentProcess.addFirst(childNodeRaw);
+                }
             }
-        }
-
-        return root.getValue().node;
+            return root.getValue().node;
+        }).collect(Collectors.toList());
     }
 
-    private Node parseNode(String id, String name, JsonNode node, NodeCreatorFactory.Factory factory) throws NotFoundPinException, NotFoundDeviceConfigException, JsonProcessingException, NotFoundDeviceException, FlowException {
+    private Node parseNode(String id, String name, JsonNode root, NodeCreatorFactory.Factory factory) throws NotFoundPinException, NotFoundDeviceConfigException, JsonProcessingException, NotFoundDeviceException, FlowException {
+        JsonNode node = root.get("sensor");
         switch (name) {
             case "SendPwmValueNode" -> {
                 String deviceId = fString(node, "deviceId");
                 String memberId = fString(node, "memberKey");
                 Integer pin = fInteger(node, "pin");
-                String valueKey = fString(node, "valueVariableName");
+                String valueKey = fString(node, "valueVariable");
                 return factory.sendPwmValueNode(id, SendPwmValueNode.Data.create(memberId, deviceId, valueKey, pin));
             }
             case "ListeningSensorNode" -> {
                 String deviceId = fString(node, "deviceId");
                 String memberId = fString(node, "memberKey");
-                MessageType type = MessageType.valueOf(fString(node, "type").toUpperCase());
+                MessageType type = MessageType.valueOf(fString(node, "messageType").toUpperCase());
                 ListeningSensorNode.Data data = ListeningSensorNode.Data.create(deviceId, type);
                 return factory.listeningSensorNode(id, memberId, data);
             }
@@ -133,15 +130,6 @@ public class ParserFlows {
         return node.findValue("_name").asText();
     }
 
-    private static Boolean isRoot(JsonNode node) {
-        try {
-            return node.findValue("_root").asBoolean(false);
-        } catch (Exception e) {
-            return false;
-        }
-
-    }
-
     private static String fString(JsonNode node, String value) {
         return node.findValue(value).asText();
     }
@@ -149,21 +137,19 @@ public class ParserFlows {
     private static Integer fInteger(JsonNode node, String value) {
         return node.findValue(value).asInt();
     }
-    
+
     private static Long fLong(JsonNode node, String value) {
         return node.findValue(value).asLong();
     }
 
 
     private static class RawNode {
-        public RawNode(Node thisNode, List<String> childrenRef, String ref, boolean isRoot) {
+        public RawNode(Node thisNode, List<String> childrenRef, String ref) {
             this.node = thisNode;
             this.childrenRef = childrenRef;
             this.ref = ref;
-            this.isRoot = isRoot;
         }
 
-        public boolean isRoot;
         public String ref;
         public Node node;
         public List<String> childrenRef;

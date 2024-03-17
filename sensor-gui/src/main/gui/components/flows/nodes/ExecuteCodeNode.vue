@@ -16,11 +16,15 @@ watch(code, () => {
 })
 
 function handleUpdate() {
-  updateNode(props.id, {"sensor": code})
+  updateNode(props.id, {
+    sensor: {
+      code: code
+    }
+  })
 }
 </script>
 
 <template>
   <div><strong>{{ props.id }}</strong></div>
-  <q-input type="textarea" label="Code JS"  @keyup="handleUpdate" v-model="code"></q-input>
+  <q-input type="textarea" label="Code JS" @keyup="handleUpdate" v-model="code"></q-input>
 </template>

@@ -7,8 +7,10 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import pl.lasota.sensor.core.exceptions.NotFoundFlowsException;
 import pl.lasota.sensor.core.models.Member;
-import pl.lasota.sensor.core.models.flows.Flows;
+import pl.lasota.sensor.core.models.flows.Flow;
 import pl.lasota.sensor.core.repository.FlowRepository;
+
+import java.util.List;
 
 
 @Service
@@ -19,18 +21,19 @@ public class FlowService {
     private final FlowRepository fr;
 
     @Transactional
-    public Long saveFlows(Long memberId, String config) {
-        Flows flows = new Flows();
-        flows.setActivate(false);
-        flows.setConfig(config);
+    public Long saveFlows(Long memberId, Flow flow) {
         Member member = new Member();
         member.setId(memberId);
-        flows.setMember(member);
-        return fr.save(flows).getId();
+        flow.setMember(member);
+        return fr.save(flow).getId();
     }
 
-    public Flows findFlows(Long memberId, Long flowId) throws NotFoundFlowsException {
+    public Flow findFlows(Long memberId, Long flowId) throws NotFoundFlowsException {
         return fr.findFlowsBy(memberId, flowId).orElseThrow(NotFoundFlowsException::new);
+    }
+
+    public List<Flow> getAll(Long memberId) {
+        return fr.findFlowsBy(memberId).stream().toList();
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)

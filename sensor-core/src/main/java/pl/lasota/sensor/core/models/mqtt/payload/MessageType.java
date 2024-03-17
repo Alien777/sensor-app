@@ -25,7 +25,10 @@ public enum MessageType {
     PWM;
 
 
-    public static boolean isFromEsp(MessageType messageType) {
-        return List.of(DEVICE_CONNECTED, SINGLE_ADC_SIGNAL).contains(messageType);
+    public static List<MessageType> getListMessageTypeFromDevice() {
+        return List.of(DEVICE_CONNECTED, SINGLE_ADC_SIGNAL);
+    }
+    public static boolean isFromDevice(MessageType messageType) {
+        return getListMessageTypeFromDevice().contains(messageType);
     }
 }

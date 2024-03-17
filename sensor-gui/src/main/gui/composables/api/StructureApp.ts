@@ -1,13 +1,28 @@
 import dayjs from "dayjs";
 
-export interface NodeDraggable{
+export interface Node {
+    ref: string;
+    name: string;
+    childed: Array<string>;
+    sensor: any;
+    position: any;
+}
+
+export interface NodeDraggable {
     name: string;
     type: string;
 }
+
+export interface FlowT {
+    id: number;
+    config: string;
+    name: string;
+    isActivate: boolean;
+}
+
 export interface ErrorT {
     code: string;
     message: string;
-
 }
 
 export interface DeviceT {

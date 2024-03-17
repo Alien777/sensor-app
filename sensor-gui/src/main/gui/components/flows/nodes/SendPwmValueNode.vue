@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import {deviceApi} from "~/composables/api/DeviceApi";
-import {ConfigUtilsApi} from "~/composables/api/ConfigUtilsApi";
+import {configUtilsApi} from "~/composables/api/ConfigUtilsApi";
 import SelectLazy from "~/components/common/SelectLazy.vue";
 import {watch} from "vue";
 import {useVueFlow} from "@vue-flow/core";
@@ -8,7 +8,7 @@ import {useVueFlow} from "@vue-flow/core";
 const {updateNode} = useVueFlow()
 const runtimeConfig = useRuntimeConfig();
 const {getAllDevice} = deviceApi(runtimeConfig);
-const {getPwmsPins} = ConfigUtilsApi(runtimeConfig);
+const {getPwmsPins} = configUtilsApi(runtimeConfig);
 
 const props = defineProps({
   id: {
@@ -61,6 +61,6 @@ function handleUpdate() {
   <strong>{{ props.id }}</strong>
   <SelectLazy v-model="deviceId" :provide-data="provideDataDevice" label="Device Key"/>
   <SelectLazy v-model="pin" :provide-data="provideDataPins" label="PWM pin"/>
-  <SelectLazy v-model="valueVariable" :provide-data="provideDataPins" label="Variable"/>
+  <q-input v-model="valueVariable" label="Variable" maxlength="40"/>
 
 </template>

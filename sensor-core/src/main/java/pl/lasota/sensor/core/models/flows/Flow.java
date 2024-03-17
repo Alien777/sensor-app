@@ -12,7 +12,7 @@ import pl.lasota.sensor.core.models.Member;
 @Table(name = "flow")
 @Data
 @NoArgsConstructor
-public class Flows {
+public class Flow {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "flow_seq")
@@ -29,5 +29,8 @@ public class Flows {
     @Column(name = "config", columnDefinition = "jsonb", length = 100000)
     @Type(value = JsonBinaryType.class)
     private String config;
+
+    @Column(name = "name", unique = true)
+    private String name;
 
 }

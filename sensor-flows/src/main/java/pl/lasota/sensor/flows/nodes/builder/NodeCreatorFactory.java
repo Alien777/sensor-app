@@ -9,22 +9,18 @@ import pl.lasota.sensor.core.exceptions.NotFoundDeviceConfigException;
 import pl.lasota.sensor.core.exceptions.NotFoundDeviceException;
 import pl.lasota.sensor.core.exceptions.NotFoundPinException;
 import pl.lasota.sensor.core.models.device.DeviceConfig;
-import pl.lasota.sensor.core.models.mqtt.payload.MessageType;
 import pl.lasota.sensor.core.models.mqtt.payload.to.ConfigPayload;
 import pl.lasota.sensor.core.restapi.SensorApiEndpoint;
 import pl.lasota.sensor.core.service.DeviceService;
 import pl.lasota.sensor.core.service.DeviceUtilsService;
 import pl.lasota.sensor.flows.nodes.Node;
 import pl.lasota.sensor.flows.nodes.nodes.*;
-import pl.lasota.sensor.flows.nodes.nodes.start.ListeningSensorNode;
+import pl.lasota.sensor.flows.nodes.nodes.ListeningSensorNode;
 import pl.lasota.sensor.flows.nodes.nodes.AsyncNode;
-import pl.lasota.sensor.flows.nodes.nodes.start.CronNode;
+import pl.lasota.sensor.flows.nodes.nodes.CronNode;
 import pl.lasota.sensor.flows.nodes.nodes.SleepNode;
-import pl.lasota.sensor.flows.nodes.nodes.WaitNode;
 import pl.lasota.sensor.flows.nodes.utils.GlobalContext;
 import pl.lasota.sensor.flows.nodes.utils.SensorListeningManager;
-
-import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -53,10 +49,6 @@ public class NodeCreatorFactory {
 
         public final Node asyncNodeCreator(String id) {
             return new AsyncNode(id, globalContext);
-        }
-
-        public final Node waitNode(String id, String waitForThread, long second) {
-            return new WaitNode(id, globalContext, waitForThread, second);
         }
 
         public final Node executeCodeNode(String id, String code) {

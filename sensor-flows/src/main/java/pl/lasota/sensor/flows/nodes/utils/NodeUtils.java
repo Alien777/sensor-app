@@ -1,9 +1,15 @@
 package pl.lasota.sensor.flows.nodes.utils;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.graalvm.polyglot.*;
 import org.graalvm.polyglot.io.IOAccess;
+import pl.lasota.sensor.flows.nodes.Node;
+import pl.lasota.sensor.flows.nodes.StartFlowNode;
+import pl.lasota.sensor.flows.nodes.nodes.CronNode;
+import pl.lasota.sensor.flows.nodes.nodes.ListeningSensorNode;
 
 import java.util.Map;
 import java.util.Optional;
@@ -53,29 +59,35 @@ public final class NodeUtils {
     }
 
     public static <T> Optional<T> getValue(String pathValue, LocalContext localContext, GlobalContext globalContext) {
+        ObjectMapper mapper = new ObjectMapper();
         if (pathValue == null || pathValue.isBlank()) {
             return Optional.empty();
         }
         try {
-            var split = pathValue.split("\\.");
-            if (split.length == 1) {
-                var o = localContext.getVariables().get(pathValue);
-                return Optional.ofNullable((T) o);
-            } else if (split.length == 2) {
-                if (split[0].equals(GLOBAL_CONTEXT_NAME)) {
-                    var o = globalContext.getVariables().get(split[1]);
-                    return Optional.ofNullable((T) o);
-                } else {
-                    var o = localContext.getVariables().get(split[1]);
-                    return Optional.ofNullable((T) o);
-                }
+            JsonNode rootNode;
+            if (pathValue.startsWith(GLOBAL_CONTEXT_NAME)) {
+                rootNode = mapper.valueToTree(globalContext.getVariables());
+            } else if (pathValue.startsWith(LOCAL_CONTEXT_NAME)) {
+                rootNode = mapper.valueToTree(localContext.getVariables());
             } else {
                 return Optional.empty();
             }
+
+            String jsonPath = pathValue.substring(3).replaceAll("\\.", "/");
+            JsonNode valueNode = rootNode.at("/" + jsonPath);
+            if (valueNode.isMissingNode()) {
+                return Optional.empty();
+            }
+            return Optional.ofNullable(mapper.treeToValue(valueNode, (Class<T>) Object.class));
         } catch (Exception e) {
             log.error("Problem with cast ", e);
             return Optional.empty();
         }
+    }
+
+
+    public static boolean isRoot(Node node) {
+        return node instanceof StartFlowNode;
     }
 
     @Getter

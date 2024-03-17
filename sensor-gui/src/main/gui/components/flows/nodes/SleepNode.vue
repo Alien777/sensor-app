@@ -16,7 +16,11 @@ watch(sleepTimeSeconds, () => {
 })
 
 function handleUpdate() {
-  updateNode(props.id, {"sensor": sleepTimeSeconds})
+  updateNode(props.id, {
+    sensor: {
+      sleepTimeSeconds: sleepTimeSeconds
+    }
+  })
 }
 </script>
 

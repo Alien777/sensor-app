@@ -20,8 +20,6 @@ public class AsyncNode extends Node {
             try {
                 LocalContext newLocalContext = new LocalContext();
                 super.execute(newLocalContext);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
             } finally {
                 globalContext.getThreads().remove(id);
             }

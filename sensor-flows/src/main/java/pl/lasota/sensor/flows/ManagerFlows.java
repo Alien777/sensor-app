@@ -4,11 +4,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import pl.lasota.sensor.core.models.sensor.Sensor;
 import pl.lasota.sensor.core.service.FlowService;
+import pl.lasota.sensor.flows.nodes.StartFlowNode;
 import pl.lasota.sensor.flows.nodes.builder.NodeCreatorFactory;
 import pl.lasota.sensor.flows.nodes.builder.ParserFlows;
 import pl.lasota.sensor.flows.nodes.Node;
 import pl.lasota.sensor.flows.nodes.utils.SensorListeningManager;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -30,7 +32,17 @@ public class ManagerFlows {
 
         fs.activateFlow(id);
         try {
-            Node flows = pf.flows(config, ncf.create());
+            List<Node> flows = pf.flows(config, ncf.create());
+
+            boolean isError = flows.parallelStream()
+                    .map(node -> ((StartFlowNode) node).start())
+                    .anyMatch(aBoolean -> !aBoolean);
+
+            if (isError) {
+                flows.forEach(Node::clear);
+                fs.deactivateFlow(id);
+                return false;
+            }
             startedFlow.put(id, new ActiveFlow(flows, config));
         } catch (Exception e) {
             fs.deactivateFlow(id);
@@ -45,15 +57,14 @@ public class ManagerFlows {
             return false;
         }
 
-        fs.deactivateFlow(id);
         try {
-            Node root = activeFlow.getRoot();
-            root.clear();
-
+            activeFlow.getRoots().forEach(Node::clear);
+            startedFlow.remove(id);
         } catch (Exception e) {
             fs.activateFlow(id);
             return false;
         }
+        fs.deactivateFlow(id);
         return true;
     }
 }

@@ -4,7 +4,7 @@ import { Background } from '@vue-flow/background'
 
 <template>
   <div style="height: 100%; width: 100%">
-    <Background :size="2" :gap="20" pattern-color="#BDBDBD">
+    <Background :size="2" :gap="20" pattern-color="#BDBDBB">
       <slot />
     </Background>
   </div>

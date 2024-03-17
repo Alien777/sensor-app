@@ -1,7 +1,7 @@
 <template>
-    <div ref="editorElement" class="editor-container">
-      <slot v-if="isLoading"></slot>
-    </div>
+  <div ref="editorElement" class="editor-container">
+    <slot v-if="isLoading"></slot>
+  </div>
 </template>
 
 <script lang="ts">
@@ -45,7 +45,16 @@ export default defineComponent({
 
     onMounted(() => {
       if (editorElement.value) {
-        const mergedOptions = {...defaultOptions, ...props.options};
+        const mergedOptions = {
+          ...defaultOptions,
+          ...props.options,
+          ...{
+            minimap: {
+              enabled: false,
+            }
+          }
+        };
+        mergedOptions.formatOnType = true;
         if (props.lang === 'json') {
           Monaco.languages.json.jsonDefaults.setDiagnosticsOptions(props.jsonDefaultConfig);
         }
@@ -54,10 +63,12 @@ export default defineComponent({
         editor.setModel(model);
 
         editor.onDidChangeModelContent(() => {
-          emit('update:modelValue', editor.getValue());
+          emit('update:modelValue', editor?.getValue());
         });
-
         isLoading.value = false;
+        setTimeout(() => {
+          editor?.getAction('editor.action.formatDocument')?.run();
+        }, 100); // Adjust the delay as necessary
       }
     });
 
@@ -65,6 +76,7 @@ export default defineComponent({
     watch(() => props.modelValue, (newValue) => {
       if (editor && newValue !== editor.getValue()) {
         editor.setValue(newValue);
+        editor.getAction('editor.action.formatDocument')?.run()
       }
     });
 

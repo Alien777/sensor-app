@@ -4,6 +4,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import pl.lasota.sensor.core.exceptions.FlowRuntimeException;
 import pl.lasota.sensor.flows.nodes.utils.GlobalContext;
 import pl.lasota.sensor.flows.nodes.utils.LocalContext;
 
@@ -22,14 +23,18 @@ public abstract class Node {
 
     protected final GlobalContext globalContext;
 
-    public void execute(LocalContext localContext) throws Exception {
+    public void execute(LocalContext localContext) throws FlowRuntimeException {
         for (Node node : nodes) {
-            if (Thread.currentThread().isInterrupted()) {
-                log.info("Thread was interrupted, stopping execution.");
-                return;
+            if (globalContext.isStopped()) {
+                break;
             }
-            log.info("Execute node {} from {} to {}", id, this.getClass().getName(), node.getClass().getName());
-            node.execute(localContext);
+            try {
+                log.info("Executing node {} from {} to {}", id, this.getClass().getName(), node.getClass().getName());
+                node.execute(localContext);
+            } catch (Exception e) {
+                log.error("Occurred error during executing node {} from {} to {}", id, this.getClass().getName(), node.getClass().getName());
+                throw new RuntimeException(e);
+            }
         }
     }
 

@@ -1,11 +1,13 @@
 package pl.lasota.sensor.flows.nodes.utils;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import pl.lasota.sensor.core.models.sensor.Sensor;
 
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service
+@Slf4j
 public class SensorListeningManager {
     private final ConcurrentHashMap<KeySensor, SensorListening> client = new ConcurrentHashMap<>();
 
@@ -20,11 +22,7 @@ public class SensorListeningManager {
     public void broadcast(Sensor sensor) {
         client.forEach((keySensor, sensorListening) -> {
             if (keySensor.getDeviceId().equals(sensor.getDevice().getId())) {
-                try {
-                    sensorListening.onReceiving(sensor);
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
+                sensorListening.onReceiving(sensor);
             }
         });
     }

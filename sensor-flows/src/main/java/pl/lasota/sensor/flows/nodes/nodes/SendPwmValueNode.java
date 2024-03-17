@@ -2,6 +2,7 @@ package pl.lasota.sensor.flows.nodes.nodes;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import pl.lasota.sensor.core.exceptions.FlowRuntimeException;
 import pl.lasota.sensor.core.models.mqtt.payload.MessageType;
 import pl.lasota.sensor.core.models.rest.SendPwmS;
 import pl.lasota.sensor.core.restapi.SensorApiEndpoint;
@@ -26,11 +27,15 @@ public class SendPwmValueNode extends Node {
     }
 
     @Override
-    public void execute(LocalContext localContext) throws Exception {
+    public void execute(LocalContext localContext) {
         Optional<Long> value = NodeUtils.getValue(data.valueVariable, localContext, globalContext);
         if (value.isPresent()) {
-            sensorApiEndpoint.sendPwmValueToDevice(new SendPwmS(data.memberKey, data.deviceId, data.pin, value.get()));
-            super.execute(localContext);
+            try {
+                sensorApiEndpoint.sendPwmValueToDevice(new SendPwmS(data.memberKey, data.deviceId, data.pin, value.get()));
+                super.execute(localContext);
+            } catch (Exception e) {
+                throw new FlowRuntimeException(e);
+            }
         }
     }
 

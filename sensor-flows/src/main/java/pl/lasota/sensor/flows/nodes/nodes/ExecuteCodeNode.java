@@ -23,7 +23,7 @@ public class ExecuteCodeNode extends Node {
     }
 
     @Override
-    public void execute(LocalContext localContext) throws Exception {
+    public void execute(LocalContext localContext) {
         try (Context context = buildContext(LanguageId.JS)) {
             updateLangContext(LanguageId.JS, localContext, globalContext, context);
             String codeToExecute = String.format("%s", code);

@@ -10,7 +10,7 @@ public class NodeMock extends Node {
     }
 
     @Override
-    public void execute(LocalContext localContext) throws Exception {
+    public void execute(LocalContext localContext)  {
 
     }
 

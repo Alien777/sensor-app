@@ -8,7 +8,7 @@ const MonacoEditorCustom = defineAsyncComponent(() => import('./MonacoEditorCust
 const runtimeConfig = useRuntimeConfig();
 const {getDeviceConfig, saveDeviceConfig, getAllConfigs, activateConfig} = deviceApi(runtimeConfig);
 
-const splitterHigh = 70;
+const splitterHigh = 275;
 const props = defineProps({
   device: {
     type: Object as () => DeviceT,
@@ -61,73 +61,68 @@ const selectConfig = (config: DeviceConfigT) => {
 </script>
 
 <template>
-  <p><strong>{{ device.name ? device.name : device.id }}</strong> You editing config
-    id:<strong>{{ currentConfigEditRef.id }}</strong></p>
-  <q-splitter v-model="splitterHigh" style="height: 400px">
+  <div class="q-pb-md">
+    <q-btn-group spread>
+      <q-btn icon="save" color="green" @click="saveConfigAction">Save as new config</q-btn>
+      <q-btn icon="check"  @click="activateConfigAction"
+             v-if="currentConfigEditRef.forVersion===device.version && currentConfigEditRef.id!==currentConfigDevice.id"
+             color="green">Activate config
+      </q-btn>
+    </q-btn-group>
+  </div>
+  <q-splitter v-model="splitterHigh" unit="px" style="height: calc(100vh - 150px)">
     <template v-slot:before>
-      <ClientOnly>
+      <q-list padding>
+        <q-item v-for="config in allDevicesConfigsRef"
+                clickable
+                v-ripple
+                @click="()=>selectConfig(config)"
+                :active="currentConfigEditRef.id===config.id">
 
+          <q-item-section avatar>
+            <q-item-label>{{ `id: ${config.id}` }}</q-item-label>
+            <s v-if="config.forVersion!==device.version">
+              <q-item-label>{{ `ID: ${config.forVersion}` }}
+                <q-tooltip>
+                  This version of config is doesn't compatibility with device firmware version
+                </q-tooltip>
+              </q-item-label>
+            </s>
+            <q-item-label v-else>{{ `ver.: ${config.forVersion}` }}</q-item-label>
+          </q-item-section>
+          <q-item-section side top>
+            <q-item-label caption>{{ formatTime(config.time as Date) }}</q-item-label>
+            <q-item-label>
+              <q-icon v-if="currentConfigDevice.id===config.id" name="check" color="green">
+                <q-tooltip>
+                  Current activated. This configuration will be send to device.
+                </q-tooltip>
+              </q-icon>
+              <q-icon v-if="!config.isCorrect" name="close" color="red">
+                <q-tooltip>
+                  This configuration is doesn't correct with schema. Not possible to active it.
+                </q-tooltip>
+              </q-icon>
+            </q-item-label>
+          </q-item-section>
+        </q-item>
+      </q-list>
+    </template>
+    <template v-slot:after>
+      <ClientOnly>
         <MonacoEditorCustom :jsonDefaultConfig="generateConfig(currentConfigEditRef)"
                             v-model="currentConfigEditRef.config"
                             lang="json"
                             class="editor">
-          Loading...
         </MonacoEditorCustom>
       </ClientOnly>
     </template>
-    <template v-slot:after>
-      <div class="q-pa-md" style="max-width: 350px">
-
-        <q-list separator padding>
-          <q-item v-for="config in allDevicesConfigsRef"
-                  clickable
-                  v-ripple
-                  @click="()=>selectConfig(config)"
-                  :active="currentConfigEditRef.id===config.id">
-
-            <q-item-section avatar>
-              <q-item-label>{{ `id: ${config.id}` }}</q-item-label>
-              <s v-if="config.forVersion!==device.version">
-                <q-item-label>{{ `ID: ${config.forVersion}` }}
-                  <q-tooltip>
-                    This version of config is doesn't compatibility with device firmware version
-                  </q-tooltip>
-                </q-item-label>
-              </s>
-              <q-item-label v-else>{{ `ver.: ${config.forVersion}` }}</q-item-label>
-            </q-item-section>
-            <q-item-section side top>
-              <q-item-label caption>{{ formatTime(config.time as Date) }}</q-item-label>
-              <q-item-label>
-                <q-icon v-if="currentConfigDevice.id===config.id" name="check" color="green">
-                  <q-tooltip>
-                    Current activated. This configuration will be send to device.
-                  </q-tooltip>
-                </q-icon>
-                <q-icon v-if="!config.isCorrect" name="close" color="red">
-                  <q-tooltip>
-                    This configuration is doesn't correct with schema. Not possible to active it.
-                  </q-tooltip>
-                </q-icon>
-              </q-item-label>
-            </q-item-section>
-          </q-item>
-        </q-list>
-      </div>
-    </template>
   </q-splitter>
-  <q-btn @click="saveConfigAction">Save as new config</q-btn>
-  <q-btn @click="activateConfigAction"
-         v-if="currentConfigEditRef.forVersion===device.version && currentConfigEditRef.id!==currentConfigDevice.id"
-         color="green"
-         text-color="black">Activate config
-  </q-btn>
-
 </template>
 
 <style lang="css" scoped>
 .editor {
   width: 100%;
-  height: calc(500px - 3em);
+
 }
 </style>
