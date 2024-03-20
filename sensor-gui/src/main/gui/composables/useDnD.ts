@@ -1,6 +1,6 @@
-import {type GraphNode, useVueFlow, type XYPosition} from '@vue-flow/core'
+import {type Edge, type GraphNode, useVueFlow, type XYPosition} from '@vue-flow/core'
 import {ref, watch} from 'vue'
-import type {NodeDraggable} from "~/composables/api/StructureApp";
+import type {Node, NodeDraggable} from "~/composables/api/StructureApp";
 
 let id = 0
 
@@ -23,7 +23,7 @@ const state = {
 export default function useDragAndDrop() {
     const {isDragOver, isDragging} = state
 
-    const {addNodes, screenToFlowCoordinate, onNodesInitialized, updateNode} = useVueFlow()
+    const {addNodes, addEdges, screenToFlowCoordinate, onNodesInitialized, updateNode} = useVueFlow()
 
     watch(isDragging, (dragging) => {
         document.body.style.userSelect = dragging ? 'none' : ''
@@ -67,50 +67,59 @@ export default function useDragAndDrop() {
             y: event.clientY,
         })
         if (event.dataTransfer) {
-
             const nodeDraggable = JSON.parse(event.dataTransfer.getData('application/vueflow')) as NodeDraggable;
-
             const nodeId = getId(nodeDraggable.name)
-
-            const component = defineAsyncComponent(() =>
-                import(`~/components/flows/nodes/${nodeDraggable.name}.vue`)
-            )
-
-            const wrap = defineComponent({
-                name: 'NodeWrap',
-                setup(props, {slots}) {
-                    return () =>
-                        h('div', {style: {height: '100%', width: '100%'}},
-                            h(component, {
-                                id: nodeId
-                            }, slots.default ? slots.default() : [])
-                        );
-                },
-            });
-
-
-            const newNode: any | Node | Node[] | ((nodes: GraphNode[]) => Node | Node[]) = {
-                id: nodeId,
-                type: nodeDraggable.type,
-                position,
-                width: 230,
-                data: {
-                    label: wrap,
-                }
-            }
-            const {off} = onNodesInitialized(() => {
-                updateNode(nodeId, (node) => ({
-                    position: {
-                        x: node.position.x - node.dimensions.width / 2,
-                        y: node.position.y - node.dimensions.height / 2
-                    },
-                }))
-
-                off()
-            })
-
-            addNodes(newNode)
+            insert(nodeDraggable, nodeId, position);
         }
+    }
+
+    function insertEdges(edge: Edge) {
+        addEdges(edge);
+    }
+
+    function insert(insert: Node | NodeDraggable, id: string, position: XYPosition | any) {
+        const component = defineAsyncComponent(() =>
+            import(`~/components/flows/nodes/${insert.name}.vue`)
+        )
+
+
+        const wrap = defineComponent({
+            name: 'NodeWrap',
+            setup(props, {slots}) {
+                return () =>
+                    h('div', {style: {height: '100%', width: '100%'}},
+                        h(component, {
+                            id: id,
+                            sensor: insert.sensor
+                        }, slots.default ? slots.default() : [])
+                    );
+            },
+        });
+
+
+        const newNode: any | Node | Node[] | ((nodes: GraphNode[]) => Node | Node[]) = {
+            id: id,
+            name: insert.name,
+            type: insert.type,
+            position: position,
+            width: 230,
+            data: {
+                label: wrap,
+            }
+        }
+
+        const {off} = onNodesInitialized(() => {
+            updateNode(id, (node) => ({
+                position: {
+                    x: node.position.x - node.dimensions.width / 2,
+                    y: node.position.y - node.dimensions.height / 2
+                },
+            }))
+
+            off()
+        })
+
+        addNodes(newNode)
     }
 
     return {
@@ -120,5 +129,7 @@ export default function useDragAndDrop() {
         onDragLeave,
         onDragOver,
         onDrop,
+        insert,
+        insertEdges,
     }
 }

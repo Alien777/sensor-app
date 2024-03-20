@@ -2,12 +2,11 @@ import type {FlowT, Node} from "~/composables/api/StructureApp";
 
 export const flowApi = (runtimeConfig: any) => {
     let {fetchApiRequest} = fetchUtils(runtimeConfig);
-    const saveFlow = async (config: Array<Node>): Promise<void> => {
-        let value = await fetchApiRequest<void>("/flow",
+    const saveFlow = async (flow: FlowT): Promise<void> => {
+        await fetchApiRequest<void>("/flow",
             {
-                method: 'post', body: config
+                method: 'post', body: flow
             });
-        return value.data.value;
     }
 
     const startFlow = async (id: number): Promise<void> => {
@@ -32,9 +31,17 @@ export const flowApi = (runtimeConfig: any) => {
         return value.data.value;
     }
 
+    const get = async (id: number): Promise<Array<FlowT>> => {
+        let value = await fetchApiRequest<Array<FlowT>>(`/flow/${id}`,
+            {
+                method: 'get'
+            });
+        return value.data.value;
+    }
+
 
     return {
-        saveFlow, startFlow, stopFlow,getAll
+        saveFlow, startFlow, stopFlow, getAll, get
     }
 
 

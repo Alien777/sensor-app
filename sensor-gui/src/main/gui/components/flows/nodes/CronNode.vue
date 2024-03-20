@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import {ref, watch} from 'vue'
+import {onMounted, ref, watch} from 'vue'
 import {useVueFlow} from "@vue-flow/core";
 
 const cron = ref("*/30 * * * *");
@@ -8,7 +8,19 @@ const props = defineProps({
     type: String,
     required: true,
   },
+  sensor: {
+    type: Object as () => any,
+    required: false,
+  },
 })
+
+onMounted(() => {
+  if (!props.sensor) {
+    return;
+  }
+  cron.value = props.sensor.cron
+})
+
 const {updateNode} = useVueFlow()
 
 watch(cron, () => {

@@ -4,6 +4,10 @@ const props = defineProps({
     type: String,
     required: true,
   },
+  sensor: {
+    type: Object as () => any,
+    required: false,
+  },
 })
 </script>
 

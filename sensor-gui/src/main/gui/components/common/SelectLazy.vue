@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {ref, defineEmits, defineProps,} from "vue";
+import {ref, defineEmits, defineProps, onMounted, onBeforeMount, watch, defineModel} from "vue";
 
 const emit = defineEmits(['update:modelValue']);
 
@@ -16,25 +16,20 @@ const props = defineProps({
 const setOptions = (value: any) => {
   options.value = value;
 }
+const model = defineModel()
 
-const value = ref(null)
 const options = ref(null)
 const filter = (val: any, update: any, abort: any) => {
   update(() => {
     props.provideData(setOptions);
   })
 }
-
-watch(value, (newValue) => {
-  emit('update:modelValue', newValue);
-});
-
 </script>
 
 <template>
   <div class="q-gutter-md row items-start">
     <q-select
-        v-model="value"
+        v-model="model"
         :label="props.label"
         :options="options"
         @filter="filter"

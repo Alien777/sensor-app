@@ -5,18 +5,20 @@ export interface Node {
     name: string;
     childed: Array<string>;
     sensor: any;
+    type: string,
     position: any;
 }
 
 export interface NodeDraggable {
     name: string;
     type: string;
+    sensor: any;
 }
 
 export interface FlowT {
     id: number;
-    config: string;
     name: string;
+    config: string;
     isActivate: boolean;
 }
 

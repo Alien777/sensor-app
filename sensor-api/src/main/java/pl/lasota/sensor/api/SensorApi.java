@@ -16,6 +16,7 @@ import org.springframework.integration.annotation.IntegrationComponentScan;
 @EnableFeignClients(basePackages = {"pl.lasota.sensor.core.restapi"})
 @EnableDiscoveryClient
 public class SensorApi {
+
     public static void main(String[] args) {
         SpringApplication.run(SensorApi.class, args);
     }

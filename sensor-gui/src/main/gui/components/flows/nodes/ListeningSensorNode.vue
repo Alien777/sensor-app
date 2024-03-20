@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import {deviceApi} from "~/composables/api/DeviceApi";
 import SelectLazy from "~/components/common/SelectLazy.vue";
-import {watch} from "vue";
+import {watch, onMounted, ref, defineModel} from "vue";
 import {useVueFlow} from "@vue-flow/core";
 import {configUtilsApi} from "~/composables/api/ConfigUtilsApi";
 
@@ -18,12 +18,27 @@ const props = defineProps({
     type: String,
     required: true,
   },
+  sensor: {
+    type: Object as () => any,
+    required: false,
+  },
 })
+
+onMounted(() => {
+  if (!props.sensor) {
+    return;
+  }
+  deviceId.value = props.sensor.deviceId
+  messageType.value = props.sensor.messageType
+})
+
 const provideDataDevice = (value: any) => {
   getAllDevice().then(v => {
     value(v.map(a => a.id));
   })
 }
+
+
 
 const provideDataMessageType = (value: any) => {
   if (deviceId.value == null) {

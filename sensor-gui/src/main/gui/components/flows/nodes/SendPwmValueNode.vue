@@ -2,7 +2,7 @@
 import {deviceApi} from "~/composables/api/DeviceApi";
 import {configUtilsApi} from "~/composables/api/ConfigUtilsApi";
 import SelectLazy from "~/components/common/SelectLazy.vue";
-import {watch} from "vue";
+import {onMounted, watch} from "vue";
 import {useVueFlow} from "@vue-flow/core";
 
 const {updateNode} = useVueFlow()
@@ -15,6 +15,11 @@ const props = defineProps({
     type: String,
     required: true,
   },
+  sensor: {
+    type: Object as () => any,
+    required: false,
+  },
+
 })
 const provideDataDevice = (value: any) => {
   getAllDevice().then(v => {
@@ -35,6 +40,14 @@ const deviceId = ref(null);
 const pin = ref(null);
 const valueVariable = ref(null);
 
+onMounted(() => {
+  if (!props.sensor) {
+    return;
+  }
+  deviceId.value = props.sensor.deviceId
+  pin.value = props.sensor.pin
+  valueVariable.value = props.sensor.valueVariable
+})
 
 watch(deviceId, () => {
   handleUpdate();

@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import {ref, watch} from 'vue'
+import {onMounted, ref, watch} from 'vue'
 import {useVueFlow} from "@vue-flow/core";
 
 const code = ref("let result=true");
@@ -8,6 +8,18 @@ const props = defineProps({
     type: String,
     required: true,
   },
+  sensor: {
+    type: Object as () => any,
+    required: false,
+  },
+})
+
+onMounted(() => {
+  if (!props.sensor) {
+    return;
+  }
+
+  code.value = props.sensor.code
 })
 const {updateNode} = useVueFlow()
 

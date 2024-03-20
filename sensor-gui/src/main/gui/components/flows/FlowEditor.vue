@@ -1,30 +1,17 @@
 <script setup lang="ts">
 import {defineProps, onMounted, ref} from 'vue'
-import {MarkerType, useVueFlow, VueFlow} from '@vue-flow/core'
-import {type FlowT} from "~/composables/api/StructureApp";
+import {type Edge, MarkerType, useVueFlow, VueFlow} from '@vue-flow/core'
+import {type FlowT, type Node, type NodeDraggable} from "~/composables/api/StructureApp";
 import DropzoneBackground from "~/components/flows/DropzoneBackground.vue";
-
 import useDragAndDrop from "~/composables/useDnD";
 import {MiniMap} from "@vue-flow/minimap";
 import {flowApi} from "~/composables/api/FlowApi";
 
-const props = defineProps({
-  flow: {
-    type: Object as () => FlowT,
-    required: true
-  }
-});
+
 definePageMeta({
   layout: "panel",
   middleware: "page-any-roles"
 })
-const nodes = ref([])
-const edges = ref([])
-const {onConnect, addEdges, toObject} = useVueFlow()
-const runtimeConfig = useRuntimeConfig();
-const {saveFlow, getAll} = flowApi(runtimeConfig)
-
-
 const {onDragStart} = useDragAndDrop();
 const draggableItems = ref([
   {type: 'input', name: 'ListeningSensorNode'},
@@ -34,46 +21,102 @@ const draggableItems = ref([
   {type: 'default', name: 'AsyncNode'},
   {type: 'default', name: 'SleepNode'}
 ]);
-const {onDragOver, onDrop, onDragLeave, isDragOver} = useDragAndDrop()
+const {onDragOver, onDrop, onDragLeave, isDragOver, insert, insertEdges} = useDragAndDrop()
 const val = 200
 const innerTab = ref('')
 const splitterModel = ref(200)
+const {onConnect, addEdges, toObject} = useVueFlow()
+const runtimeConfig = useRuntimeConfig();
+const {saveFlow, getAll, get} = flowApi(runtimeConfig)
 
+
+const props = defineProps({
+  flow: {
+    type: Object as () => FlowT,
+    required: true
+  }
+});
+
+// Tworzenie lokalnej zmiennej reaktywnej
+const name = ref(props.flow?.name);
+const config = ref(props.flow?.config);
+
+const nodes = ref<any[]>([]);
+const edges = ref<any[]>([]);
+
+const convert = (nodesArray: Array<Node>) => {
+
+  nodesArray.forEach((node: Node) => {
+    const n = {
+      id: node.ref,
+      name: node.name,
+      type: node.type,
+      position: node.position,
+      sensor: node.sensor,
+    }
+
+    insert(n, node.ref, node.position);
+    let id = 1;
+    node.childed.forEach(childRef => {
+
+      const x = (): Edge => {
+        id++;
+        return {
+          id: 'ID_' + id,
+          source: node.ref,
+          target: childRef
+        };
+      };
+      insertEdges(x());
+    });
+  });
+}
 
 onMounted(() => {
   setTimeout(() => {
     if (flows && flows.value && flows.value?.length >= 1) {
-      innerTab.value = flows.value[0].id;
+      innerTab.value = String(flows.value[0].id);
+      name.value = props.flow?.name;
+      config.value = props.flow?.config;
+      nodes.value = [];
+      edges.value = []
+      let parse = JSON.parse(config.value) as Array<Node>;
+      convert(parse);
     }
 
   }, 100)
 })
-const handleConnect = (params) => {
+const handleConnect = (params: any) => {
   const {sourceHandle, targetHandle} = params;
   if (sourceHandle.endsWith('__handle-bottom') && targetHandle.endsWith('__handle-top')) {
     addEdges([params]);
   }
 };
+
 const {data: flows} = useAsyncData('flows', getAll);
 const onSave = () => {
   const nodes = toObject();
-  console.log(nodes)
 
-  const nod = nodes.nodes.map(value => {
+  const nod = nodes.nodes.map((value: any) => {
     return {
       ref: value.id,
-      name: value.id,
+      name: value.name,
       childed: [],
       position: value.position,
+      type: value.type,
       sensor: value.sensor
     };
   })
   nod.forEach(myNod => {
     myNod.childed = nodes.edges.filter(n => n.source === myNod.ref).map(value => value.target);
   })
-  console.log(nod)
-  console.log(props.flow?.name)
-  // saveFlow(nod)
+  let s = JSON.stringify(nod);
+  const x = {
+    id: props.flow?.id,
+    name: name,
+    config: s
+  }
+  saveFlow(x)
 }
 
 onConnect(handleConnect)
@@ -81,9 +124,9 @@ onConnect(handleConnect)
 
 <template>
   <div class="q-pb-md">
-    <q-input label="Name" :model-value="props.flow?.name"></q-input>
+    <q-input label="Name" v-model="name"></q-input>
     <q-btn-group spread>
-      <q-btn icon="save" color="green" @click="onSave">{{ flow && flow.id ? 'Save flow' : 'Save new flow'}}</q-btn>
+      <q-btn icon="save" color="green" @click="onSave">{{ flow && flow.id ? 'Save flow' : 'Save new flow' }}</q-btn>
       <q-btn v-if="flow && !flow.isActivate" icon="start" text-color="black" color="yellow">Start</q-btn>
       <q-btn v-else-if="flow && flow.isActivate" icon="stop" color="red">Stop</q-btn>
     </q-btn-group>
@@ -97,7 +140,7 @@ onConnect(handleConnect)
         <q-card-section>
           <div v-for="item in draggableItems.filter(v => v.type==='input')" :key="item.name"
                :class="`vue-flow__node-${item.type}`"
-               :draggable="true" @dragstart="onDragStart($event, {type: item.type,name: item.name})">
+               :draggable="true" @dragstart="onDragStart($event, {type: item.type, name: item.name} as NodeDraggable)">
             {{ item.name }}
           </div>
         </q-card-section>
@@ -109,7 +152,7 @@ onConnect(handleConnect)
         <q-card-section>
           <div v-for="item in draggableItems.filter(v => v.type==='default')" :key="item.name"
                :class="`vue-flow__node-${item.type}`"
-               :draggable="true" @dragstart="onDragStart($event, {type: item.type,name: item.name})">
+               :draggable="true" @dragstart="onDragStart($event, {type: item.type,name: item.name} as NodeDraggable)">
             {{ item.name }}
           </div>
         </q-card-section>
