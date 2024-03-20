@@ -94,9 +94,15 @@ export default function useDragAndDrop() {
         const wrap = defineComponent({
             name: 'NodeWrap',
             setup(props, {slots}) {
+                const copyIdToClipboard = () => {
+                    navigator.clipboard.writeText(id).then(() => {
+                    }).catch(err => {
+                        console.error('Failed to copy ID to clipboard', err);
+                    });
+                };
                 return () =>
                     h('div', {style: {height: '100%', width: '100%'}}, [
-                        h('strong', id),
+                        h('strong', {onClick: copyIdToClipboard}, id),
                         h(component, {
                             id: id,
                             sensor: insert.sensor
