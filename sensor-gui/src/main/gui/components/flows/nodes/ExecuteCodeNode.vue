@@ -37,6 +37,5 @@ function handleUpdate() {
 </script>
 
 <template>
-  <div><strong>{{ props.id }}</strong></div>
   <q-input type="textarea" label="Code JS" @keyup="handleUpdate" v-model="code"></q-input>
 </template>

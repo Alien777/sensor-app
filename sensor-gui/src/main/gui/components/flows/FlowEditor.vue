@@ -21,7 +21,7 @@ const draggableItems = ref([
   {type: 'default', name: 'AsyncNode'},
   {type: 'default', name: 'SleepNode'}
 ]);
-const {onDragOver, onDrop, onDragLeave, isDragOver, insert, insertEdges} = useDragAndDrop()
+const {onDragOver, onDrop, onDragLeave, isDragOver, insertNode, insertEdge} = useDragAndDrop()
 const val = 200
 const innerTab = ref('')
 const splitterModel = ref(200)
@@ -55,19 +55,18 @@ const convert = (nodesArray: Array<Node>) => {
       sensor: node.sensor,
     }
 
-    insert(n, node.ref, node.position);
-    let id = 1;
+    insertNode(n, node.ref, node.position);
+    let edgeId = 1;
     node.childed.forEach(childRef => {
-
       const x = (): Edge => {
-        id++;
+        edgeId++;
         return {
-          id: 'ID_' + id,
+          id: 'ID_' + edgeId,
           source: node.ref,
           target: childRef
         };
       };
-      insertEdges(x());
+      insertEdge(x());
     });
   });
 }

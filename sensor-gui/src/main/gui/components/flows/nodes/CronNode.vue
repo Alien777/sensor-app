@@ -37,6 +37,5 @@ function handleUpdate() {
 </script>
 
 <template>
-  <div><strong>{{ props.id }}</strong></div>
   <q-input label="Time execute" hint="Cron format e.g. */30 * * * *" @keyup="handleUpdate" v-model="cron"></q-input>
 </template>

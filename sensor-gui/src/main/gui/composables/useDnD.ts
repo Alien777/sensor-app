@@ -2,15 +2,19 @@ import {type Edge, type GraphNode, useVueFlow, type XYPosition} from '@vue-flow/
 import {ref, watch} from 'vue'
 import type {Node, NodeDraggable} from "~/composables/api/StructureApp";
 
-let id = 0
+let global_id: number = 0
 
 /**
  * @returns {string} - A unique id.
  */
 function getId(name: string) {
-    return `${name}_${id++}`
+    return `${name}_${global_id++}`
 }
 
+function extractNumberFromString(str: string) {
+    const result = /(\d+)$/.exec(str);
+    return result ? Number(result[1]) : null;
+}
 
 const state = {
     /**
@@ -69,29 +73,34 @@ export default function useDragAndDrop() {
         if (event.dataTransfer) {
             const nodeDraggable = JSON.parse(event.dataTransfer.getData('application/vueflow')) as NodeDraggable;
             const nodeId = getId(nodeDraggable.name)
-            insert(nodeDraggable, nodeId, position);
+            insertNode(nodeDraggable, nodeId, position);
         }
     }
 
-    function insertEdges(edge: Edge) {
+    function insertEdge(edge: Edge) {
         addEdges(edge);
     }
 
-    function insert(insert: Node | NodeDraggable, id: string, position: XYPosition | any) {
+    function insertNode(insert: Node | NodeDraggable, id: string, position: XYPosition | any) {
+        const max_id = extractNumberFromString(id);
+        global_id = 0;
+        if (max_id && max_id >= global_id) {
+            global_id = max_id + 1;
+        }
         const component = defineAsyncComponent(() =>
             import(`~/components/flows/nodes/${insert.name}.vue`)
         )
-
 
         const wrap = defineComponent({
             name: 'NodeWrap',
             setup(props, {slots}) {
                 return () =>
-                    h('div', {style: {height: '100%', width: '100%'}},
+                    h('div', {style: {height: '100%', width: '100%'}}, [
+                        h('strong', id),
                         h(component, {
                             id: id,
                             sensor: insert.sensor
-                        }, slots.default ? slots.default() : [])
+                        }, slots.default ? slots.default() : [])]
                     );
             },
         });
@@ -129,7 +138,7 @@ export default function useDragAndDrop() {
         onDragLeave,
         onDragOver,
         onDrop,
-        insert,
-        insertEdges,
+        insertNode,
+        insertEdge
     }
 }

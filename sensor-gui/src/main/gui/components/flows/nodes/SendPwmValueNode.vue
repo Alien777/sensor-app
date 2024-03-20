@@ -71,9 +71,7 @@ function handleUpdate() {
 </script>
 
 <template>
-  <strong>{{ props.id }}</strong>
   <SelectLazy v-model="deviceId" :provide-data="provideDataDevice" label="Device Key"/>
   <SelectLazy v-model="pin" :provide-data="provideDataPins" label="PWM pin"/>
   <q-input v-model="valueVariable" label="Variable" maxlength="40"/>
-
 </template>

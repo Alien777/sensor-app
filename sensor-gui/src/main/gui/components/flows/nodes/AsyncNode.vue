@@ -12,9 +12,7 @@ const props = defineProps({
 </script>
 
 <template>
-  <div><strong>{{ props.id }}</strong></div>
 </template>
 
 <style scoped lang="css">
-
 </style>

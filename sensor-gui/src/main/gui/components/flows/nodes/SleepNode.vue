@@ -36,6 +36,5 @@ function handleUpdate() {
 </script>
 
 <template>
-  <div><strong>{{ props.id }}</strong></div>
   <q-input label="Sleep time [s]" @keyup="handleUpdate" v-model="sleepTimeSeconds"></q-input>
 </template>

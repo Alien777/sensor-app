@@ -67,8 +67,6 @@ function handleUpdate() {
 </script>
 
 <template>
-  <strong>{{ props.id }}</strong>
   <SelectLazy v-model="deviceId" :provide-data="provideDataDevice" label="Device Id"/>
   <SelectLazy v-model="messageType" :provide-data="provideDataMessageType" label="Message type"/>
-
 </template>
