@@ -7,9 +7,11 @@
           class="text-teal">
         <q-tab :name="'new'" icon="schema"
                label="Create New Flow"/>
-        <q-tab v-for="flow in flows" :style="!flow.isActivate?'color: red':''" :name="flow.id"
-               :icon="flow.isActivate?'start':'stop'"
-               :label="flow.name?flow.name:flow.id"/>
+        <q-tab v-for="flow in flows" :style="!flow.activate?'color: red':''" :name="flow.id"
+               :icon="flow.activate?'start':'stop'"
+               :label="flow.name?flow.name:flow.id">
+          <q-btn v-if="flow && flow.id" icon="delete" color="blue" @click="onDelete(flow.id)"></q-btn>
+        </q-tab>
       </q-tabs>
     </template>
     <template v-slot:after>
@@ -17,10 +19,10 @@
           vertical
           v-model="tab">
         <q-tab-panel :name="'new'" icon="schema">
-          <FlowEditor :flow="null"/>
+          <FlowEditor :onChangeFlow="onChangeFlow" :flow="null"/>
         </q-tab-panel>
         <q-tab-panel v-for="flow in flows" :name="flow.id" icon="schema">
-          <FlowEditor :flow="flow"/>
+          <FlowEditor :onChangeFlow="onChangeFlow" :flow="flow"/>
         </q-tab-panel>
       </q-tab-panels>
     </template>
@@ -32,6 +34,7 @@
 import {flowApi} from "~/composables/api/FlowApi";
 import {onMounted, ref} from 'vue'
 import FlowEditor from "~/components/flows/FlowEditor.vue";
+import type {FlowT} from "~/composables/api/StructureApp";
 
 definePageMeta({
   layout: "panel",
@@ -39,12 +42,17 @@ definePageMeta({
 })
 
 const runtimeConfig = useRuntimeConfig();
-const {getAll} = flowApi(runtimeConfig)
-const {data: flows} = useAsyncData('flows', getAll);
+const {getAll, deleteFlow} = flowApi(runtimeConfig)
+const {data: flows, refresh} = useAsyncData('flows', getAll);
 
 const tab = ref('')
 const width = ref(200)
-
+const onDelete = (id: number) => {
+  deleteFlow(id).finally(() => refresh());
+}
+const onChangeFlow = () => {
+  refresh();
+}
 
 onMounted(() => {
   setTimeout(() => {

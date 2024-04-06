@@ -2,10 +2,9 @@ package pl.lasota.sensor.flows.nodes.nodes;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import pl.lasota.sensor.core.apis.SensorMicroserviceEndpoint;
+import pl.lasota.sensor.core.apis.model.sensor.SendPwm;
 import pl.lasota.sensor.core.exceptions.FlowRuntimeException;
-import pl.lasota.sensor.core.models.mqtt.payload.MessageType;
-import pl.lasota.sensor.core.models.rest.SendPwmS;
-import pl.lasota.sensor.core.restapi.SensorApiEndpoint;
 import pl.lasota.sensor.flows.nodes.FlowNode;
 import pl.lasota.sensor.flows.nodes.Node;
 import pl.lasota.sensor.flows.nodes.utils.GlobalContext;
@@ -18,20 +17,20 @@ import java.util.Optional;
 public class SendPwmValueNode extends Node {
 
     private final Data data;
-    private final SensorApiEndpoint sensorApiEndpoint;
+    private final SensorMicroserviceEndpoint sensorMicroserviceEndpoint;
 
-    public SendPwmValueNode(String id, GlobalContext globalContext, Data data, SensorApiEndpoint sensorApiEndpoint) {
+    public SendPwmValueNode(String id, GlobalContext globalContext, Data data, SensorMicroserviceEndpoint sensorMicroserviceEndpoint) {
         super(id, globalContext);
         this.data = data;
-        this.sensorApiEndpoint = sensorApiEndpoint;
+        this.sensorMicroserviceEndpoint = sensorMicroserviceEndpoint;
     }
 
     @Override
     public void execute(LocalContext localContext) {
-        Optional<Long> value = NodeUtils.getValue(data.valueVariable, localContext, globalContext);
+        Optional<Long> value = NodeUtils.getValue(data.valueVariable, localContext, globalContext, Long.class);
         if (value.isPresent()) {
             try {
-                sensorApiEndpoint.sendPwmValueToDevice(new SendPwmS(data.memberKey, data.deviceId, data.pin, value.get()));
+                sensorMicroserviceEndpoint.sendPwmValueToDevice(new SendPwm(data.deviceId, data.token, data.pin, value.get()));
                 super.execute(localContext);
             } catch (Exception e) {
                 throw new FlowRuntimeException(e);
@@ -42,9 +41,15 @@ public class SendPwmValueNode extends Node {
     @AllArgsConstructor(staticName = "create")
     @Getter
     public static class Data {
+        private String memberId;
         private final String deviceId;
-        private final String memberKey;
+        private String token;
         private final String valueVariable;
         private final int pin;
+
+        public void setUp(String memberId, String token) {
+            this.memberId = memberId;
+            this.token = token;
+        }
     }
 }

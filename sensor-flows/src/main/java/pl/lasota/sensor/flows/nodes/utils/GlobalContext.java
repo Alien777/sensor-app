@@ -1,19 +1,26 @@
 package pl.lasota.sensor.flows.nodes.utils;
 
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import pl.lasota.sensor.core.common.User;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @Getter
+@RequiredArgsConstructor
 public class GlobalContext {
     private final AtomicBoolean stopped = new AtomicBoolean(false);
     private final Map<String, ScheduledFuture<?>> schedules = new ConcurrentHashMap<>();
     private final Map<String, Thread> threads = new ConcurrentHashMap<>();
     private final Map<String, Object> variables = new ConcurrentHashMap<>();
+    private final User user;
+
 
     public final Object getVariable(String key) {
         return variables.get(key);
@@ -32,5 +39,14 @@ public class GlobalContext {
 
     public boolean isStopped() {
         return stopped.get();
+    }
+
+    public void recreateSecurityHolder()
+    {
+        Authentication authentication = new UsernamePasswordAuthenticationToken(user,
+                null,
+                user.getGrantedRoles());
+        SecurityContextHolder.clearContext();
+        SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 }

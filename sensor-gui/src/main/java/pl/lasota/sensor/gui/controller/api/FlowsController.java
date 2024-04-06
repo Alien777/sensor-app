@@ -4,64 +4,54 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import pl.lasota.sensor.core.models.Member;
-import pl.lasota.sensor.core.models.flows.Flow;
-import pl.lasota.sensor.core.restapi.SensorFlowsEndpoint;
-import pl.lasota.sensor.core.restapi.SensorFlowsHelper;
-import pl.lasota.sensor.core.service.FlowService;
-import pl.lasota.sensor.core.service.MemberService;
-import pl.lasota.sensor.gui.model.FlowSaveT;
-import pl.lasota.sensor.gui.model.FlowT;
+import pl.lasota.sensor.core.apis.FlowsMicroserviceEndpoint;
+import pl.lasota.sensor.core.apis.model.flow.FlowSaveT;
+import pl.lasota.sensor.core.apis.model.flow.FlowStatusT;
+import pl.lasota.sensor.core.apis.model.flow.FlowT;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/flow")
 @Slf4j
 @RequiredArgsConstructor
 public class FlowsController {
-    private final FlowService flowService;
-    private final MemberService ms;
-    private final SensorFlowsEndpoint sfe;
-    private final SensorFlowsHelper sfh;
 
+    private final FlowsMicroserviceEndpoint sfe;
 
     @PostMapping
     @PreAuthorize("isAuthenticated()")
-    public void save(@RequestBody FlowSaveT flowT) throws Exception {
-        Member member = ms.loggedUser();
-        flowService.saveFlows(member.getId(), FlowSaveT.map(flowT));
+    public FlowStatusT save(@RequestBody FlowSaveT flowT) throws Exception {
+        return sfe.save(flowT);
     }
 
     @PostMapping("/start/{id}")
     @PreAuthorize("isAuthenticated()")
-    public void startFlows(@PathVariable("id") Long id) throws Exception {
-        Member member = ms.loggedUser();
-        Flow flow = flowService.findFlows(member.getId(), id);
-        sfe.startFlows(flow.getId(), flow.getConfig());
+    public FlowStatusT startFlows(@PathVariable("id") Long id) throws Exception {
+        return sfe.start(id);
     }
 
     @DeleteMapping("/stop/{id}")
     @PreAuthorize("isAuthenticated()")
-    public void stopFlows(@PathVariable("id") Long id) throws Exception {
-        Member member = ms.loggedUser();
-        flowService.findFlows(member.getId(), id);
-        sfh.stopFlowsAllInstance(id);
+    public FlowStatusT stopFlows(@PathVariable("id") Long id) throws Exception {
+        return sfe.stop(id);
     }
 
     @GetMapping()
     @PreAuthorize("isAuthenticated()")
     public List<FlowT> getAll() throws Exception {
-        Member member = ms.loggedUser();
-        return flowService.getAll(member.getId()).stream().map(FlowT::map).collect(Collectors.toList());
+        return sfe.get();
     }
 
     @GetMapping("/{id}")
     @PreAuthorize("isAuthenticated()")
     public FlowT get(@PathVariable("id") Long id) throws Exception {
-        Member member = ms.loggedUser();
-        return FlowT.map(flowService.findFlows(member.getId(), id));
+        return sfe.get(id);
     }
 
+    @DeleteMapping("/{id}")
+    @PreAuthorize("isAuthenticated()")
+    public void delete(@PathVariable("id") Long id) throws Exception {
+        sfe.delete(id);
+    }
 }

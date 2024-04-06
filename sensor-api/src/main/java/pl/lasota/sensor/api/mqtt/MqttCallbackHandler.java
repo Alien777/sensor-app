@@ -9,6 +9,7 @@ import org.eclipse.paho.mqttv5.common.MqttMessage;
 import org.eclipse.paho.mqttv5.common.packet.MqttProperties;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+import pl.lasota.sensor.api.MessageReceiver;
 import pl.lasota.sensor.api.model.MessagePayload;
 
 @Component
@@ -16,10 +17,10 @@ import pl.lasota.sensor.api.model.MessagePayload;
 public class MqttCallbackHandler implements MqttCallback {
     private final SimpleCallback connected;
     private final SimpleCallback disconnected;
-    private final MqttMessageReceiver receiver;
+    private final MessageReceiver receiver;
 
     public MqttCallbackHandler(@Qualifier("connected") SimpleCallback connected,
-                               @Qualifier("disconnected") SimpleCallback disconnected, MqttMessageReceiver receiver) {
+                               @Qualifier("disconnected") SimpleCallback disconnected, MessageReceiver receiver) {
         this.connected = connected;
         this.disconnected = disconnected;
         this.receiver = receiver;

@@ -6,11 +6,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import pl.lasota.sensor.core.exceptions.FlowException;
-import pl.lasota.sensor.core.exceptions.NotFoundDeviceConfigException;
-import pl.lasota.sensor.core.exceptions.NotFoundDeviceException;
-import pl.lasota.sensor.core.exceptions.NotFoundPinException;
-import pl.lasota.sensor.core.models.mqtt.payload.MessageType;
+import pl.lasota.sensor.core.exceptions.*;
+import pl.lasota.sensor.core.entities.mqtt.payload.MessageType;
 import pl.lasota.sensor.flows.nodes.Node;
 import pl.lasota.sensor.flows.nodes.nodes.AsyncNode;
 import pl.lasota.sensor.flows.nodes.nodes.SendPwmValueNode;
@@ -26,12 +23,13 @@ import static pl.lasota.sensor.flows.nodes.utils.NodeUtils.isRoot;
 @Slf4j
 public class ParserFlows {
 
-    public List<Node> flows(String flowsJson, NodeCreatorFactory.Factory factory) throws JsonProcessingException, NotFoundPinException, NotFoundDeviceConfigException, NotFoundDeviceException, FlowException {
+    public List<Node> flows(String flowsJson, NodeCreatorFactory.Factory factory) throws JsonProcessingException, NotFoundPinException, NotFoundDeviceConfigException, NotFoundDeviceException, FlowException, NotFoundMemberException {
         log.info("Parse flow to node {} ", flowsJson);
         final Map<String, RawNode> nodesRaw = new HashMap<>();
         ObjectMapper om = new ObjectMapper();
         JsonNode jsonNode = om.readTree(flowsJson);
-        for (JsonNode node : jsonNode) {
+        JsonNode nodes = jsonNode.findValue("nodes");
+        for (JsonNode node : nodes) {
             String ref = ref(node);
             String name = name(node);
             List<String> childed = childed(node);
@@ -71,37 +69,35 @@ public class ParserFlows {
         }).collect(Collectors.toList());
     }
 
-    private Node parseNode(String id, String name, JsonNode root, NodeCreatorFactory.Factory factory) throws NotFoundPinException, NotFoundDeviceConfigException, JsonProcessingException, NotFoundDeviceException, FlowException {
+    private Node parseNode(String ref, String name, JsonNode root, NodeCreatorFactory.Factory factory) throws NotFoundPinException, NotFoundDeviceConfigException, JsonProcessingException, NotFoundDeviceException, FlowException, NotFoundMemberException {
         JsonNode node = root.get("sensor");
         switch (name) {
             case "SendPwmValueNode" -> {
                 String deviceId = fString(node, "deviceId");
-                String memberId = fString(node, "memberKey");
                 Integer pin = fInteger(node, "pin");
                 String valueKey = fString(node, "valueVariable");
-                return factory.sendPwmValueNode(id, SendPwmValueNode.Data.create(memberId, deviceId, valueKey, pin));
+                return factory.sendPwmValueNode(ref, SendPwmValueNode.Data.create(null, deviceId, null, valueKey, pin));
             }
             case "ListeningSensorNode" -> {
                 String deviceId = fString(node, "deviceId");
-                String memberId = fString(node, "memberKey");
                 MessageType type = MessageType.valueOf(fString(node, "messageType").toUpperCase());
-                ListeningSensorNode.Data data = ListeningSensorNode.Data.create(deviceId, type);
-                return factory.listeningSensorNode(id, memberId, data);
+                ListeningSensorNode.Data data = ListeningSensorNode.Data.create(deviceId, null, null, type);
+                return factory.listeningSensorNode(ref, data);
             }
             case "ExecuteCodeNode" -> {
                 String condition = fString(node, "code");
-                return factory.executeCodeNode(id, condition);
+                return factory.executeCodeNode(ref, condition);
             }
             case "AsyncNode" -> {
-                return factory.asyncNodeCreator(id);
+                return factory.asyncNodeCreator(ref);
             }
             case "CronNode" -> {
                 String cron = fString(node, "cron");
-                return factory.cronNode(id, cron);
+                return factory.cronNode(ref, cron);
             }
             case "SleepNode" -> {
                 Long sleepTimeSeconds = fLong(node, "sleepTimeSeconds");
-                return factory.sleepNode(id, sleepTimeSeconds);
+                return factory.sleepNode(ref, sleepTimeSeconds);
             }
             default -> throw new IllegalStateException("Unexpected value: " + name);
         }
@@ -118,16 +114,16 @@ public class ParserFlows {
 
     private static List<String> childed(JsonNode node) {
         List<String> children = new ArrayList<>();
-        node.findValue("_childed").iterator().forEachRemaining(ref -> children.add(ref.asText()));
+        node.findValue("childed").iterator().forEachRemaining(ref -> children.add(ref.asText()));
         return children;
     }
 
     private static String ref(JsonNode node) {
-        return node.findValue("_ref").asText();
+        return node.findValue("ref").asText();
     }
 
     private static String name(JsonNode node) {
-        return node.findValue("_name").asText();
+        return node.findValue("name").asText();
     }
 
     private static String fString(JsonNode node, String value) {

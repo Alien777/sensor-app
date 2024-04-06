@@ -2,7 +2,7 @@ package pl.lasota.sensor.flows.nodes.utils;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import pl.lasota.sensor.core.models.sensor.Sensor;
+import pl.lasota.sensor.core.apis.model.flow.FlowSensorT;
 
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -19,9 +19,9 @@ public class SensorListeningManager {
         client.put(id, sensorListening);
     }
 
-    public void broadcast(Sensor sensor) {
+    public void broadcast(FlowSensorT sensor) {
         client.forEach((keySensor, sensorListening) -> {
-            if (keySensor.getDeviceId().equals(sensor.getDevice().getId())) {
+            if (keySensor.getDeviceId().equals(sensor.getDeviceId())) {
                 sensorListening.onReceiving(sensor);
             }
         });

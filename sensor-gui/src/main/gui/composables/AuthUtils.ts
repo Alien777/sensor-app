@@ -83,10 +83,13 @@ export const authUtils = (runtimeConfig: any) => {
         return getUser()?.fullName as string;
     }
 
+    const memberId = () => {
+        return getUser()?.id as string;
+    }
+
     const hasRole = (role: string) => {
         const user = getUser();
         return !!(user && user.roles && user.roles.includes(role));
-
     };
 
 
@@ -94,6 +97,7 @@ export const authUtils = (runtimeConfig: any) => {
         auth: mainAuthProcess,
         hasRole,
         username,
+        memberId,
         isAuth,
         logout
     }

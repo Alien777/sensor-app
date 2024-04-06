@@ -17,7 +17,7 @@ public class FlowsBuilder {
 
     public FlowsBuilder addFirst(Node parent, Node child) {
         Node isFoundNode = findNode(root, parent);
-        if (isFoundNode != null) {
+        if (isFoundNode != null && !isFoundNode.getNodes().contains(child)) {
             isFoundNode.addFirst(child);
         }
         return this;
@@ -25,7 +25,7 @@ public class FlowsBuilder {
 
     public FlowsBuilder add(Node parent, Node child) {
         Node isFoundNode = findNode(root, parent);
-        if (isFoundNode != null) {
+        if (isFoundNode != null && !isFoundNode.getNodes().contains(child)) {
             isFoundNode.add(child);
         }
         return this;

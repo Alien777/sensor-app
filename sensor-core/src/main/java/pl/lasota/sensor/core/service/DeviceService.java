@@ -6,23 +6,22 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import pl.lasota.sensor.core.entities.DeviceToken;
 import pl.lasota.sensor.core.exceptions.*;
-import pl.lasota.sensor.core.models.Member;
-import pl.lasota.sensor.core.models.device.Device;
-import pl.lasota.sensor.core.models.device.DeviceConfig;
-import pl.lasota.sensor.core.models.mqtt.payload.MessageFrame;
-import pl.lasota.sensor.core.models.mqtt.payload.to.ConfigPayload;
-import pl.lasota.sensor.core.models.sensor.Sensor;
-import pl.lasota.sensor.core.repository.DeviceConfigRepository;
-import pl.lasota.sensor.core.repository.DeviceRepository;
-import pl.lasota.sensor.core.repository.MemberRepository;
-import pl.lasota.sensor.core.repository.SensorRecordingRepository;
+import pl.lasota.sensor.core.entities.Member;
+import pl.lasota.sensor.core.entities.device.Device;
+import pl.lasota.sensor.core.entities.device.DeviceConfig;
+import pl.lasota.sensor.core.entities.mqtt.payload.MessageFrame;
+import pl.lasota.sensor.core.entities.mqtt.payload.to.ConfigPayload;
+import pl.lasota.sensor.core.entities.sensor.Sensor;
+import pl.lasota.sensor.core.repository.*;
 
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
-import static pl.lasota.sensor.core.models.mqtt.payload.MessageType.DEVICE_CONNECTED;
+import static pl.lasota.sensor.core.entities.mqtt.payload.MessageType.DEVICE_CONNECTED;
 
 
 @Service
@@ -38,7 +37,7 @@ public class DeviceService {
 
     @Transactional(rollbackFor = SensorException.class)
     public Sensor insertSensorReading(MessageFrame messageFrame) throws NotFoundDefaultConfigException {
-        Optional<Device> deviceOptional = dr.findDeviceBy(messageFrame.getMemberKey(), messageFrame.getDeviceId());
+        Optional<Device> deviceOptional = dr.findDeviceBy(messageFrame.getMemberId(), messageFrame.getDeviceId());
 
         if (deviceOptional.isEmpty()) {
             return null;
@@ -70,22 +69,34 @@ public class DeviceService {
 
     }
 
+    @Transactional
+    public String save(String memberId, String deviceId, String name) {
+        String token = UUID.randomUUID().toString();
+        DeviceToken deviceToken = DeviceToken.builder().member(Member.builder().id(memberId).build())
+                .token(token).build();
+
+        Device device = Device.builder()
+                .member(Member.builder().id(memberId).build())
+                .name(name)
+                .currentDeviceToken(deviceToken)
+                .id(deviceId.toUpperCase())
+                .build();
+        dr.save(device);
+        return token;
+    }
+
     @Transactional(rollbackFor = SensorException.class)
-    public void insertNewDevice(String memberKey, String deviceId, String version) throws NotFoundDefaultConfigException, NotFoundMemberException {
-        if (dr.existsDevice(memberKey, deviceId)) {
+    public void setUpVersion(String memberId, String deviceId, String version) throws NotFoundDefaultConfigException, NotFoundMemberException {
+        if (!dr.existsDevice(memberId, deviceId)) {
+            return;
+        }
+        Device device = dr.getReferenceById(deviceId);
+        if (device.getVersion() != null) {
             return;
         }
 
-        Member member = mr.findMemberByMemberKey(memberKey).orElseThrow(NotFoundMemberException::new);
-
-        Device device = Device.builder()
-                .member(member)
-                .version(version)
-                .id(deviceId.toUpperCase())
-                .build();
-
-        member.getDevices()
-                .add(device);
+        Member member = mr.findMemberById(memberId).orElseThrow(NotFoundMemberException::new);
+        device.setVersion(version);;
 
         DeviceConfig deviceConfig = dsu.createDefaultDeviceConfig(version, device);
         device.setCurrentDeviceConfig(deviceConfig);
@@ -96,19 +107,13 @@ public class DeviceService {
     }
 
     @Transactional
-    public DeviceConfig currentDeviceConfig(String memberKey, String deviceId) throws NotFoundDeviceException, NotFoundDeviceConfigException {
-        Device device = dr.findDeviceBy(memberKey, deviceId).orElseThrow(NotFoundDeviceException::new);
-        return dsu.currentDeviceConfigCheck(device);
-    }
-
-    @Transactional
-    public DeviceConfig currentDeviceConfig(Long memberId, String deviceId) throws NotFoundDeviceException, NotFoundDeviceConfigException {
+    public DeviceConfig currentDeviceConfig(String memberId, String deviceId) throws NotFoundDeviceException {
         Device device = dr.findDeviceBy(memberId, deviceId).orElseThrow(NotFoundDeviceException::new);
         return dsu.currentDeviceConfigCheck(device);
     }
 
     @Transactional
-    public List<DeviceConfig> getConfigForDevice(Long memberId, String deviceId) throws NotFoundDeviceException {
+    public List<DeviceConfig> getConfigForDevice(String memberId, String deviceId) throws NotFoundDeviceException {
         Device device = dr.findDeviceBy(memberId, deviceId).orElseThrow(NotFoundDeviceException::new);
         List<DeviceConfig> allConfigBy = dcr.findAllDeviceConfigBy(device.getId());
         if (device.getCurrentDeviceConfig() == null) {
@@ -121,7 +126,7 @@ public class DeviceService {
 
 
     @Transactional
-    public DeviceConfig saveConfig(Long memberId, String config, String versionConfig, String deviceId) throws NotFoundDeviceException, NotFoundSchemaConfigException, ConfigParserException, ConfigCheckSumExistException {
+    public DeviceConfig saveConfig(String memberId, String config, String versionConfig, String deviceId) throws NotFoundDeviceException, NotFoundSchemaConfigException, ConfigParserException, ConfigCheckSumExistException {
         try {
             new ObjectMapper().readValue(config, ConfigPayload.class);
         } catch (JsonProcessingException e) {
@@ -156,7 +161,7 @@ public class DeviceService {
     }
 
     @Transactional
-    public void activateConfig(Long memberId, String deviceId, Long configId) throws NotFoundDeviceException, NotFoundDefaultConfigException, NotFoundSchemaConfigException, ConfigParserException, JsonProcessingException {
+    public void activateConfig(String memberId, String deviceId, Long configId) throws NotFoundDeviceException, NotFoundDefaultConfigException, NotFoundSchemaConfigException, ConfigParserException, JsonProcessingException {
         Device device = dr.findDeviceBy(memberId, deviceId).orElseThrow(NotFoundDeviceException::new);
         DeviceConfig deviceConfig = dcr.getDeviceConfig(deviceId, configId).orElseThrow(NotFoundDefaultConfigException::new);
         dsu.testConfigWithSchema(deviceConfig.getConfig(), dsu.schemaForVersion(device.getVersion()));
@@ -165,16 +170,25 @@ public class DeviceService {
     }
 
 
-    public boolean isDeviceExist(String memberKey, String deviceId) {
-        return dr.existsDevice(memberKey, deviceId);
+    public boolean isDeviceExist(String memberId, String deviceId) {
+        return dr.existsDevice(memberId, deviceId);
     }
 
-    public List<Device> getAllDeviceBy(Long memberId) {
+    public boolean isTokenValid(String memberId, String deviceId, String token) {
+        return dr.isTokenValid(memberId, deviceId, token);
+    }
+
+    public List<Device> getAllDeviceBy(String memberId) {
         return dr.findAllDevicesBy(memberId);
     }
 
     public boolean hasConfig(String deviceId) {
         return dcr.existsDeviceConfigBy(deviceId);
+    }
+
+
+    public Optional<Device> getDevice(String memberId, String deviceId) {
+        return dcr.getDevice(memberId, deviceId);
     }
 
 

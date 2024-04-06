@@ -46,7 +46,7 @@ ESP-32S schema reduces it to values 0, 1, 2, 3
     - **Description**: Configuration type is used to send configuration from the Application Server (AS) to the device.
     - **Communication way**: AS to DEVICE
 
-- `SINGLE_ADC_SIGNAL`:
+- `ANALOG`:
     - **Type**: String
     - **Description**: Indicates that an analog value has been received from the sensor.
     - **Communication way**: DEVICE to AS
@@ -106,7 +106,7 @@ ESP-32S schema reduces it to values 0, 1, 2, 3
     - **Type**: Integer
     - **Description**: The PWM value to be set on the specified pin.
 
-### AnalogValuePayload (`SINGLE_ADC_SIGNAL`)
+### AnalogValuePayload (`ANALOG`)
 
 - `pin`:
     - **Type**: Integer

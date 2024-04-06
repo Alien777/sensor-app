@@ -20,7 +20,7 @@
 
 <script setup lang="ts">
 const runtimeConfig = useRuntimeConfig();
-const {isAuth, username, hasRole, logout} = authUtils(runtimeConfig);
+const {isAuth, username, memberId, logout} = authUtils(runtimeConfig);
 
 const {apiHost} = configUtils(runtimeConfig)
 </script>

@@ -1,7 +1,7 @@
 package pl.lasota.sensor.gui.model;
 
 import lombok.Data;
-import pl.lasota.sensor.core.models.device.Device;
+import pl.lasota.sensor.core.entities.device.Device;
 
 @Data
 public class DeviceT {
@@ -10,6 +10,7 @@ public class DeviceT {
     private String version;
     private String name;
     private boolean hasConfig;
+    private String token;
 
     public static DeviceT map(Device device, boolean hasConfig) {
 
@@ -18,6 +19,7 @@ public class DeviceT {
         deviceT.version = device.getVersion();
         deviceT.name = device.getName();
         deviceT.hasConfig = hasConfig;
+        deviceT.token = device.getCurrentDeviceToken().getToken();
         return deviceT;
 
     }

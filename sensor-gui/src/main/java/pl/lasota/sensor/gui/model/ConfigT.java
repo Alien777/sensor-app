@@ -1,9 +1,7 @@
 package pl.lasota.sensor.gui.model;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Data;
-import pl.lasota.sensor.core.models.device.DeviceConfig;
+import pl.lasota.sensor.core.entities.device.DeviceConfig;
 
 import java.time.OffsetDateTime;
 

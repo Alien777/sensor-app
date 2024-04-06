@@ -27,7 +27,16 @@ const state = {
 export default function useDragAndDrop() {
     const {isDragOver, isDragging} = state
 
-    const {addNodes, addEdges, screenToFlowCoordinate, onNodesInitialized, updateNode} = useVueFlow()
+    const {
+        viewport,
+        defaultViewport,
+        connectionPosition,
+        addNodes,
+        addEdges,
+        screenToFlowCoordinate,
+        onNodesInitialized,
+        updateNode
+    } = useVueFlow()
 
     watch(isDragging, (dragging) => {
         document.body.style.userSelect = dragging ? 'none' : ''
@@ -75,6 +84,12 @@ export default function useDragAndDrop() {
             const nodeId = getId(nodeDraggable.name)
             insertNode(nodeDraggable, nodeId, position);
         }
+    }
+
+    function setViewPort(view: any) {
+        viewport.value = view;
+        defaultViewport.value = view;
+
     }
 
     function insertEdge(edge: Edge) {
@@ -144,6 +159,7 @@ export default function useDragAndDrop() {
         onDragLeave,
         onDragOver,
         onDrop,
+        setViewPort,
         insertNode,
         insertEdge
     }

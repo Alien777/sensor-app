@@ -7,7 +7,7 @@ import org.eclipse.paho.mqttv5.client.IMqttClient;
 import org.eclipse.paho.mqttv5.common.MqttException;
 import org.eclipse.paho.mqttv5.common.MqttMessage;
 import org.springframework.stereotype.Component;
-import pl.lasota.sensor.core.models.mqtt.payload.MessageFrame;
+import pl.lasota.sensor.core.entities.mqtt.payload.MessageFrame;
 
 @Component
 @Slf4j
@@ -18,7 +18,7 @@ public class MqttMessagePublish {
 
     public void publish(MessageFrame messageFrame) throws MqttException, JsonProcessingException {
         String json = messageFrame.makePayloadForDevice();
-        iMqttClient.publish("/" + messageFrame.getMemberKey() + "/" + messageFrame.getDeviceId(), new MqttMessage(json.getBytes()));
+        iMqttClient.publish("/" + messageFrame.getMemberId() + "/" + messageFrame.getDeviceId(), new MqttMessage(json.getBytes()));
         log.info("Sent messageFrame  {}", json);
     }
 

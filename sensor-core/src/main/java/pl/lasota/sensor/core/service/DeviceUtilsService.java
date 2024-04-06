@@ -14,9 +14,9 @@ import pl.lasota.sensor.core.exceptions.ConfigParserException;
 import pl.lasota.sensor.core.exceptions.NotFoundDefaultConfigException;
 import pl.lasota.sensor.core.exceptions.NotFoundDeviceConfigException;
 import pl.lasota.sensor.core.exceptions.NotFoundSchemaConfigException;
-import pl.lasota.sensor.core.models.device.Device;
-import pl.lasota.sensor.core.models.device.DeviceConfig;
-import pl.lasota.sensor.core.models.mqtt.payload.to.ConfigPayload;
+import pl.lasota.sensor.core.entities.device.Device;
+import pl.lasota.sensor.core.entities.device.DeviceConfig;
+import pl.lasota.sensor.core.entities.mqtt.payload.to.ConfigPayload;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -90,12 +90,8 @@ public class DeviceUtilsService {
         return crc32.getValue();
     }
 
-    public DeviceConfig currentDeviceConfigCheck(Device device) throws NotFoundDeviceConfigException {
-        DeviceConfig currentDeviceConfig = device.getCurrentDeviceConfig();
-        if (currentDeviceConfig == null) {
-            throw new NotFoundDeviceConfigException();
-        }
-        return currentDeviceConfig;
+    public DeviceConfig currentDeviceConfigCheck(Device device) {
+        return device.getCurrentDeviceConfig();
     }
 
     public ConfigPayload mapConfigToObject(String config) throws JsonProcessingException {

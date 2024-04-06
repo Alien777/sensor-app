@@ -5,16 +5,29 @@
           vertical
           v-model="innerTab"
           class="text-teal">
-        <q-tab v-for="device in devices" :name="device.id" icon="sensors"
-               :label="device.name?device.name:device.id"/>
+        <q-tab name="newDevice" style="color: green" icon="add">
+          <p>Add new device</p>
+        </q-tab>
+        <q-tab v-for="device in devices" :name="device.id" :icon="device.version?'sensors':'autorenew'">
+          <div style="color: green" v-if="device.version">
+            <p>id:<em> {{ device.id }}</em></p>
+            <p>{{ device.name }}</p>
+          </div>
+          <div v-else style="color: #252526">
+            <p>{{ device.name }}</p>
+          </div>
+        </q-tab>
       </q-tabs>
     </template>
     <template v-slot:after>
       <q-tab-panels
           vertical
           v-model="innerTab">
-        <q-tab-panel v-for="device in devices" :name="device.id" icon="sensors">
-          <AdvencedConfigurationDevice :device="device"/>
+        <q-tab-panel v-for="device in devices" :name="device.id" icon="not_">
+          <AdvencedConfigurationDevice  :onChange="onChange" :device="device"/>
+        </q-tab-panel>
+        <q-tab-panel name="newDevice">
+          <NewDevice :onChange="onChange"></NewDevice>
         </q-tab-panel>
       </q-tab-panels>
     </template>
@@ -29,14 +42,20 @@ import {ref, onMounted} from 'vue'
 const innerTab = ref('')
 const splitterModel = ref(200)
 
+
 const runtimeConfig = useRuntimeConfig();
 const {getAllDevice} = deviceApi(runtimeConfig);
+const {data: devices, refresh} = useAsyncData('devices', getAllDevice);
+const onChange = () => {
+  refresh();
+}
 
-const {data: devices} = useAsyncData('devices', getAllDevice);
 onMounted(() => {
   setTimeout(() => {
     if (devices && devices.value && devices.value?.length >= 1) {
       innerTab.value = devices.value[0].id;
+    } else {
+      innerTab.value = "newDevice"
     }
 
   }, 100)

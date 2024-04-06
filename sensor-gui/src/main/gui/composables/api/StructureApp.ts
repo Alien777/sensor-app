@@ -1,5 +1,17 @@
 import dayjs from "dayjs";
 
+export enum StatusOfFlow {
+    OK = "OK",
+    NOT_FOUND = "NOT_FOUND",
+    ERROR = "ERROR",
+    IS_ACTIVE_ALREADY = "IS_ACTIVE_ALREADY"
+}
+
+export interface ConfigNode {
+    nodes: Array<Node>
+    viewport: any;
+}
+
 export interface Node {
     ref: string;
     name: string;
@@ -19,7 +31,7 @@ export interface FlowT {
     id: number;
     name: string;
     config: string;
-    isActivate: boolean;
+    activate: boolean;
 }
 
 export interface ErrorT {
@@ -31,6 +43,7 @@ export interface DeviceT {
     id: string;
     name: string;
     version: string;
+    token: string;
     hasConfig: boolean
 }
 
@@ -46,6 +59,11 @@ export interface DeviceConfigT {
 export interface DeviceConfigSaveT {
     config: string;
     version: string;
+}
+
+export interface DeviceSaveT {
+    deviceId: string
+    name: string;
 }
 
 export function timeToDate(d: DeviceConfigT): DeviceConfigT {

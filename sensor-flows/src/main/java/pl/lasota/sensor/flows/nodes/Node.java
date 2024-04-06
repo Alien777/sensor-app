@@ -30,6 +30,7 @@ public abstract class Node {
             }
             try {
                 log.info("Executing node {} from {} to {}", id, this.getClass().getName(), node.getClass().getName());
+                globalContext.recreateSecurityHolder();
                 node.execute(localContext);
             } catch (Exception e) {
                 log.error("Occurred error during executing node {} from {} to {}", id, this.getClass().getName(), node.getClass().getName());

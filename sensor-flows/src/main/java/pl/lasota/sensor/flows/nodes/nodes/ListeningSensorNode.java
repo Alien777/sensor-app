@@ -3,18 +3,13 @@ package pl.lasota.sensor.flows.nodes.nodes;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import pl.lasota.sensor.core.exceptions.FlowException;
-import pl.lasota.sensor.core.exceptions.FlowRuntimeException;
-import pl.lasota.sensor.core.models.mqtt.payload.MessageType;
-import pl.lasota.sensor.core.models.sensor.ConnectedDevice;
-import pl.lasota.sensor.core.models.sensor.Sensor;
-import pl.lasota.sensor.core.models.sensor.SingleAdcSignal;
+import pl.lasota.sensor.core.apis.model.flow.FlowSensorAnalogT;
+import pl.lasota.sensor.core.apis.model.flow.FlowSensorT;
+import pl.lasota.sensor.core.entities.mqtt.payload.MessageType;
 import pl.lasota.sensor.flows.nodes.FlowNode;
 import pl.lasota.sensor.flows.nodes.Node;
 import pl.lasota.sensor.flows.nodes.StartFlowNode;
 import pl.lasota.sensor.flows.nodes.utils.*;
-
-import java.util.concurrent.atomic.AtomicBoolean;
 
 @FlowNode
 @Slf4j
@@ -22,7 +17,6 @@ public class ListeningSensorNode extends Node implements StartFlowNode, SensorLi
     private final SensorListeningManager slm;
     private final KeySensor keySensor;
     private final Data data;
-
 
     public ListeningSensorNode(String id, GlobalContext globalContext, Data data, SensorListeningManager slm) {
         super(id, globalContext);
@@ -47,7 +41,7 @@ public class ListeningSensorNode extends Node implements StartFlowNode, SensorLi
     }
 
     @Override
-    public void onReceiving(Sensor sensor) {
+    public void onReceiving(FlowSensorT sensor) {
         try {
             if (globalContext.isStopped()) {
                 return;
@@ -63,18 +57,17 @@ public class ListeningSensorNode extends Node implements StartFlowNode, SensorLi
     }
 
 
-    private boolean analyze(Sensor sensor, LocalContext localContext) {
+    private boolean analyze(FlowSensorT sensor, LocalContext localContext) {
         if (!sensor.getMessageType().equals(data.forMessageType)) {
             return false;
         }
 
         return switch (sensor.getMessageType()) {
             case DEVICE_CONNECTED -> {
-                ConnectedDevice s = (ConnectedDevice) sensor;
                 yield true;
             }
-            case SINGLE_ADC_SIGNAL -> {
-                SingleAdcSignal s = (SingleAdcSignal) sensor;
+            case ANALOG -> {
+                FlowSensorAnalogT s = (FlowSensorAnalogT) sensor;
                 localContext.getVariables().put(id, s);
                 yield true;
             }
@@ -99,7 +92,14 @@ public class ListeningSensorNode extends Node implements StartFlowNode, SensorLi
     @AllArgsConstructor(staticName = "create")
     @Getter
     public static class Data {
-        private String deviceId;
-        private MessageType forMessageType;
+        private final String deviceId;
+        private String memberId;
+        private String token;
+        private final MessageType forMessageType;
+
+        public void setUp(String memberId, String token) {
+            this.memberId = memberId;
+            this.token = token;
+        }
     }
 }

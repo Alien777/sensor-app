@@ -55,7 +55,7 @@ static void run_task_analog(void *pvParameters)
             }
         }
 
-        publish(analog_task->config_id, response, SINGLE_ADC_SIGNAL);
+        publish(analog_task->config_id, response, ANALOG);
     }
 }
 

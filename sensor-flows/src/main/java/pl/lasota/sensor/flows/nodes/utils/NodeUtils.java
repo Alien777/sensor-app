@@ -8,8 +8,6 @@ import org.graalvm.polyglot.*;
 import org.graalvm.polyglot.io.IOAccess;
 import pl.lasota.sensor.flows.nodes.Node;
 import pl.lasota.sensor.flows.nodes.StartFlowNode;
-import pl.lasota.sensor.flows.nodes.nodes.CronNode;
-import pl.lasota.sensor.flows.nodes.nodes.ListeningSensorNode;
 
 import java.util.Map;
 import java.util.Optional;
@@ -58,7 +56,7 @@ public final class NodeUtils {
                 .build();
     }
 
-    public static <T> Optional<T> getValue(String pathValue, LocalContext localContext, GlobalContext globalContext) {
+    public static <T> Optional<T> getValue(String pathValue, LocalContext localContext, GlobalContext globalContext, Class<?> longClass) {
         ObjectMapper mapper = new ObjectMapper();
         if (pathValue == null || pathValue.isBlank()) {
             return Optional.empty();
@@ -74,11 +72,11 @@ public final class NodeUtils {
             }
 
             String jsonPath = pathValue.substring(3).replaceAll("\\.", "/");
-            JsonNode valueNode = rootNode.at("/" + jsonPath);
+            JsonNode valueNode = rootNode.at(jsonPath);
             if (valueNode.isMissingNode()) {
                 return Optional.empty();
             }
-            return Optional.ofNullable(mapper.treeToValue(valueNode, (Class<T>) Object.class));
+            return Optional.ofNullable(mapper.treeToValue(valueNode, (Class<T>) longClass));
         } catch (Exception e) {
             log.error("Problem with cast ", e);
             return Optional.empty();

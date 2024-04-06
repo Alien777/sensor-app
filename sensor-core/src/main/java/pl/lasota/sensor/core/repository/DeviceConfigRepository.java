@@ -5,7 +5,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import pl.lasota.sensor.core.models.device.DeviceConfig;
+import pl.lasota.sensor.core.entities.device.Device;
+import pl.lasota.sensor.core.entities.device.DeviceConfig;
 
 import java.util.List;
 import java.util.Optional;
@@ -25,4 +26,6 @@ public interface DeviceConfigRepository extends JpaRepository<DeviceConfig, Long
     @Query("SELECT s FROM DeviceConfig s WHERE s.checksum = :checksum")
     Optional<DeviceConfig> getConfigByChecksum(@Param("checksum") Long checksum);
 
+    @Query("SELECT s FROM Device s WHERE s.id = :deviceId AND s.member.id = :memberId")
+    Optional<Device> getDevice(@Param("memberId") String memberId, @Param("deviceId")  String deviceId);
 }

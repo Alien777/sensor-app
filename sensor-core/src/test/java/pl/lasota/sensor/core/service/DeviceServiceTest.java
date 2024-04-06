@@ -6,9 +6,9 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import pl.lasota.sensor.core.configs.CoreProperties;
 import pl.lasota.sensor.core.exceptions.*;
-import pl.lasota.sensor.core.models.Member;
-import pl.lasota.sensor.core.models.device.Device;
-import pl.lasota.sensor.core.models.device.DeviceConfig;
+import pl.lasota.sensor.core.entities.Member;
+import pl.lasota.sensor.core.entities.device.Device;
+import pl.lasota.sensor.core.entities.device.DeviceConfig;
 import pl.lasota.sensor.core.repository.DeviceConfigRepository;
 import pl.lasota.sensor.core.repository.DeviceRepository;
 import pl.lasota.sensor.core.repository.MemberRepository;
@@ -34,7 +34,7 @@ class DeviceServiceTest {
         Mockito.when(drMock.existsDevice(Mockito.same("0123456789123456"), Mockito.same("012345678912"))).thenReturn(true);
 
         DeviceService deviceService = new DeviceService(drMock, srrMock, dcMock, mrMock, dsuMock);
-        deviceService.insertNewDevice("0123456789123456", "012345678912", "1.0");
+        deviceService.setUpVersion("0123456789123456", "012345678912", "1.0");
 
         Mockito.verify(drMock, Mockito.times(0)).save(Mockito.any());
 
@@ -50,12 +50,12 @@ class DeviceServiceTest {
         DeviceUtilsService dsuMock = Mockito.mock(DeviceUtilsService.class);
 
         Mockito.when(drMock.existsDevice(Mockito.same("0123456789123456"), Mockito.same("012345678912"))).thenReturn(false);
-        Mockito.when(mrMock.findMemberByMemberKey(Mockito.same("0123456789123456"))).thenReturn(Optional.of(member));
+        Mockito.when(mrMock.findMemberById(Mockito.same("0123456789123456"))).thenReturn(Optional.of(member));
         Mockito.when(dsuMock.createDefaultDeviceConfig(Mockito.same("1.0"), Mockito.any(Device.class)))
                 .thenReturn(DeviceConfig.builder().id(1L).build());
 
         DeviceService deviceService = new DeviceService(drMock, srrMock, dcMock, mrMock, dsuMock);
-        deviceService.insertNewDevice("0123456789123456", "012345678912", "1.0");
+        deviceService.setUpVersion("0123456789123456", "012345678912", "1.0");
 
 
         ArgumentCaptor<Device> deviceCaptor = ArgumentCaptor.forClass(Device.class);
@@ -78,7 +78,7 @@ class DeviceServiceTest {
         DeviceConfigRepository dcrMock = Mockito.mock(DeviceConfigRepository.class);
         MemberRepository mrMock = Mockito.mock(MemberRepository.class);
         Mockito.when(cpMock.getFirmwareFolder()).thenReturn("/");
-        Mockito.when(drMock.findDeviceBy(Mockito.same(1L), Mockito.same("1L"))).thenReturn(Optional.of(device));
+        Mockito.when(drMock.findDeviceBy(Mockito.same("1L"), Mockito.same("1L"))).thenReturn(Optional.of(device));
         DeviceService deviceService = new DeviceService(drMock, srrMock, dcrMock, mrMock, new DeviceUtilsService(cpMock));
 
         String config = "{\"analog_configs\": []}";
@@ -93,14 +93,14 @@ class DeviceServiceTest {
 
     private void validOk(DeviceService deviceService, DeviceConfigRepository dcrMock, String config) throws ConfigCheckSumExistException, ConfigParserException, NotFoundSchemaConfigException, NotFoundDeviceException {
         Mockito.reset(dcrMock);
-        deviceService.saveConfig(1L, config, resourceDirectory, "1L");
+        deviceService.saveConfig("1L", config, resourceDirectory, "1L");
         Mockito.verify(dcrMock, Mockito.times(1)).save(Mockito.any());
     }
 
     private void validNoOk(DeviceService deviceService, DeviceConfigRepository dcrMock, String config) {
         Mockito.reset(dcrMock);
         Assertions.assertThrowsExactly(ConfigParserException.class, () ->
-                deviceService.saveConfig(1L, config, resourceDirectory, "1L"));
+                deviceService.saveConfig("1L", config, resourceDirectory, "1L"));
 
         Mockito.verify(dcrMock, Mockito.times(0)).save(Mockito.any());
     }

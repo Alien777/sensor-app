@@ -13,15 +13,27 @@ const props = defineProps({
   device: {
     type: Object as () => DeviceT,
     required: true
+  },
+  onChange: {
+    type: Function as PropType<() => void>,
+    required: true
   }
 });
+const currentConfigDevice = ref(null);
+const currentConfigEditRef = ref(null);
+const allDevicesConfigsRef = ref(null);
+const fetch = async () => {
+  if (props.device?.version) {
+    const currentConfigDownload = await getDeviceConfig(props.device.id);
+    currentConfigDevice.value = currentConfigDownload;
+    currentConfigEditRef.value = currentConfigDownload;
+    const allDevicesConfigsDownload = await getAllConfigs(props.device.id);
+    allDevicesConfigsRef.value = allDevicesConfigsDownload;
+  }
+}
 
-const currentConfigDownload = await getDeviceConfig(props.device.id);
-const allDevicesConfigsDownload = await getAllConfigs(props.device.id);
-const currentConfigDevice = ref(currentConfigDownload);
-const currentConfigEditRef = ref(currentConfigDownload);
-const allDevicesConfigsRef = ref(allDevicesConfigsDownload);
 
+onMounted(() => fetch())
 const generateConfig: any = (currentConfig: DeviceConfigT) => {
   return {
     validate: true,
@@ -37,7 +49,7 @@ const saveConfigAction = async () => {
     config: currentConfigEditRef.value.config,
     version: currentConfigEditRef.value.forVersion
   };
-  await saveDeviceConfig(props.device?.id, save);
+  await saveDeviceConfig(props.device?.id, save).then(value => props.onChange());
   getAllConfigs(props.device.id).then(v => {
     allDevicesConfigsRef.value = v;
   });
@@ -61,63 +73,66 @@ const selectConfig = (config: DeviceConfigT) => {
 </script>
 
 <template>
-  <div class="q-pb-md">
-    <q-btn-group spread>
-      <q-btn icon="save" color="green" @click="saveConfigAction">Save as new config</q-btn>
-      <q-btn icon="check"  @click="activateConfigAction"
-             v-if="currentConfigEditRef.forVersion===device.version && currentConfigEditRef.id!==currentConfigDevice.id"
-             color="green">Activate config
-      </q-btn>
-    </q-btn-group>
-  </div>
-  <q-splitter v-model="splitterHigh" unit="px" style="height: calc(100vh - 150px)">
-    <template v-slot:before>
-      <q-list padding>
-        <q-item v-for="config in allDevicesConfigsRef"
-                clickable
-                v-ripple
-                @click="()=>selectConfig(config)"
-                :active="currentConfigEditRef.id===config.id">
+  <div v-if="currentConfigDevice && currentConfigDevice.config">
+    <div class="q-pb-md">
+      <q-btn-group spread>
+        <q-btn icon="save" color="green" @click="saveConfigAction">Save as new config</q-btn>
+        <q-btn icon="check" @click="activateConfigAction"
+               v-if="currentConfigEditRef.forVersion===device.version && currentConfigEditRef.id!==currentConfigDevice.id"
+               color="green">Activate config
+        </q-btn>
+      </q-btn-group>
+    </div>
+    <q-splitter v-model="splitterHigh" unit="px" style="height: calc(100vh - 150px)">
+      <template v-slot:before>
+        <q-list padding>
+          <q-item v-for="config in allDevicesConfigsRef"
+                  clickable
+                  v-ripple
+                  @click="()=>selectConfig(config)"
+                  :active="currentConfigEditRef.id===config.id">
 
-          <q-item-section avatar>
-            <q-item-label>{{ `id: ${config.id}` }}</q-item-label>
-            <s v-if="config.forVersion!==device.version">
-              <q-item-label>{{ `ID: ${config.forVersion}` }}
-                <q-tooltip>
-                  This version of config is doesn't compatibility with device firmware version
-                </q-tooltip>
+            <q-item-section avatar>
+              <q-item-label>{{ `id: ${config.id}` }}</q-item-label>
+              <s v-if="config.forVersion!==device.version">
+                <q-item-label>{{ `ID: ${config.forVersion}` }}
+                  <q-tooltip>
+                    This version of config is doesn't compatibility with device firmware version
+                  </q-tooltip>
+                </q-item-label>
+              </s>
+              <q-item-label v-else>{{ `ver.: ${config.forVersion}` }}</q-item-label>
+            </q-item-section>
+            <q-item-section side top>
+              <q-item-label caption>{{ formatTime(config.time as Date) }}</q-item-label>
+              <q-item-label>
+                <q-icon v-if="currentConfigDevice.id===config.id" name="check" color="green">
+                  <q-tooltip>
+                    Current activated. This configuration will be send to device.
+                  </q-tooltip>
+                </q-icon>
+                <q-icon v-if="!config.isCorrect" name="close" color="red">
+                  <q-tooltip>
+                    This configuration is doesn't correct with schema. Not possible to active it.
+                  </q-tooltip>
+                </q-icon>
               </q-item-label>
-            </s>
-            <q-item-label v-else>{{ `ver.: ${config.forVersion}` }}</q-item-label>
-          </q-item-section>
-          <q-item-section side top>
-            <q-item-label caption>{{ formatTime(config.time as Date) }}</q-item-label>
-            <q-item-label>
-              <q-icon v-if="currentConfigDevice.id===config.id" name="check" color="green">
-                <q-tooltip>
-                  Current activated. This configuration will be send to device.
-                </q-tooltip>
-              </q-icon>
-              <q-icon v-if="!config.isCorrect" name="close" color="red">
-                <q-tooltip>
-                  This configuration is doesn't correct with schema. Not possible to active it.
-                </q-tooltip>
-              </q-icon>
-            </q-item-label>
-          </q-item-section>
-        </q-item>
-      </q-list>
-    </template>
-    <template v-slot:after>
-      <ClientOnly>
-        <MonacoEditorCustom :jsonDefaultConfig="generateConfig(currentConfigEditRef)"
-                            v-model="currentConfigEditRef.config"
-                            lang="json"
-                            class="editor">
-        </MonacoEditorCustom>
-      </ClientOnly>
-    </template>
-  </q-splitter>
+            </q-item-section>
+          </q-item>
+        </q-list>
+      </template>
+      <template v-slot:after>
+        <ClientOnly>
+          <MonacoEditorCustom :jsonDefaultConfig="generateConfig(currentConfigEditRef)"
+                              v-model="currentConfigEditRef.config"
+                              lang="json"
+                              class="editor">
+          </MonacoEditorCustom>
+        </ClientOnly>
+      </template>
+    </q-splitter>
+  </div>
+  <NotSetUpVersion :device="props.device" v-else></NotSetUpVersion>
 </template>
 
 <style lang="css" scoped>

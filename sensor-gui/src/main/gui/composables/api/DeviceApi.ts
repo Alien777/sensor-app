@@ -2,6 +2,18 @@ import {type DeviceConfigSaveT, type DeviceConfigT, type DeviceT, timeToDate} fr
 
 export const deviceApi = (runtimeConfig: any) => {
     let {fetchApiRequest} = fetchUtils(runtimeConfig);
+
+    const saveDevice = async (id: string, name: string): Promise<string> => {
+        let value = await fetchApiRequest<string>(`/device`,
+            {
+                method: 'post', body: {
+                    id: id,
+                    name: name
+                }
+            });
+        return value.data.value;
+    }
+
     const getAllDevice = async (): Promise<DeviceT[]> => {
         let value = await fetchApiRequest<DeviceT[]>("/device",
             {method: 'get'});
@@ -33,7 +45,7 @@ export const deviceApi = (runtimeConfig: any) => {
     }
 
     return {
-        getAllDevice, getDeviceConfig, saveDeviceConfig, getAllConfigs, activateConfig
+        getAllDevice, getDeviceConfig, saveDeviceConfig, getAllConfigs, activateConfig,saveDevice
     }
 
 

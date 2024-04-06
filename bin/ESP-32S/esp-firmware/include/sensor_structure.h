@@ -33,7 +33,7 @@ typedef struct PwmSetup PwmSetup;
 typedef enum
 {
     DEVICE_CONNECTED,
-    SINGLE_ADC_SIGNAL,
+    ANALOG,
     PWM,
     CONFIG,
     UNKNOWN,

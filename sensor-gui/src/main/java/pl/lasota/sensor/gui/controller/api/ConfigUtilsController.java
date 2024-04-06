@@ -11,12 +11,12 @@ import org.springframework.web.bind.annotation.RestController;
 import pl.lasota.sensor.core.exceptions.NotFoundDeviceConfigException;
 import pl.lasota.sensor.core.exceptions.NotFoundDeviceException;
 import pl.lasota.sensor.core.exceptions.NotFoundMemberException;
-import pl.lasota.sensor.core.models.Member;
-import pl.lasota.sensor.core.models.device.DeviceConfig;
-import pl.lasota.sensor.core.models.mqtt.payload.MessageType;
-import pl.lasota.sensor.core.models.mqtt.payload.to.AnalogConfig;
-import pl.lasota.sensor.core.models.mqtt.payload.to.ConfigPayload;
-import pl.lasota.sensor.core.models.mqtt.payload.to.PwmConfig;
+import pl.lasota.sensor.core.entities.Member;
+import pl.lasota.sensor.core.entities.device.DeviceConfig;
+import pl.lasota.sensor.core.entities.mqtt.payload.MessageType;
+import pl.lasota.sensor.core.entities.mqtt.payload.to.AnalogConfig;
+import pl.lasota.sensor.core.entities.mqtt.payload.to.ConfigPayload;
+import pl.lasota.sensor.core.entities.mqtt.payload.to.PwmConfig;
 import pl.lasota.sensor.core.service.DeviceService;
 import pl.lasota.sensor.core.service.DeviceUtilsService;
 import pl.lasota.sensor.core.service.MemberService;
@@ -39,8 +39,8 @@ public class ConfigUtilsController {
     @GetMapping("/{device}/pwm/pins")
     @PreAuthorize("isAuthenticated()")
     public List<Integer> getPwmsPins(@PathVariable("device") String device) throws NotFoundMemberException, NotFoundDeviceConfigException, NotFoundDeviceException, JsonProcessingException {
-        Member member = ms.loggedUser();
-        DeviceConfig deviceConfig = ds.currentDeviceConfig(member.getMemberKey(), device);
+        Member member = ms.loggedMember();
+        DeviceConfig deviceConfig = ds.currentDeviceConfig(member.getId(), device);
         ConfigPayload configPayload = dsu.mapConfigToObject(deviceConfig.getConfig());
         return configPayload.getPwmConfig().stream().map(PwmConfig::getPin).collect(Collectors.toList());
     }
@@ -48,8 +48,8 @@ public class ConfigUtilsController {
     @GetMapping("/{device}/analog/pins")
     @PreAuthorize("isAuthenticated()")
     public List<Integer> getAnalogsPins(@PathVariable("device") String device) throws NotFoundMemberException, NotFoundDeviceConfigException, NotFoundDeviceException, JsonProcessingException {
-        Member member = ms.loggedUser();
-        DeviceConfig deviceConfig = ds.currentDeviceConfig(member.getMemberKey(), device);
+        Member member = ms.loggedMember();
+        DeviceConfig deviceConfig = ds.currentDeviceConfig(member.getId(), device);
         ConfigPayload configPayload = dsu.mapConfigToObject(deviceConfig.getConfig());
         return configPayload.getAnalogReader().stream().map(AnalogConfig::getPin).collect(Collectors.toList());
     }
@@ -57,8 +57,8 @@ public class ConfigUtilsController {
     @GetMapping("/{device}/message-type")
     @PreAuthorize("isAuthenticated()")
     public List<MessageType> getAvailableMessageType(@PathVariable("device") String device) throws NotFoundMemberException, JsonProcessingException, NotFoundDeviceConfigException, NotFoundDeviceException {
-        Member member = ms.loggedUser();
-        DeviceConfig deviceConfig = ds.currentDeviceConfig(member.getMemberKey(), device);
+        Member member = ms.loggedMember();
+        DeviceConfig deviceConfig = ds.currentDeviceConfig(member.getId(), device);
         ConfigPayload configPayload = dsu.mapConfigToObject(deviceConfig.getConfig());
         if (!configPayload.getAnalogReader().isEmpty()) {
             return MessageType.getListMessageTypeFromDevice();

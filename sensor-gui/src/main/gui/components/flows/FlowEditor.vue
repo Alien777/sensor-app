@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import {defineProps, onMounted, ref} from 'vue'
 import {type Edge, MarkerType, useVueFlow, VueFlow} from '@vue-flow/core'
-import {type FlowT, type Node, type NodeDraggable} from "~/composables/api/StructureApp";
+import {type ConfigNode, type FlowT, type Node, type NodeDraggable} from "~/composables/api/StructureApp";
 import DropzoneBackground from "~/components/flows/DropzoneBackground.vue";
 import useDragAndDrop from "~/composables/useDnD";
 import {MiniMap} from "@vue-flow/minimap";
 import {flowApi} from "~/composables/api/FlowApi";
+import {Notify} from "quasar";
 
 
 definePageMeta({
@@ -21,18 +22,22 @@ const draggableItems = ref([
   {type: 'default', name: 'AsyncNode'},
   {type: 'default', name: 'SleepNode'}
 ]);
-const {onDragOver, onDrop, onDragLeave, isDragOver, insertNode, insertEdge} = useDragAndDrop()
+const {setViewPort, onDragOver, onDrop, onDragLeave, isDragOver, insertNode, insertEdge} = useDragAndDrop()
 const val = 200
 const innerTab = ref('')
 const splitterModel = ref(200)
-const {onConnect, addEdges, toObject} = useVueFlow()
+const {onConnect, addEdges, toObject,setViewport} = useVueFlow()
 const runtimeConfig = useRuntimeConfig();
-const {saveFlow, getAll, get} = flowApi(runtimeConfig)
+const {saveFlow, getAll, get, startFlow, stopFlow} = flowApi(runtimeConfig)
 
 
 const props = defineProps({
   flow: {
     type: Object as () => FlowT,
+    required: true
+  },
+  onChangeFlow: {
+    type: Function as PropType<() => void>,
     required: true
   }
 });
@@ -43,10 +48,14 @@ const config = ref(props.flow?.config);
 
 const nodes = ref<any[]>([]);
 const edges = ref<any[]>([]);
+const nameRules = [
+  val => (val && val.length > 0) || 'Field is required',
+  val => (val && val.length >= 2) || 'Name must be at least 1 characters',
+  val => (val && val.length <= 40) || 'Name must be less than 40 characters'
+];
+const convert = (node: ConfigNode) => {
 
-const convert = (nodesArray: Array<Node>) => {
-
-  nodesArray.forEach((node: Node) => {
+  node.nodes.forEach((node: Node) => {
     const n = {
       id: node.ref,
       name: node.name,
@@ -60,8 +69,9 @@ const convert = (nodesArray: Array<Node>) => {
     node.childed.forEach(childRef => {
       const x = (): Edge => {
         edgeId++;
+
         return {
-          id: 'ID_' + edgeId,
+          id: node.ref + '_' + childRef + '_ID_' + edgeId,
           source: node.ref,
           target: childRef
         };
@@ -69,6 +79,7 @@ const convert = (nodesArray: Array<Node>) => {
       insertEdge(x());
     });
   });
+  setViewport(node.viewport);
 }
 
 onMounted(() => {
@@ -79,7 +90,7 @@ onMounted(() => {
       config.value = props.flow?.config;
       nodes.value = [];
       edges.value = []
-      let parse = JSON.parse(config.value) as Array<Node>;
+      let parse = JSON.parse(config.value) as ConfigNode;
       convert(parse);
     }
 
@@ -94,8 +105,16 @@ const handleConnect = (params: any) => {
 
 const {data: flows} = useAsyncData('flows', getAll);
 const onSave = () => {
-  const nodes = toObject();
 
+  if (name.value == null || name.value.length <= 1) {
+    Notify.create({
+      type: 'negative',
+      message: 'Please fill the Name field. min 1 characters'
+    })
+    return;
+  }
+  const nodes = toObject();
+  console.log(nodes)
   const nod = nodes.nodes.map((value: any) => {
     return {
       ref: value.id,
@@ -109,26 +128,43 @@ const onSave = () => {
   nod.forEach(myNod => {
     myNod.childed = nodes.edges.filter(n => n.source === myNod.ref).map(value => value.target);
   })
-  let s = JSON.stringify(nod);
+  const config = {
+    nodes: nod,
+    viewport: nodes.viewport
+  }
   const x = {
     id: props.flow?.id,
     name: name,
-    config: s
+    config: JSON.stringify(config)
   }
-  saveFlow(x)
+  saveFlow(x).finally(() => {
+    props.onChangeFlow()
+  })
 }
 
 onConnect(handleConnect)
 </script>
-
 <template>
+  <div v-if="!flow || flow.id!==null" class="text-h5"><p style="color:green;">{{ name }}</p></div>
   <div class="q-pb-md">
-    <q-input label="Name" v-model="name"></q-input>
+    <q-input maxlength="40"
+             label="Name"
+             :rules="nameRules"
+             v-model="name">
+    </q-input>
     <q-btn-group spread>
       <q-btn icon="save" color="green" @click="onSave">{{ flow && flow.id ? 'Save flow' : 'Save new flow' }}</q-btn>
-      <q-btn v-if="flow && !flow.isActivate" icon="start" text-color="black" color="yellow">Start</q-btn>
-      <q-btn v-else-if="flow && flow.isActivate" icon="stop" color="red">Stop</q-btn>
+      <q-btn @click="()=>
+        startFlow(flow.id).finally(() => props.onChangeFlow())
+ " v-if="flow && !flow.activate" icon="start" text-color="black"
+             color="yellow">Start
+      </q-btn>
+
+      <q-btn @click="()=>  stopFlow(flow.id).finally(() => props.onChangeFlow())" v-else-if="flow && flow.activate"
+             icon="stop" color="red">Stop
+      </q-btn>
     </q-btn-group>
+
   </div>
   <q-splitter v-model="splitterModel" style=" height: calc(100vh - 150px);" unit="px" class="dndflow" @drop="onDrop">
     <template v-slot:before>

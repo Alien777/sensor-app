@@ -49,3 +49,6 @@ sensor:
   core:
     sensor-flows-name: sensor-flows
     firmware-folder: bin
+    jwt-internal:
+      secret: Gkl3uP7ATJcLNka0p7+v4hY0OcTu9Y08+QP1sFYE4PI=
+      expiration: 1440
