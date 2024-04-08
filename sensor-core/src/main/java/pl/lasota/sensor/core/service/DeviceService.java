@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pl.lasota.sensor.core.entities.DeviceToken;
+import pl.lasota.sensor.core.entities.device.DeviceTemporary;
 import pl.lasota.sensor.core.exceptions.*;
 import pl.lasota.sensor.core.entities.Member;
 import pl.lasota.sensor.core.entities.device.Device;
@@ -34,6 +35,7 @@ public class DeviceService {
     private final DeviceConfigRepository dcr;
     private final MemberRepository mr;
     private final DeviceUtilsService dsu;
+    private final DeviceTemporaryRepository dtr;
 
     @Transactional(rollbackFor = SensorException.class)
     public Sensor insertSensorReading(MessageFrame messageFrame) throws NotFoundDefaultConfigException {
@@ -72,9 +74,17 @@ public class DeviceService {
     @Transactional
     public String save(String memberId, String deviceId, String name) {
         String token = UUID.randomUUID().toString();
-        DeviceToken deviceToken = DeviceToken.builder().member(Member.builder().id(memberId).build())
+        DeviceToken deviceToken = DeviceToken.builder()
+                .member(Member.builder().id(memberId).build())
                 .token(token).build();
-
+        if (deviceId == null || deviceId.isBlank()) {
+            dtr.save(DeviceTemporary.builder()
+                    .time(OffsetDateTime.now())
+                    .name(name)
+                    .member(Member.builder().id(memberId).build())
+                    .currentDeviceToken(deviceToken).build());
+            return token;
+        }
         Device device = Device.builder()
                 .member(Member.builder().id(memberId).build())
                 .name(name)
@@ -83,6 +93,26 @@ public class DeviceService {
                 .build();
         dr.save(device);
         return token;
+    }
+
+
+    @Transactional
+    public boolean moveDeviceFromTemporary(String memberId, String deviceId, String token) {
+        Optional<DeviceTemporary> tokenValid = dtr.isTokenValid(memberId, token);
+        if (tokenValid.isEmpty()) {
+            return false;
+        }
+        DeviceTemporary deviceTemporary = tokenValid.get();
+        save(memberId, deviceId, token);
+        Device device = Device.builder()
+                .member(Member.builder().id(memberId).build())
+                .name(deviceTemporary.getName())
+                .currentDeviceToken(deviceTemporary.getCurrentDeviceToken())
+                .id(deviceId.toUpperCase())
+                .build();
+        dr.save(device);
+        dtr.delete(deviceTemporary);
+        return true;
     }
 
     @Transactional(rollbackFor = SensorException.class)
@@ -96,7 +126,7 @@ public class DeviceService {
         }
 
         Member member = mr.findMemberById(memberId).orElseThrow(NotFoundMemberException::new);
-        device.setVersion(version);;
+        device.setVersion(version);
 
         DeviceConfig deviceConfig = dsu.createDefaultDeviceConfig(version, device);
         device.setCurrentDeviceConfig(deviceConfig);
@@ -142,7 +172,7 @@ public class DeviceService {
         Device deviceOptional = dr.findDeviceBy(memberId, deviceId).orElseThrow(NotFoundDeviceException::new);
 
         long checkSum = dsu.checkSum(config + versionConfig);
-        Optional<DeviceConfig> existByCheckSum = dcr.getConfigByChecksum(checkSum);
+        Optional<DeviceConfig> existByCheckSum = dcr.getConfigByChecksum(checkSum, deviceOptional.getId());
 
         if (existByCheckSum.isPresent()) {
             throw new ConfigCheckSumExistException("All ready exist configuration " + existByCheckSum.get().getId());
@@ -181,6 +211,11 @@ public class DeviceService {
     public List<Device> getAllDeviceBy(String memberId) {
         return dr.findAllDevicesBy(memberId);
     }
+
+    public List<DeviceTemporary> getAllTemporaryBy(String memberId) {
+        return dtr.findAllDevicesBy(memberId);
+    }
+
 
     public boolean hasConfig(String deviceId) {
         return dcr.existsDeviceConfigBy(deviceId);

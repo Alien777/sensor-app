@@ -52,3 +52,4 @@ sensor:
     jwt-internal:
       secret: Gkl3uP7ATJcLNka0p7+v4hY0OcTu9Y08+QP1sFYE4PI=
       expiration: 1440
+  mqtt-ip: 192.168.1.71

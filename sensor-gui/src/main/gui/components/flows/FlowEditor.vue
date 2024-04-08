@@ -26,9 +26,9 @@ const {setViewPort, onDragOver, onDrop, onDragLeave, isDragOver, insertNode, ins
 const val = 200
 const innerTab = ref('')
 const splitterModel = ref(200)
-const {onConnect, addEdges, toObject,setViewport} = useVueFlow()
+const {onConnect, addEdges, toObject, setViewport} = useVueFlow()
 const runtimeConfig = useRuntimeConfig();
-const {saveFlow, getAll, get, startFlow, stopFlow} = flowApi(runtimeConfig)
+const {saveFlow, getAll, deleteFlow, get, startFlow, stopFlow} = flowApi(runtimeConfig)
 
 
 const props = defineProps({
@@ -145,7 +145,8 @@ const onSave = () => {
 onConnect(handleConnect)
 </script>
 <template>
-  <div v-if="!flow || flow.id!==null" class="text-h5"><p style="color:green;">{{ name }}</p></div>
+  <div v-if="!flow || flow.id!==null" class="text-h5"><p>Editing: {{ name }}</p></div>
+  <hr>
   <div class="q-pb-md">
     <q-input maxlength="40"
              label="Name"
@@ -153,15 +154,16 @@ onConnect(handleConnect)
              v-model="name">
     </q-input>
     <q-btn-group spread>
-      <q-btn icon="save" color="green" @click="onSave">{{ flow && flow.id ? 'Save flow' : 'Save new flow' }}</q-btn>
+      <q-btn icon="save" class="bg-green-1" @click="onSave">{{ flow && flow.id ? 'Save flow' : 'Save new flow' }}</q-btn>
       <q-btn @click="()=>
         startFlow(flow.id).finally(() => props.onChangeFlow())
- " v-if="flow && !flow.activate" icon="start" text-color="black"
-             color="yellow">Start
+ " v-if="flow && !flow.activate" icon="start" class="bg-green-3">Start
       </q-btn>
-
       <q-btn @click="()=>  stopFlow(flow.id).finally(() => props.onChangeFlow())" v-else-if="flow && flow.activate"
-             icon="stop" color="red">Stop
+             icon="stop" class="bg-red-1">Stop
+      </q-btn>
+      <q-btn v-if="flow" @click="()=>  deleteFlow(flow.id).finally(() => props.onChangeFlow())"
+             icon="delete" class="bg-red-4">Delete
       </q-btn>
     </q-btn-group>
 

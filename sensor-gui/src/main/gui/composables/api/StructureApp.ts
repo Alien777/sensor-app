@@ -62,8 +62,8 @@ export interface DeviceConfigSaveT {
 }
 
 export interface DeviceSaveT {
-    deviceId: string
-    name: string;
+    token: string
+    server: string;
 }
 
 export function timeToDate(d: DeviceConfigT): DeviceConfigT {

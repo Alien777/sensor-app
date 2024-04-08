@@ -123,7 +123,7 @@ static esp_err_t saveHandle(httpd_req_t *req)
     char password[65] = {0};
     char member[17] = {0};
     char server_ip[17] = {0};
-
+    char token[37] = {0};
     while (remaining > 0)
     {
 
@@ -140,7 +140,7 @@ static esp_err_t saveHandle(httpd_req_t *req)
         char *password_start = strstr(content, "name=\"password\"\r\n\r\n");
         char *member_key_start = strstr(content, "name=\"member_key\"\r\n\r\n");
         char *server_ip_start = strstr(content, "name=\"server_ip\"\r\n\r\n");
-
+        char *token_start = strstr(content, "name=\"token\"\r\n\r\n");
         if (ssid_start)
         {
             sscanf(ssid_start + strlen("name=\"ssid\"\r\n\r\n"), "%32[^\r]", ssid);
@@ -164,6 +164,11 @@ static esp_err_t saveHandle(httpd_req_t *req)
             sscanf(server_ip_start + strlen("name=\"server_ip\"\r\n\r\n"), "%16[^\r]", server_ip);
             trim(server_ip);
         }
+        if (token_start)
+        {
+            sscanf(token_start + strlen("name=\"token\"\r\n\r\n"), "%36[^\r]", token);
+            trim(token);
+        }
 
         remaining -= ret;
     }
@@ -185,7 +190,12 @@ static esp_err_t saveHandle(httpd_req_t *req)
         save_server_ip(server_ip);
     }
 
-        if (strlen(ssid) > 0 && strlen(password) > 0)
+    if (strlen(token) > 0)
+    {
+        save_token(token);
+    }
+
+    if (strlen(ssid) > 0 && strlen(password) > 0)
     {
         connect(ssid, password);
     }

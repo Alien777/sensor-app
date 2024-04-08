@@ -33,8 +33,11 @@ onMounted(() => {
 })
 
 const provideDataDevice = (value: any) => {
-  getAllDevice().then(v => {
-    value(v.map(a => a.id));
+  getAllDevice(false).then(v => {
+    value(v.map(a => ({
+      "value": a.id,
+      "label": a.name,
+    })));
   })
 }
 

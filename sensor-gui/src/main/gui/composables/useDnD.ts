@@ -99,9 +99,10 @@ export default function useDragAndDrop() {
     function insertNode(insert: Node | NodeDraggable, id: string, position: XYPosition | any) {
         const max_id = extractNumberFromString(id);
         global_id = 0;
-        if (max_id && max_id >= global_id) {
+        if (max_id != null && max_id >= global_id) {
             global_id = max_id + 1;
         }
+
         const component = defineAsyncComponent(() =>
             import(`~/components/flows/nodes/${insert.name}.vue`)
         )

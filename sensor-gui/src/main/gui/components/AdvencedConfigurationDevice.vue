@@ -74,12 +74,14 @@ const selectConfig = (config: DeviceConfigT) => {
 
 <template>
   <div v-if="currentConfigDevice && currentConfigDevice.config">
+    <div class="text-h5"><p>Editing: {{ props.device.name }}</p></div>
+    <hr>
     <div class="q-pb-md">
       <q-btn-group spread>
-        <q-btn icon="save" color="green" @click="saveConfigAction">Save as new config</q-btn>
+        <q-btn icon="save" class="bg-green-1" @click="saveConfigAction">Save as new config</q-btn>
         <q-btn icon="check" @click="activateConfigAction"
                v-if="currentConfigEditRef.forVersion===device.version && currentConfigEditRef.id!==currentConfigDevice.id"
-               color="green">Activate config
+               class="bg-green-2">Activate config
         </q-btn>
       </q-btn-group>
     </div>
@@ -132,7 +134,12 @@ const selectConfig = (config: DeviceConfigT) => {
       </template>
     </q-splitter>
   </div>
-  <NotSetUpVersion :device="props.device" v-else></NotSetUpVersion>
+  <div v-else>
+    <div class="text-h5"><p>Device {{ props.device.name }} not configured compleate</p></div>
+    <hr>
+    <NotSetUpVersion :device="props.device" ></NotSetUpVersion>
+  </div>
+
 </template>
 
 <style lang="css" scoped>

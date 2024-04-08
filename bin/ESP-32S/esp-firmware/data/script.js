@@ -20,6 +20,7 @@ function fetchInformation() {
             document.getElementById("ip-json").textContent = data.ip || "No info";
             document.getElementById("device-key-json").textContent = data.device || "No info";
             document.getElementById("server-ip-json").textContent = data.server_ip || "No info";
+            document.getElementById("server_ip").value = data.server_ip || "No info";
         })
         .catch(error => {
             console.error('Error fetching connected SSID:', error);
@@ -66,7 +67,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     form.addEventListener('submit', function (event) {
         event.preventDefault();
-
+        console.log("test");
         const formData = new FormData(form);
 
         fetch('/save', {
@@ -75,6 +76,8 @@ document.addEventListener('DOMContentLoaded', function () {
         })
             .then(response => response.text())
             .then(data => {
+                console.log("RELOAC");
+                location.reload(true);
             })
             .catch(error => {
                 console.error('Error:', error);

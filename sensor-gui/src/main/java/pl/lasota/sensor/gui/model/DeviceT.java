@@ -2,6 +2,9 @@ package pl.lasota.sensor.gui.model;
 
 import lombok.Data;
 import pl.lasota.sensor.core.entities.device.Device;
+import pl.lasota.sensor.core.entities.device.DeviceTemporary;
+
+import java.util.UUID;
 
 @Data
 public class DeviceT {
@@ -22,5 +25,14 @@ public class DeviceT {
         deviceT.token = device.getCurrentDeviceToken().getToken();
         return deviceT;
 
+    }
+
+    public static DeviceT map(DeviceTemporary device) {
+        DeviceT deviceT = new DeviceT();
+        deviceT.name = device.getName();
+        deviceT.id = UUID.randomUUID().toString();
+        deviceT.hasConfig = false;
+        deviceT.token = device.getCurrentDeviceToken().getToken();
+        return deviceT;
     }
 }

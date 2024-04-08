@@ -13,10 +13,8 @@ import pl.lasota.sensor.core.apis.SensorMicroserviceEndpoint;
 import pl.lasota.sensor.core.service.DeviceService;
 import pl.lasota.sensor.core.service.DeviceUtilsService;
 import pl.lasota.sensor.core.service.MemberService;
-import pl.lasota.sensor.gui.model.ConfigSaveT;
-import pl.lasota.sensor.gui.model.ConfigT;
-import pl.lasota.sensor.gui.model.DeviceSaveT;
-import pl.lasota.sensor.gui.model.DeviceT;
+import pl.lasota.sensor.gui.config.properties.SensorProperties;
+import pl.lasota.sensor.gui.model.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,21 +34,33 @@ public class DevicesController {
 
     private final SensorMicroserviceEndpoint sae;
 
+    private final SensorProperties properties;
+
 
     @PostMapping()
     @PreAuthorize("isAuthenticated()")
-    public String saveConfig(@RequestBody DeviceSaveT device) throws NotFoundMemberException {
+    public String saveDevice(@RequestBody DeviceSaveT device) throws NotFoundMemberException {
         Member member = ms.loggedMember();
-        return ds.save(member.getId(),device.getId(),device.getName());
+        return ds.save(member.getId(), device.getId(), device.getName());
+
     }
 
     @GetMapping
     @PreAuthorize("isAuthenticated()")
-    public List<DeviceT> devices() throws NotFoundMemberException {
+    public List<DeviceT> devices(@RequestParam("withNotActive") boolean withNotActive) throws NotFoundMemberException {
         Member member = ms.loggedMember();
-        return ds.getAllDeviceBy(member.getId()).parallelStream()
+        List<DeviceT> devices = ds.getAllDeviceBy(member.getId()).parallelStream()
                 .map(device -> DeviceT.map(device, ds.hasConfig(device.getId())))
                 .collect(Collectors.toList());
+        if (withNotActive) {
+            List<DeviceT> temp = ds.getAllTemporaryBy(member.getId()).parallelStream()
+                    .map(DeviceT::map)
+                    .toList();
+            devices.addAll(temp);
+        } else {
+            return devices.stream().filter(deviceT -> deviceT.getVersion() != null).toList();
+        }
+        return devices;
     }
 
 

@@ -19,6 +19,7 @@ const setOptions = (value: any) => {
 const model = defineModel()
 
 const options = ref(null)
+props.provideData(setOptions);
 const filter = (val: any, update: any, abort: any) => {
   update(() => {
     props.provideData(setOptions);
@@ -33,6 +34,8 @@ const filter = (val: any, update: any, abort: any) => {
         :label="props.label"
         :options="options"
         @filter="filter"
+        emit-value
+        map-options
         style="width: 100%">
       <template v-slot:no-option>
         <q-item>

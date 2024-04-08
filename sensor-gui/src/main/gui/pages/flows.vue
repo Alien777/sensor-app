@@ -3,14 +3,14 @@
     <template v-slot:before>
       <q-tabs
           vertical
-          v-model="tab"
-          class="text-teal">
-        <q-tab :name="'new'" icon="schema"
+          v-model="tab">
+        <q-tab class="bg-green-2" :name="'new'" icon="schema"
                label="Create New Flow"/>
-        <q-tab v-for="flow in flows" :style="!flow.activate?'color: red':''" :name="flow.id"
+        <q-tab v-for="flow in flows"
+               :name="flow.id"
                :icon="flow.activate?'start':'stop'"
+               :class="flow.activate?'bg-green-1':'bg-red-1'"
                :label="flow.name?flow.name:flow.id">
-          <q-btn v-if="flow && flow.id" icon="delete" color="blue" @click="onDelete(flow.id)"></q-btn>
         </q-tab>
       </q-tabs>
     </template>
@@ -47,10 +47,9 @@ const {data: flows, refresh} = useAsyncData('flows', getAll);
 
 const tab = ref('')
 const width = ref(200)
-const onDelete = (id: number) => {
-  deleteFlow(id).finally(() => refresh());
-}
+
 const onChangeFlow = () => {
+  onMounted()
   refresh();
 }
 

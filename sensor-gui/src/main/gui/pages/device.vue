@@ -2,19 +2,20 @@
   <q-splitter v-model="splitterModel" unit="px">
     <template v-slot:before>
       <q-tabs
+          shrink
           vertical
           v-model="innerTab"
-          class="text-teal">
-        <q-tab name="newDevice" style="color: green" icon="add">
+      >
+        <q-tab class="bg-green-2" name="newDevice" icon="add">
           <p>Add new device</p>
         </q-tab>
-        <q-tab v-for="device in devices" :name="device.id" :icon="device.version?'sensors':'autorenew'">
-          <div style="color: green" v-if="device.version">
-            <p>id:<em> {{ device.id }}</em></p>
-            <p>{{ device.name }}</p>
+        <q-tab :class="!device.version?'bg-red-1':'bg-white'" v-for="device in devices" :name="device.id"
+               :icon="device.version?'sensors':'autorenew'">
+          <div v-if="device.version">
+            <p>{{ device.name.substring(0, 20) }}</p>
           </div>
-          <div v-else style="color: #252526">
-            <p>{{ device.name }}</p>
+          <div v-else>
+            <p>{{ device.name.substring(0, 20) }}</p>
           </div>
         </q-tab>
       </q-tabs>
@@ -24,9 +25,11 @@
           vertical
           v-model="innerTab">
         <q-tab-panel v-for="device in devices" :name="device.id" icon="not_">
-          <AdvencedConfigurationDevice  :onChange="onChange" :device="device"/>
+          <AdvencedConfigurationDevice :onChange="onChange" :device="device"/>
         </q-tab-panel>
         <q-tab-panel name="newDevice">
+          <div class="text-h5"><p>Create new device</p></div>
+          <hr>
           <NewDevice :onChange="onChange"></NewDevice>
         </q-tab-panel>
       </q-tab-panels>
@@ -45,7 +48,7 @@ const splitterModel = ref(200)
 
 const runtimeConfig = useRuntimeConfig();
 const {getAllDevice} = deviceApi(runtimeConfig);
-const {data: devices, refresh} = useAsyncData('devices', getAllDevice);
+const {data: devices, refresh} = useAsyncData('devices', () => getAllDevice(true));
 const onChange = () => {
   refresh();
 }

@@ -155,6 +155,28 @@ void save_server_ip(const char *server_ip)
     ESP_LOGI("MEMORY", "Save server ip");
 }
 
+
+void save_token(const char *token)
+{
+    ConfigEps config;
+
+    if (load_config(&config) != ESP_OK)
+    {
+        memset(&config, 0, sizeof(ConfigEps));
+    }
+
+    strncpy(config.token, token, sizeof(config.token));
+
+    esp_err_t err = save_config(&config);
+    if (err != ESP_OK)
+    {
+        handle_error(err);
+        return;
+    }
+
+    ESP_LOGI("MEMORY", "Save token");
+}
+
 static void save_initial()
 {
     ConfigEps config;

@@ -14,5 +14,4 @@ public interface SensorMicroserviceEndpoint {
     @RequestMapping(method = RequestMethod.POST, value = "/api/sensor/send/pwm")
     void sendPwmValueToDevice(@RequestBody SendPwm configS) throws Exception;
 
-
 }

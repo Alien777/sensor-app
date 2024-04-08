@@ -23,8 +23,8 @@ public interface DeviceConfigRepository extends JpaRepository<DeviceConfig, Long
     @Query("SELECT s FROM DeviceConfig s WHERE s.device.id = :deviceId ORDER BY s.time DESC ")
     List<DeviceConfig> findAllDeviceConfigBy(@Param("deviceId") String deviceId);
 
-    @Query("SELECT s FROM DeviceConfig s WHERE s.checksum = :checksum")
-    Optional<DeviceConfig> getConfigByChecksum(@Param("checksum") Long checksum);
+    @Query("SELECT s FROM DeviceConfig s WHERE s.checksum = :checksum AND s.device.id = :deviceId")
+    Optional<DeviceConfig> getConfigByChecksum(@Param("checksum") Long checksum, @Param("deviceId") String deviceId);
 
     @Query("SELECT s FROM Device s WHERE s.id = :deviceId AND s.member.id = :memberId")
     Optional<Device> getDevice(@Param("memberId") String memberId, @Param("deviceId")  String deviceId);

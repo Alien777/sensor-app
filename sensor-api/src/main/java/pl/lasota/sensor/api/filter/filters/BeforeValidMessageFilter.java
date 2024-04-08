@@ -8,7 +8,6 @@ import pl.lasota.sensor.api.filter.Chain;
 import pl.lasota.sensor.api.filter.Context;
 import pl.lasota.sensor.api.filter.Filter;
 import pl.lasota.sensor.core.entities.mqtt.payload.MessageFrame;
-import pl.lasota.sensor.core.entities.mqtt.payload.MessageType;
 import pl.lasota.sensor.core.service.DeviceService;
 import pl.lasota.sensor.core.service.MemberService;
 
@@ -46,9 +45,13 @@ public class BeforeValidMessageFilter implements Filter<MessageFrame, MessageFra
             return;
         }
 
-        if (!ds.isDeviceExist(request.getMemberId(), request.getDeviceId()) && !request.getMessageType().equals(MessageType.DEVICE_CONNECTED)) {
-            log.info("Device not existing {} ", request.getDeviceId());
-            return;
+        if (!ds.isDeviceExist(request.getMemberId(), request.getDeviceId())) {
+
+            if(!ds.moveDeviceFromTemporary(request.getMemberId(), request.getDeviceId(), request.getToken()))
+            {
+                log.info("Device not existing {} ", request.getDeviceId());
+                return;
+            }
         }
 
         if (!ds.isTokenValid(request.getMemberId(), request.getDeviceId(), request.getToken())) {
