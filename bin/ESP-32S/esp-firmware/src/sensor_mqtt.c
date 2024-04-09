@@ -12,7 +12,7 @@ static void mqttEventHandler(void *handler_args, esp_event_base_t base, int32_t 
 
 static void mqttEventHandler(void *handler_args, esp_event_base_t base, int32_t event_id, void *event_data)
 {
-    ESP_LOGI(TAG_MQTT, "Event dispatched from event loop base=%s topic=%s, event_id=%" PRIi32 "", base, topicSubscribe(), event_id);
+    // ESP_LOGI(TAG_MQTT, "Event dispatched from event loop base=%s topic=%s, event_id=%" PRIi32 "", base, topicSubscribe(), event_id);
     esp_mqtt_event_handle_t event = (esp_mqtt_event_handle_t)event_data;
 
     switch ((esp_mqtt_event_id_t)event_id)
@@ -76,7 +76,7 @@ void publish(const int config_id, const char *message, message_type type)
     const char *message_type = message_type_convert_to_chars(type);
 
     int requiredSize = snprintf(NULL, 0,
-                                "{\"%s\":%d,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"payload\":%s,\"message_type\":\"%s\"}", "config_identifier", config_id, "version_firmware", VERSION_FIRMWARE,
+                                "{\"%s\":\"%s\",\"%s\":%d,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"payload\":%s,\"message_type\":\"%s\"}", "token", config.token, "config_identifier", config_id, "version_firmware", VERSION_FIRMWARE,
                                 DEVICE_KEY, device_key, MEMBER_KEY, config.member_key, message, message_type) +
                        1;
 
@@ -85,7 +85,7 @@ void publish(const int config_id, const char *message, message_type type)
     if (json != NULL)
     {
         snprintf(json, requiredSize,
-                 "{\"%s\":%d,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"payload\":%s,\"message_type\":\"%s\"}", "config_identifier", config_id, "version_firmware", VERSION_FIRMWARE,
+                 "{\"%s\":\"%s\",\"%s\":%d,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"payload\":%s,\"message_type\":\"%s\"}", "token", config.token, "config_identifier", config_id, "version_firmware", VERSION_FIRMWARE,
                  DEVICE_KEY, device_key, MEMBER_KEY, config.member_key, message, message_type);
         esp_mqtt_client_publish(client, PUBLISH_TOPIC, json, 0, 2, 0);
         free(json);

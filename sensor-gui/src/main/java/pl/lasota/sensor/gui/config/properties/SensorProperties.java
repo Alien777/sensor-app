@@ -12,4 +12,5 @@ public class SensorProperties {
     private JwtProperties jwt;
     private RedirectProperties redirect;
     private String guiUrl;
+    private String mqttIp;
 }

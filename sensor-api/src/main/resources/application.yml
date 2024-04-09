@@ -4,9 +4,10 @@ eureka:
       defaultZone: ${EUREKA_URI:http://localhost:8761/eureka}
   instance:
     preferIpAddress: true
+    instance-id: ${spring.application.name}:${random.uuid}
 spring:
   application:
-    name: "sensor-api"
+    name: sensor-api
   datasource:
     url: jdbc:postgresql://localhost:5432/sensor
     username: db
@@ -33,7 +34,12 @@ sensor:
     max-reconnect-delay: 5000
     connection-timeout: 30000
     automatic-reconnect: true
+    unsecur-rest-endpoint: true
   core:
-    firmware: bin
+    sensor-flows-name: sensor-flows
+    firmware-folder: bin
+    jwt-internal:
+      secret: Gkl3uP7ATJcLNka0p7+v4hY0OcTu9Y08+QP1sFYE4PI=
+      expiration: 1440
 server:
   port: 0

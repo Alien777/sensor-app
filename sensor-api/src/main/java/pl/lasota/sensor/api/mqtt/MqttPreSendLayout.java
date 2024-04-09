@@ -4,10 +4,13 @@ package pl.lasota.sensor.api.mqtt;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import pl.lasota.sensor.core.models.device.DeviceConfig;
-import pl.lasota.sensor.core.models.mqtt.payload.MessageFrame;
-import pl.lasota.sensor.core.models.mqtt.payload.to.PwmPayload;
+import pl.lasota.sensor.core.entities.device.Device;
+import pl.lasota.sensor.core.entities.device.DeviceConfig;
+import pl.lasota.sensor.core.entities.mqtt.payload.MessageFrame;
+import pl.lasota.sensor.core.entities.mqtt.payload.to.PwmPayload;
 import pl.lasota.sensor.core.service.DeviceService;
+
+import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
@@ -17,25 +20,25 @@ public class MqttPreSendLayout {
     private final MqttMessagePublish mqttMessagePublish;
     private final DeviceService deviceService;
 
-    public void sendConfig(String memberKey, String deviceKey) throws Exception {
-        DeviceConfig lastDeviceConfig = deviceService.currentDeviceConfig(memberKey, deviceKey);
+    public void sendConfig(String memberId, String deviceId) throws Exception {
+        DeviceConfig lastDeviceConfig = deviceService.currentDeviceConfig(memberId, deviceId);
+        Optional<Device> deviceOptional = deviceService.getDevice(memberId, deviceId);
+        if (deviceOptional.isPresent()) {
+            Device device = deviceOptional.get();
+            MessageFrame mf = MessageFrame.factoryConfigPayload(lastDeviceConfig.getId(), lastDeviceConfig.getForVersion(), deviceId, memberId, device.getCurrentDeviceToken().getToken(), lastDeviceConfig.getConfig());
+            mqttMessagePublish.publish(mf);
+        }
 
-        MessageFrame mf = MessageFrame.factoryConfigPayload(lastDeviceConfig.getId(),
-                lastDeviceConfig.getForVersion(),
-                deviceKey,
-                memberKey,
-                lastDeviceConfig.getConfig());
-
-        mqttMessagePublish.publish(mf);
     }
 
-    public void sendPwm(String memberKey, String deviceKey, int pin, long value) throws Exception {
-        DeviceConfig lastDeviceConfig = deviceService.currentDeviceConfig(memberKey, deviceKey);
-        MessageFrame mf = MessageFrame.factoryPwmPayload(lastDeviceConfig.getId(),
-                lastDeviceConfig.getForVersion(),
-                deviceKey,
-                memberKey,
-                new PwmPayload(pin, value));
-        mqttMessagePublish.publish(mf);
+    public void sendPwm(String memberId, String deviceId, int pin, long value) throws Exception {
+        DeviceConfig lastDeviceConfig = deviceService.currentDeviceConfig(memberId, deviceId);
+        Optional<Device> deviceOptional = deviceService.getDevice(memberId, deviceId);
+        if (deviceOptional.isPresent()) {
+            Device device = deviceOptional.get();
+            MessageFrame mf = MessageFrame.factoryPwmPayload(lastDeviceConfig.getId(), lastDeviceConfig.getForVersion(), deviceId, memberId, device.getCurrentDeviceToken().getToken(), new PwmPayload(pin, value));
+            mqttMessagePublish.publish(mf);
+        }
+
     }
 }

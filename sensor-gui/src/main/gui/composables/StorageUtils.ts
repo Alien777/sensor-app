@@ -1,6 +1,6 @@
 export interface UserInfo {
     fullName: string
-    id: number,
+    id: string,
     roles: Array<string>
 }
 

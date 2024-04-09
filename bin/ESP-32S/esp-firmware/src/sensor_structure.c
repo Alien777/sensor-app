@@ -18,8 +18,8 @@ const char *message_type_convert_to_chars(message_type state)
     {
     case DEVICE_CONNECTED:
         return "DEVICE_CONNECTED";
-    case SINGLE_ADC_SIGNAL:
-        return "SINGLE_ADC_SIGNAL";
+    case ANALOG:
+        return "ANALOG";
     case CONFIG:
         return "CONFIG";
     case PWM:
@@ -35,9 +35,9 @@ message_type chars_convert_to_message_type(const char *state)
     {
         return DEVICE_CONNECTED;
     }
-    else if (strcmp(state, "SINGLE_ADC_SIGNAL") == 0)
+    else if (strcmp(state, "ANALOG") == 0)
     {
-        return SINGLE_ADC_SIGNAL;
+        return ANALOG;
     }
     else if (strcmp(state, "CONFIG") == 0)
     {

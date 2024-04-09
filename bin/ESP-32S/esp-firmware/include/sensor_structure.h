@@ -1,8 +1,8 @@
 #ifndef SENSOR_STRUCTURE_H
 #define SENSOR_STRUCTURE_H
 
-#define MEMBER_KEY "member_key"
-#define DEVICE_KEY "device_key"
+#define MEMBER_KEY "member_id"
+#define DEVICE_KEY "device_id"
 #define WIFI_PASS "wifi_pass"
 #define WIFI_SSID "wifi_ssid"
 #define PUBLISH_TOPIC "server"
@@ -21,6 +21,7 @@
 #include <esp_log.h>
 #include <esp_err.h>
 
+
 typedef struct WifiNetwork WifiNetwork;
 typedef struct AnalogTask AnalogTask;
 typedef struct PwmTask PwmTask;
@@ -33,7 +34,7 @@ typedef struct PwmSetup PwmSetup;
 typedef enum
 {
     DEVICE_CONNECTED,
-    SINGLE_ADC_SIGNAL,
+    ANALOG,
     PWM,
     CONFIG,
     UNKNOWN,
@@ -110,6 +111,7 @@ struct ConfigEps
     char wifi_password[64];
     char member_key[17];
     char server_ip[17];
+    char token[37];
     bool inited;
 };
 

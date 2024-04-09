@@ -39,9 +39,7 @@ export const fetchUtils = (runtimeConfig: any) => {
         additionalOptions?: UseFetchOptions<any>
     ): Promise<_AsyncData<T, FetchError<ErrorT> | null>> => {
         const data: _AsyncData<T, FetchError<ErrorT> | null> = await fetchApi(url, additionalOptions);
-        console.log(data.error.value)
         if (data.error.value != null) {
-            console.log(data.error.value.statusCode)
             if (data.error.value.statusCode === 401) {
                 simpleLogout();
             }

@@ -1,6 +1,5 @@
 package pl.lasota.sensor.gui.config;
 
-import jakarta.servlet.Filter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,8 +10,8 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
-import pl.lasota.sensor.gui.auth.SensorAuthenticationSuccessHandler;
-import pl.lasota.sensor.gui.auth.filters.JwtOncePerRequestFilter;
+import pl.lasota.sensor.gui.security.SensorAuthenticationSuccessHandler;
+import pl.lasota.sensor.gui.security.JwtOncePerRequestFilter;
 import pl.lasota.sensor.gui.config.properties.SensorProperties;
 import pl.lasota.sensor.gui.controller.GlobalExceptionHandler;
 
@@ -30,7 +29,7 @@ public class SecureConfig {
     private final SensorProperties properties;
 
     @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(request -> {
@@ -50,12 +49,11 @@ public class SecureConfig {
                             .authenticated();
                 })
                 .logout(AbstractHttpConfigurer::disable)
-
                 .oauth2Login(a -> a
                         .successHandler(sensorAuthenticationSuccessHandler))
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(withDefaults())
-                .addFilterBefore((Filter) jwtOncePerRequestFilter, (Class<? extends Filter>) UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(jwtOncePerRequestFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 }

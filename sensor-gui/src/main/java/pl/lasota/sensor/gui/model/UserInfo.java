@@ -9,7 +9,6 @@ import java.util.List;
 @RequiredArgsConstructor
 //email is username
 public class UserInfo {
-    private final String fullName;
-    private final Long id;
+    private final String id;
     private final List<String> roles;
 }

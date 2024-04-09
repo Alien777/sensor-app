@@ -6,16 +6,17 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import pl.lasota.sensor.core.common.User;
+import pl.lasota.sensor.core.exceptions.NotFoundMemberException;
 import pl.lasota.sensor.core.exceptions.SaveMemberException;
 import pl.lasota.sensor.core.exceptions.UserExistingException;
 import pl.lasota.sensor.core.exceptions.UserNotExistingException;
-import pl.lasota.sensor.core.models.Member;
-import pl.lasota.sensor.core.models.Provider;
-import pl.lasota.sensor.core.models.Role;
+import pl.lasota.sensor.core.entities.Member;
+import pl.lasota.sensor.core.entities.Provider;
+import pl.lasota.sensor.core.entities.Role;
 import pl.lasota.sensor.core.repository.MemberRepository;
 
 import java.util.Optional;
-import java.util.function.Supplier;
 
 
 @Service
@@ -54,7 +55,7 @@ public class MemberService {
         user.setName(name);
         user.setRole(Role.ROLE_USER);
         user.setEnabled(true);
-        user.setMemberKey(generateKeyPair.generateRandomString());
+        user.setId(generateKeyPair.generateRandomString());
 
         return user;
     }
@@ -65,13 +66,22 @@ public class MemberService {
 
     }
 
-    public boolean isMemberExistByMemberKey(String memberKey) {
-        return memberRepository.existsByMemberKey(memberKey);
+    public boolean isMemberExistByMemberId(String memberId) {
+        return memberRepository.existsById(memberId);
     }
 
-    public Member loggedUser() {
+    public Member loggedMember() throws NotFoundMemberException {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         UserDetails principal = (UserDetails) authentication.getPrincipal();
-        return memberRepository.findByEmail(principal.getUsername()).orElse(null);
+        return memberRepository.findMemberById(principal.getUsername()).orElseThrow(NotFoundMemberException::new);
+    }
+
+    public User loggedUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return (User) authentication.getPrincipal();
+    }
+
+    public Optional<Member> getMember(String memberId) {
+        return memberRepository.findMemberById(memberId);
     }
 }

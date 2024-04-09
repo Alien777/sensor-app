@@ -8,20 +8,32 @@ const MonacoEditorCustom = defineAsyncComponent(() => import('./MonacoEditorCust
 const runtimeConfig = useRuntimeConfig();
 const {getDeviceConfig, saveDeviceConfig, getAllConfigs, activateConfig} = deviceApi(runtimeConfig);
 
-const splitterHigh = 70;
+const splitterHigh = 275;
 const props = defineProps({
   device: {
     type: Object as () => DeviceT,
     required: true
+  },
+  onChange: {
+    type: Function as PropType<() => void>,
+    required: true
   }
 });
+const currentConfigDevice = ref(null);
+const currentConfigEditRef = ref(null);
+const allDevicesConfigsRef = ref(null);
+const fetch = async () => {
+  if (props.device?.version) {
+    const currentConfigDownload = await getDeviceConfig(props.device.id);
+    currentConfigDevice.value = currentConfigDownload;
+    currentConfigEditRef.value = currentConfigDownload;
+    const allDevicesConfigsDownload = await getAllConfigs(props.device.id);
+    allDevicesConfigsRef.value = allDevicesConfigsDownload;
+  }
+}
 
-const currentConfigDownload = await getDeviceConfig(props.device.id);
-const allDevicesConfigsDownload = await getAllConfigs(props.device.id);
-const currentConfigDevice = ref(currentConfigDownload);
-const currentConfigEditRef = ref(currentConfigDownload);
-const allDevicesConfigsRef = ref(allDevicesConfigsDownload);
 
+onMounted(() => fetch())
 const generateConfig: any = (currentConfig: DeviceConfigT) => {
   return {
     validate: true,
@@ -37,7 +49,7 @@ const saveConfigAction = async () => {
     config: currentConfigEditRef.value.config,
     version: currentConfigEditRef.value.forVersion
   };
-  await saveDeviceConfig(props.device?.id, save);
+  await saveDeviceConfig(props.device?.id, save).then(value => props.onChange());
   getAllConfigs(props.device.id).then(v => {
     allDevicesConfigsRef.value = v;
   });
@@ -61,24 +73,21 @@ const selectConfig = (config: DeviceConfigT) => {
 </script>
 
 <template>
-  <p><strong>{{ device.name ? device.name : device.deviceKey }}</strong> You editing config
-    id:<strong>{{ currentConfigEditRef.id }}</strong></p>
-  <q-splitter v-model="splitterHigh" style="height: 400px">
-    <template v-slot:before>
-      <ClientOnly>
-
-        <MonacoEditorCustom :jsonDefaultConfig="generateConfig(currentConfigEditRef)"
-                            v-model="currentConfigEditRef.config"
-                            lang="json"
-                            class="editor">
-          Loading...
-        </MonacoEditorCustom>
-      </ClientOnly>
-    </template>
-    <template v-slot:after>
-      <div class="q-pa-md" style="max-width: 350px">
-
-        <q-list separator padding>
+  <div v-if="currentConfigDevice && currentConfigDevice.config">
+    <div class="text-h5"><p>Editing: {{ props.device.name }}</p></div>
+    <hr>
+    <div class="q-pb-md">
+      <q-btn-group spread>
+        <q-btn icon="save" class="bg-green-1" @click="saveConfigAction">Save as new config</q-btn>
+        <q-btn icon="check" @click="activateConfigAction"
+               v-if="currentConfigEditRef.forVersion===device.version && currentConfigEditRef.id!==currentConfigDevice.id"
+               class="bg-green-2">Activate config
+        </q-btn>
+      </q-btn-group>
+    </div>
+    <q-splitter v-model="splitterHigh" unit="px" style="height: calc(100vh - 150px)">
+      <template v-slot:before>
+        <q-list padding>
           <q-item v-for="config in allDevicesConfigsRef"
                   clickable
                   v-ripple
@@ -104,30 +113,38 @@ const selectConfig = (config: DeviceConfigT) => {
                     Current activated. This configuration will be send to device.
                   </q-tooltip>
                 </q-icon>
-                <q-icon v-if="!config.isCorrect" name="close" color="red">
-                  <q-tooltip>
-                    This configuration is doesn't correct with schema. Not possible to active it.
-                  </q-tooltip>
-                </q-icon>
+<!--                <q-icon v-if="!config.isCorrect" name="close" color="red">-->
+<!--                  <q-tooltip>-->
+<!--                    This configuration is doesn't correct with schema. Not possible to active it.-->
+<!--                  </q-tooltip>-->
+<!--                </q-icon>-->
               </q-item-label>
             </q-item-section>
           </q-item>
         </q-list>
-      </div>
-    </template>
-  </q-splitter>
-  <q-btn @click="saveConfigAction">Save as new config</q-btn>
-  <q-btn @click="activateConfigAction"
-         v-if="currentConfigEditRef.forVersion===device.version && currentConfigEditRef.id!==currentConfigDevice.id"
-         color="green"
-         text-color="black">Activate config
-  </q-btn>
+      </template>
+      <template v-slot:after>
+        <ClientOnly>
+          <MonacoEditorCustom :jsonDefaultConfig="generateConfig(currentConfigEditRef)"
+                              v-model="currentConfigEditRef.config"
+                              lang="json"
+                              class="editor">
+          </MonacoEditorCustom>
+        </ClientOnly>
+      </template>
+    </q-splitter>
+  </div>
+  <div v-else>
+    <div class="text-h5"><p>Device {{ props.device.name }} not configured compleate</p></div>
+    <hr>
+    <NotSetUpVersion :device="props.device" ></NotSetUpVersion>
+  </div>
 
 </template>
 
 <style lang="css" scoped>
 .editor {
   width: 100%;
-  height: calc(500px - 3em);
+
 }
 </style>

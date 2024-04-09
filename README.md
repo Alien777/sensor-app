@@ -15,6 +15,8 @@ I want to create a simple system for remote management of devices like ESP and o
   Contains GUI and API for the Frontend.
 - `sensor-eureka`:
   Provides discovery for sensor-api for sensor-gui, e.g., send new config.
+- `sensor-flow`:
+  Component that manages flows and their launch
 - `bin`:
   - `esp-firmware`:
     Firmware for ESP 32. The project is written in C language for ESP IDF.
@@ -27,9 +29,13 @@ I want to create a simple system for remote management of devices like ESP and o
 
 ![img.png](readme/esp-panel.png)
 
-### GUI Panel
+### Flow config
 
-![img.png](readme/gui-panel.png)
+![img.png](readme/flow-config.png)
+
+### Device config
+
+![img.png](readme/device-config.png)
 
 ### My Plan
 #### ESP32:
@@ -39,8 +45,8 @@ I want to create a simple system for remote management of devices like ESP and o
 * Support I2C
 * Support SPI
 * Dynamic OTA firmware update
-* Create a layout and mechanism for managing flow for devices and sensors
-* Add the possibility to upload firmware to the GUI
+* ~~Create a layout and mechanism for managing flow for devices and sensors~~
+* Add the possibility to upload firmware from the GUI
 * Add a panel to the GUI to read logs from a connected device via USB
 * Create a flow mechanism for devices and sensors
 
