@@ -22,6 +22,8 @@ const char *message_type_convert_to_chars(message_type state)
         return "ANALOG";
     case CONFIG:
         return "CONFIG";
+    case ANALOG_EXTORT:
+        return "ANALOG_EXTORT";
     case PWM:
         return "PWM";
     default:
@@ -42,6 +44,10 @@ message_type chars_convert_to_message_type(const char *state)
     else if (strcmp(state, "CONFIG") == 0)
     {
         return CONFIG;
+    }
+    else if (strcmp(state, "ANALOG_EXTORT") == 0)
+    {
+        return ANALOG_EXTORT;
     }
     else if (strcmp(state, "PWM") == 0)
     {
@@ -127,6 +133,17 @@ esp_err_t json_to_message(const char *j, Message *msg)
         strncpy(msg->device_key, device_key->valuestring, sizeof(msg->device_key) - 1);
     }
 
+    cJSON *token = cJSON_GetObjectItemCaseSensitive(json, "token");
+    if (token == NULL || !cJSON_IsString(token) || (token->valuestring == NULL))
+    {
+        cJSON_Delete(json);
+        return ESP_FAIL;
+    }
+    else
+    {
+        strncpy(msg->token, token->valuestring, sizeof(msg->token) - 1);
+    }
+
     cJSON *msg_type = cJSON_GetObjectItemCaseSensitive(json, "message_type");
     if (msg_type == NULL || !cJSON_IsString(msg_type) || (msg_type->valuestring == NULL))
     {
@@ -194,6 +211,15 @@ esp_err_t json_to_message(const char *j, Message *msg)
         if (duty_pwm_c != NULL && cJSON_IsNumber(duty_pwm_c))
         {
             msg->pwn_setup.duty = duty_pwm_c->valueint;
+        }
+    }
+    else if (msg->message_type == ANALOG_EXTORT)
+    {
+        cJSON *pin_pwm_c = cJSON_GetObjectItemCaseSensitive(payload_c, "pin");
+
+        if (pin_pwm_c != NULL && cJSON_IsNumber(pin_pwm_c))
+        {
+            msg->analog_read_data.pin = pin_pwm_c->valueint;
         }
     }
 
@@ -264,8 +290,10 @@ void analog_read_json(cJSON *analog_configs_c, Message *msg)
                 if (atten_c != NULL && cJSON_IsNumber(atten_c))
                 {
                     msg->analog_configs[i].atten = atten_c->valueint;
-                }else{
-                     msg->analog_configs[i].atten=3;
+                }
+                else
+                {
+                    msg->analog_configs[i].atten = 3;
                 }
                 if (sampling_c != NULL && cJSON_IsNumber(sampling_c))
                 {

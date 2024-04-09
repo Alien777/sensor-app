@@ -17,24 +17,5 @@ void start()
 
 void app_main()
 {
-
-
-    //  ledc_timer_config_t ledc_timer = {
-    //         .duty_resolution = 12,
-    //         .freq_hz = 16000,
-    //         .speed_mode = LEDC_HIGH_SPEED_MODE,
-    //         .timer_num = 1};
-    //     ledc_timer_config(&ledc_timer);
-
-    //     ledc_channel_config_t ledc_channel = {
-    //         .channel = 1,
-    //         .duty = 4000,        
-    //         .gpio_num = 23,
-    //         .speed_mode = LEDC_HIGH_SPEED_MODE,
-    //         .timer_sel = 1};
-    //     ledc_channel_config(&ledc_channel);
-
-    //     // pwm_pin_to_channel[message->pwm_configs[i].pin] = i;
-
   start();
 }

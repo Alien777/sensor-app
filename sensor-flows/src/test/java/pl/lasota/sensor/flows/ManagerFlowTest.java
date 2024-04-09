@@ -87,7 +87,7 @@ class ManagerFlowTest {
         Mockito.when(sensorMock.getDeviceId()).thenReturn("deviceId");
         Mockito.when(sensorMock.getMessageType()).thenReturn(MessageType.ANALOG);
 
-        Node root = factory.listeningSensorNode("id", ListeningSensorNode.Data.create("deviceId", null, null, MessageType.ANALOG));
+        Node root = factory.listeningSensorNode("id", ListeningSensorNode.Data.create("deviceId", MessageType.ANALOG));
         NodeMock node = Mockito.mock(NodeMock.class);
         FlowsBuilder.root(root)
                 .add(root, node);
@@ -164,13 +164,13 @@ class ManagerFlowTest {
         Mockito.when(deviceTokenMock.getToken()).thenReturn("token");
         Mockito.when(memberMock.getId()).thenReturn("memberId");
         Mockito.when(dsMock.getDevice(Mockito.same("memberId"), Mockito.same("deviceId")))
-               .thenReturn(Optional.of(deviceMock));
+                .thenReturn(Optional.of(deviceMock));
 
 
         Mockito.when(sensorMock.getDeviceId()).thenReturn("deviceId");
         Mockito.when(sensorMock.getMessageType()).thenReturn(MessageType.ANALOG);
 
-        Node root = factory.listeningSensorNode("id", ListeningSensorNode.Data.create("deviceId", null, null, MessageType.ANALOG));
+        Node root = factory.listeningSensorNode("id", ListeningSensorNode.Data.create("deviceId",   MessageType.ANALOG));
         Node async = factory.asyncNodeCreator("id1");
         Node sleep = factory.sleepNode("id3", 1);
 
@@ -211,7 +211,7 @@ class ManagerFlowTest {
         Mockito.when(sensorMock.getDeviceId()).thenReturn("deviceId");
         Mockito.when(sensorMock.getMessageType()).thenReturn(MessageType.ANALOG);
 
-        Node root = factory.listeningSensorNode("id", ListeningSensorNode.Data.create("deviceId", null, null, MessageType.ANALOG));
+        Node root = factory.listeningSensorNode("id", ListeningSensorNode.Data.create("deviceId",   MessageType.ANALOG));
         Node executeIfNode = factory.executeCodeNode("id1", "result=true");
         NodeMock nodeEnd = Mockito.mock(NodeMock.class);
 
@@ -242,7 +242,7 @@ class ManagerFlowTest {
         Mockito.when(sensorMock.getMessageType()).thenReturn(MessageType.ANALOG);
 
 
-        Node root = factory.listeningSensorNode("id", ListeningSensorNode.Data.create("deviceId", null, null, MessageType.DEVICE_CONNECTED));
+        Node root = factory.listeningSensorNode("id", ListeningSensorNode.Data.create("deviceId",  MessageType.DEVICE_CONNECTED));
         globalContext.getVariables().put("my_var", false);
         Node executeIfNode = factory.executeCodeNode("id1", "result = g_c.my_var");
         NodeMock nodeEnd = Mockito.mock(NodeMock.class);
@@ -275,7 +275,7 @@ class ManagerFlowTest {
 
         globalContext.getVariables().put("my_var", true);
 
-        Node root = factory.listeningSensorNode("id1", ListeningSensorNode.Data.create("deviceId", null, null, MessageType.ANALOG));
+        Node root = factory.listeningSensorNode("id1", ListeningSensorNode.Data.create("deviceId", MessageType.ANALOG));
 
         Node executeCodeNode = factory.executeCodeNode("id2", """
                 g_c.my_var=12

@@ -54,6 +54,7 @@ static void mqttEventHandler(void *handler_args, esp_event_base_t base, int32_t 
             }
             config_json(message);
             set_pwm(message);
+            analog_extort(message);
             free(message);
         }
         break;

@@ -10,6 +10,7 @@ import pl.lasota.sensor.core.exceptions.*;
 import pl.lasota.sensor.core.entities.mqtt.payload.MessageType;
 import pl.lasota.sensor.flows.nodes.Node;
 import pl.lasota.sensor.flows.nodes.nodes.AsyncNode;
+import pl.lasota.sensor.flows.nodes.nodes.RequestAnalogDataNode;
 import pl.lasota.sensor.flows.nodes.nodes.SendPwmValueNode;
 import pl.lasota.sensor.flows.nodes.nodes.ListeningSensorNode;
 
@@ -76,12 +77,17 @@ public class ParserFlows {
                 String deviceId = fString(node, "deviceId");
                 Integer pin = fInteger(node, "pin");
                 String valueKey = fString(node, "valueVariable");
-                return factory.sendPwmValueNode(ref, SendPwmValueNode.Data.create(null, deviceId, null, valueKey, pin));
+                return factory.sendPwmValueNode(ref, SendPwmValueNode.Data.create(deviceId, valueKey, pin));
+            }
+            case "RequestAnalogDataNode" -> {
+                String deviceId = fString(node, "deviceId");
+                Integer pin = fInteger(node, "pin");
+                return factory.requestAnalogData(ref, RequestAnalogDataNode.Data.create(deviceId, pin));
             }
             case "ListeningSensorNode" -> {
                 String deviceId = fString(node, "deviceId");
                 MessageType type = MessageType.valueOf(fString(node, "messageType").toUpperCase());
-                ListeningSensorNode.Data data = ListeningSensorNode.Data.create(deviceId, null, null, type);
+                ListeningSensorNode.Data data = ListeningSensorNode.Data.create(deviceId, type);
                 return factory.listeningSensorNode(ref, data);
             }
             case "ExecuteCodeNode" -> {

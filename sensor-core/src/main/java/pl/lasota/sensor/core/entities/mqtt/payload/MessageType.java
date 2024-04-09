@@ -20,6 +20,11 @@ public enum MessageType {
     ANALOG,
 
     /**
+     * Extort analog value
+     **/
+    ANALOG_EXTORT,
+
+    /**
      * During Host send pwm value to Device
      **/
     PWM;

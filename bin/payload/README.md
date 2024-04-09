@@ -55,6 +55,11 @@ ESP-32S schema reduces it to values 0, 1, 2, 3
     - **Description**: Indicates that an analog value has been received from the sensor.
     - **Communication way**: DEVICE to AS
 
+- `ANALOG_EXTORT`:
+  - **Type**: String
+  - **Description**: Forcing an analog value to be read. It will be sent in ANALOG communication
+  - **Communication way**: AS to DEVICE
+
 - `PWM`:
     - **Type**: String
     - **Description**: Indicates that the Application Server (AS) sends a value to the PWM pin.
@@ -65,13 +70,13 @@ ESP-32S schema reduces it to values 0, 1, 2, 3
 ### ConfigPayload (`CONFIG`)
 
 - `analog_configs`:
-    - **Type**: Array<AnalogConfigReader>, Optional
+    - **Type**: Array<AnalogConfig>, Optional
     - **Description**: Configuration of analog reader.
 - `pwm_configs`:
-    - **Type**: Array<AnalogConfigReader>, Optional
+    - **Type**: Array<PwmConfig>, Optional
     - **Description**: Configuration of PWM.
 
-### AnalogConfigReader (`CONFIG`)
+### AnalogConfig (`CONFIG`)
 
 - `pin`:
     - **Type**: Integer
@@ -100,6 +105,21 @@ ESP-32S schema reduces it to values 0, 1, 2, 3
     - **Type**: Integer, Optional, Null
     - **Description**: The reading frequency in milliseconds for this analog pin.
 
+### PwmConfig (`CONFIG`)
+
+- `pin`:
+  - **Type**: Integer
+  - **Description**: Pwm pin
+
+- `freq`:
+  - **Type**: Integer
+  - **Description**: Frequency of PWM
+
+- `resolution`:
+  - **Type**: Integer
+  - **Description**:  Resolution of PWM
+
+
 ### PwmPayload (`PWM`)
 
 - `pin`:
@@ -123,3 +143,9 @@ ESP-32S schema reduces it to values 0, 1, 2, 3
 ### ConnectDevicePayload (`DEVICE_CONNECTED`)
 
 - No fields required.
+
+### ForceReadingOfAnalogDataPayload (`ANALOG_EXTORT`)
+
+- `pin`:
+  - **Type**: Integer
+  - **Description**: Pin on which it will force reading

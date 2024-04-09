@@ -22,6 +22,7 @@ const draggableItems = ref([
   {type: 'input', name: 'ListeningSensorNode'},
   {type: 'input', name: 'CronNode'},
   {type: 'default', name: 'SendPwmValueNode'},
+  {type: 'default', name: 'RequestAnalogDataNode'},
   {type: 'default', name: 'ExecuteCodeNode'},
   {type: 'default', name: 'AsyncNode'},
   {type: 'default', name: 'SleepNode'}

@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Data;
 import pl.lasota.sensor.core.entities.mqtt.payload.from.AnalogValuePayload;
 import pl.lasota.sensor.core.entities.mqtt.payload.from.ConnectDevicePayload;
+import pl.lasota.sensor.core.entities.mqtt.payload.to.ForceReadingOfAnalogDataPayload;
 import pl.lasota.sensor.core.entities.mqtt.payload.to.PwmPayload;
 import pl.lasota.sensor.core.entities.sensor.Sensor;
 
@@ -71,7 +72,7 @@ public class MessageFrame {
     public String makePayloadForDevice() throws JsonProcessingException {
         return switch (messageType) {
             case DEVICE_CONNECTED, ANALOG -> throw new UnsupportedOperationException();
-            case CONFIG, PWM -> om.writeValueAsString(this);
+            case CONFIG, PWM, ANALOG_EXTORT -> om.writeValueAsString(this);
         };
     }
 
@@ -82,7 +83,7 @@ public class MessageFrame {
     public Sensor.SensorBuilder getPayloadFromDriver() {
         return switch (messageType) {
             case DEVICE_CONNECTED -> new ConnectDevicePayload().parse(this);
-            case CONFIG, PWM -> throw new UnsupportedOperationException();
+            case CONFIG, PWM, ANALOG_EXTORT -> throw new UnsupportedOperationException();
             case ANALOG -> new AnalogValuePayload().parse(this);
         };
     }
@@ -102,6 +103,15 @@ public class MessageFrame {
     public static MessageFrame factoryPwmPayload(Long configId, String version, String deviceId, String memberId, String token, PwmPayload pwmPayload) throws JsonProcessingException {
         String json = om.writeValueAsString(pwmPayload);
         return new MessageFrame(configId, version, deviceId, memberId, MessageType.PWM, token, om.readTree(json));
+    }
+
+    /**
+     * @hidden
+     */
+    @JsonIgnore
+    public static MessageFrame factorySendForAnalogData(Long configId, String version, String deviceId, String memberId, String token, ForceReadingOfAnalogDataPayload analogData) throws JsonProcessingException {
+        String json = om.writeValueAsString(analogData);
+        return new MessageFrame(configId, version, deviceId, memberId, MessageType.ANALOG_EXTORT, token, om.readTree(json));
     }
 
 }

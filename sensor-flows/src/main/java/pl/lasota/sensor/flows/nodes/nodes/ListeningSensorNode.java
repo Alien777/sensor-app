@@ -93,13 +93,6 @@ public class ListeningSensorNode extends Node implements StartFlowNode, SensorLi
     @Getter
     public static class Data {
         private final String deviceId;
-        private String memberId;
-        private String token;
         private final MessageType forMessageType;
-
-        public void setUp(String memberId, String token) {
-            this.memberId = memberId;
-            this.token = token;
-        }
     }
 }

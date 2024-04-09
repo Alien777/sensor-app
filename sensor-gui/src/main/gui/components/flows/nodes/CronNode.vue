@@ -3,7 +3,7 @@ import {onMounted, ref, watch} from 'vue'
 import {useVueFlow} from "@vue-flow/core";
 
 const cron = ref("*/30 * * * *");
-const cprops = defineProps({
+const props = defineProps({
   id: {
     type: String,
     required: true,

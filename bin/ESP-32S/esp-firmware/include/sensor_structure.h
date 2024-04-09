@@ -30,11 +30,13 @@ typedef struct AnalogConfig AnalogConfig;
 typedef struct PwmConfig PwmConfig;
 typedef struct ConfigEps ConfigEps;
 typedef struct PwmSetup PwmSetup;
+typedef struct AnalogReadData AnalogReadData;
 
 typedef enum
 {
     DEVICE_CONNECTED,
     ANALOG,
+    ANALOG_EXTORT,
     PWM,
     CONFIG,
     UNKNOWN,
@@ -81,10 +83,17 @@ struct PwmSetup
 };
 
 
+struct AnalogReadData
+{
+    int pin;
+};
+
+
 struct Message
 {
     char member_key[17];
     char device_key[13];
+    char token[37];
     char version[8];
     int config_id;
     message_type message_type;
@@ -92,6 +101,7 @@ struct Message
     PwmConfig pwm_configs[MAX_S];
     AnalogConfig analog_configs[MAX_S];
     PwmSetup pwn_setup;
+    AnalogReadData analog_read_data;
 
     int analog_configs_size;
     int pwm_configs_size;

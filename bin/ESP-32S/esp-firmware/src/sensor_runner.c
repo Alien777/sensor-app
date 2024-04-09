@@ -83,7 +83,7 @@ void config_json(Message *message)
 
         ledc_channel_config_t ledc_channel = {
             .channel = i,
-            .duty = 0,        
+            .duty = 0,
             .gpio_num = message->pwm_configs[i].pin,
             .speed_mode = LEDC_HIGH_SPEED_MODE,
             .timer_sel = i};
@@ -99,6 +99,13 @@ void config_json(Message *message)
         AnalogTask *outputTask = deepCopyMessageToOutputTask(message, i);
         if (outputTask)
         {
+            if (outputTask->analog_config.sampling <= 0)
+            {
+                   adc1_config_channel_atten(outputTask->analog_config.pin, outputTask->analog_config.atten);
+                   adc1_config_width(outputTask->analog_config.width);
+                   continue;
+            }
+
             TaskHandle_t taskHandle;
             xTaskCreate(&run_task_analog, "readAnalogTask", 2048, outputTask, 5, &taskHandle);
             addTask(taskHandle, outputTask);
@@ -199,4 +206,19 @@ void set_pwm(Message *message)
     int channel = pwm_pin_to_channel[message->pwn_setup.pin];
     ledc_set_duty(LEDC_HIGH_SPEED_MODE, channel, message->pwn_setup.duty);
     ledc_update_duty(LEDC_HIGH_SPEED_MODE, channel);
+}
+
+void analog_extort(Message *message)
+{
+    if (message->message_type != ANALOG_EXTORT)
+    {
+        ESP_LOGD("TASK", "This not analog extort message");
+        return;
+    }
+    ESP_LOGI("ANALOG EXTORT", "For pin: %d", message->analog_read_data.pin);
+
+    int analogValue = adc1_get_raw(message->analog_read_data.pin);
+    char response[100];
+    snprintf(response, sizeof(response), "{\"adc_raw\":%d, \"pin\":%d}", analogValue, message->analog_read_data.pin);
+    publish(message->config_id, response, ANALOG);
 }

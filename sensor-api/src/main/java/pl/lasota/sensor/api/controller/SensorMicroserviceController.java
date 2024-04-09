@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.RestController;
 import pl.lasota.sensor.api.mqtt.MqttPreSendLayout;
 import pl.lasota.sensor.core.apis.model.sensor.SendConfig;
+import pl.lasota.sensor.core.apis.model.sensor.SendForAnalogData;
 import pl.lasota.sensor.core.apis.model.sensor.SendPwm;
 import pl.lasota.sensor.core.apis.SensorMicroserviceEndpoint;
 import pl.lasota.sensor.core.entities.Member;
@@ -27,6 +28,12 @@ public class SensorMicroserviceController implements SensorMicroserviceEndpoint 
     public void sendPwmValueToDevice(SendPwm configS) throws Exception {
         Member member = ms.loggedMember();
         mqttPreSendLayout.sendPwm(member.getId(), configS.deviceId(), configS.pin(), configS.value());
+    }
+
+    @Override
+    public void sendRequestForDataAnalog(SendForAnalogData configS) throws Exception {
+        Member member = ms.loggedMember();
+        mqttPreSendLayout.sendForAnalogData(member.getId(), configS.deviceId(), configS.pin());
     }
 
 }

@@ -68,6 +68,14 @@ public class NodeCreatorFactory {
             return new CronNode(ref, globalContext, taskScheduler, cron);
         }
 
+        public Node requestAnalogData(String ref, RequestAnalogDataNode.Data data) throws NotFoundMemberException, NotFoundDeviceException {
+            Member member = ms.loggedMember();
+            Optional<Device> optionalDevice = ds.getDevice(member.getId(), data.getDeviceId());
+            if (optionalDevice.isEmpty()) {
+                throw new NotFoundDeviceException();
+            }
+            return new RequestAnalogDataNode(ref, globalContext, data, sae);
+        }
 
         public final Node listeningSensorNode(String ref, ListeningSensorNode.Data data) throws NotFoundDeviceException, FlowException, NotFoundMemberException {
             Member member = ms.loggedMember();
@@ -75,21 +83,17 @@ public class NodeCreatorFactory {
             if (optionalDevice.isEmpty()) {
                 throw new NotFoundDeviceException();
             }
-            Device device = optionalDevice.get();
-            data.setUp(member.getId(), device.getCurrentDeviceToken().getToken());
             return new ListeningSensorNode(ref, globalContext, data, slm);
         }
 
-        public final Node sendPwmValueNode(String ref, SendPwmValueNode.Data data) throws NotFoundDeviceException, NotFoundDeviceConfigException, JsonProcessingException, NotFoundPinException, NotFoundMemberException {
+        public final Node sendPwmValueNode(String ref, SendPwmValueNode.Data data) throws NotFoundDeviceException, JsonProcessingException, NotFoundPinException, NotFoundMemberException {
             Member member = ms.loggedMember();
             Optional<Device> deviceOptional = ds.getDevice(member.getId(), data.getDeviceId());
             if (deviceOptional.isEmpty()) {
                 throw new NotFoundDeviceException();
             }
-            Device device = deviceOptional.get();
-            data.setUp(member.getId(), device.getCurrentDeviceToken().getToken());
 
-            DeviceConfig deviceConfig = ds.currentDeviceConfig(data.getMemberId(), data.getDeviceId());
+            DeviceConfig deviceConfig = ds.currentDeviceConfig(member.getId(), data.getDeviceId());
             ConfigPayload configPayload = dus.mapConfigToObject(deviceConfig.getConfig());
             boolean b = configPayload.getPwmConfig().stream().anyMatch(pwmConfig -> pwmConfig.getPin() == data.getPin());
             if (!b) {
@@ -98,6 +102,8 @@ public class NodeCreatorFactory {
 
             return new SendPwmValueNode(ref, globalContext, data, sae);
         }
+
+
     }
 
 
