@@ -7,12 +7,16 @@ import useDragAndDrop from "~/composables/useDnD";
 import {MiniMap} from "@vue-flow/minimap";
 import {flowApi} from "~/composables/api/FlowApi";
 import {Notify} from "quasar";
+import {useQuasar} from 'quasar'
 
+const q = useQuasar()
 
 definePageMeta({
   layout: "panel",
   middleware: "page-any-roles"
 })
+
+
 const {onDragStart} = useDragAndDrop();
 const draggableItems = ref([
   {type: 'input', name: 'ListeningSensorNode'},
@@ -143,6 +147,7 @@ const onSave = () => {
 }
 
 onConnect(handleConnect)
+const $q = useQuasar();
 </script>
 <template>
   <div v-if="!flow || flow.id!==null" class="text-h5"><p>Editing: {{ name }}</p></div>
@@ -154,7 +159,10 @@ onConnect(handleConnect)
              v-model="name">
     </q-input>
     <q-btn-group spread>
-      <q-btn icon="save" class="bg-green-1" @click="onSave">{{ flow && flow.id ? 'Save flow' : 'Save new flow' }}</q-btn>
+      <q-btn icon="save" class="bg-green-1" @click="onSave">{{
+          flow && flow.id ? 'Save flow' : 'Save new flow'
+        }}
+      </q-btn>
       <q-btn @click="()=>
         startFlow(flow.id).finally(() => props.onChangeFlow())
  " v-if="flow && !flow.activate" icon="start" class="bg-green-3">Start
@@ -162,7 +170,18 @@ onConnect(handleConnect)
       <q-btn @click="()=> stopFlow(flow.id).finally(() => props.onChangeFlow())" v-else-if="flow && flow.activate"
              icon="stop" class="bg-red-1">Stop
       </q-btn>
-      <q-btn v-if="flow" @click="()=>  deleteFlow(flow.id).finally(() => props.onChangeFlow())"
+
+      <q-btn v-if="flow" @click="()=>  {
+       $q.dialog({
+        title: 'Confirm',
+        message: `Would you like to turn delete flow ${name}`,
+        cancel: true,
+        dark: true,
+        color: 'red',
+      }).onOk(() => {
+       deleteFlow(flow.id).finally(() => props.onChangeFlow())
+      });
+      }"
              icon="delete" class="bg-red-4">Delete
       </q-btn>
     </q-btn-group>

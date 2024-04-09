@@ -41,6 +41,9 @@ public class LocalManagerFlows {
         try {
             NodeCreatorFactory.Factory factory = ncf.create();
             List<Node> flows = pf.flows(config, factory);
+            if (flows.isEmpty()) {
+                throw new IllegalArgumentException("Not found nodes");
+            }
             startedFlow.put(id, new ActiveFlow(flows, config));
 
             boolean isError = flows.parallelStream()

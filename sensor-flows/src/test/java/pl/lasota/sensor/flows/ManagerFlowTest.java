@@ -164,7 +164,7 @@ class ManagerFlowTest {
         Mockito.when(deviceTokenMock.getToken()).thenReturn("token");
         Mockito.when(memberMock.getId()).thenReturn("memberId");
         Mockito.when(dsMock.getDevice(Mockito.same("memberId"), Mockito.same("deviceId")))
-                .thenReturn(Optional.of(deviceMock));
+               .thenReturn(Optional.of(deviceMock));
 
 
         Mockito.when(sensorMock.getDeviceId()).thenReturn("deviceId");

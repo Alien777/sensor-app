@@ -17,5 +17,5 @@ export default defineNuxtConfig({
         'nuxt-monaco-editor',
         'nuxt-quasar-ui'
     ],
-    quasar: {plugins: ["Notify"]}
+    quasar: {plugins: ["Notify", "Dialog"]}
 })
