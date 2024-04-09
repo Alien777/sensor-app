@@ -12,16 +12,20 @@ ESP-32S schema reduces it to values 0, 1, 2, 3
     - **Type**: Long
     - **Description**: Unique identifier for the configuration, facilitating precise configuration management and
       retrieval.
-
+    - 
+- `token`:
+  - **Type**: UUID
+  - **Description**: Unique generated token for communication
+  - 
 - `version_firmware`:
     - **Type**: String
     - **Description**: Specifies the firmware version of the device, crucial for compatibility checks and updates.
 
-- `device_key`:
+- `device_id`:
     - **Type**: String
     - **Description**: A unique key associated with the device, used for secure identification and communication.
 
-- `member_key`:
+- `member_id`:
     - **Type**: String
     - **Description**: Specific key related to a member, used for authentication and ensuring secure access.
 
