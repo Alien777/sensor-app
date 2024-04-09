@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import pl.lasota.sensor.core.apis.model.flow.FlowSensorT;
 import pl.lasota.sensor.core.apis.model.flow.FlowStatusT;
-import pl.lasota.sensor.core.entities.sensor.Sensor;
 import pl.lasota.sensor.flows.service.FlowService;
 import pl.lasota.sensor.flows.configs.FlowProperties;
 import pl.lasota.sensor.flows.nodes.Node;
@@ -20,7 +19,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class ManagerFlows {
+public class LocalManagerFlows {
 
     private final SensorListeningManager slm;
     private final ParserFlows pf;

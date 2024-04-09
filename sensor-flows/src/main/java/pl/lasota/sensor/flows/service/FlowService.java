@@ -10,6 +10,7 @@ import pl.lasota.sensor.core.entities.flows.Flow;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Optional;
 
 
 @Service
@@ -32,8 +33,8 @@ public class FlowService {
         return fr.save(flow);
     }
 
-    public Flow findFlows(String memberId, Long flowId) throws NotFoundFlowsException {
-        return fr.findFlowsBy(memberId, flowId).orElseThrow(NotFoundFlowsException::new);
+    public Optional<Flow> findFlows(String memberId, Long flowId) throws NotFoundFlowsException {
+        return fr.findFlowsBy(memberId, flowId);
     }
 
     public List<Flow> getAll(String memberId) {
@@ -53,5 +54,9 @@ public class FlowService {
     @Transactional
     public void delete(Long flowId) {
         fr.deleteById(flowId);
+    }
+
+    public List<Flow> findAllActiveFlows() {
+        return fr.findAllActiveFlows();
     }
 }

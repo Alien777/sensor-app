@@ -28,4 +28,8 @@ public interface FlowRepository extends JpaRepository<Flow, Long> {
     @Modifying
     @Query("UPDATE Flow f SET f.isActivate=true WHERE f.id=:id")
     void activate(@Param("id") Long id);
+
+    @Query("SELECT f FROM Flow f WHERE f.isActivate=true")
+    List<Flow> findAllActiveFlows();
+
 }

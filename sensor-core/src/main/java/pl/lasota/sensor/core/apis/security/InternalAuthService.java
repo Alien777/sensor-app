@@ -9,10 +9,12 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import pl.lasota.sensor.core.entities.Member;
 import pl.lasota.sensor.core.exceptions.InternalAuthException;
 import pl.lasota.sensor.core.common.User;
 
 import java.util.Collection;
+import java.util.Collections;
 
 @Service
 @RequiredArgsConstructor
@@ -20,6 +22,20 @@ import java.util.Collection;
 public class InternalAuthService {
 
     private final InternalJwtResolve internalJwtResolve;
+
+    public void auth(Member member) {
+
+        User user = User.builder().isEnabled(true)
+                .id(member.getId())
+                .roles(Collections.singleton(member.getRole())).build();
+
+        Authentication authentication = new UsernamePasswordAuthenticationToken(user,
+                null,
+                user.getGrantedRoles());
+
+        SecurityContextHolder.getContext()
+                .setAuthentication(authentication);
+    }
 
     public void auth(HttpServletRequest request) throws InternalAuthException {
         String token = extractBearerToken(request);
@@ -46,5 +62,6 @@ public class InternalAuthService {
 
         return null;
     }
+
 
 }

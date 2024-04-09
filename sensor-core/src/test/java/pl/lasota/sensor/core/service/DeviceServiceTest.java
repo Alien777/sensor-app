@@ -33,7 +33,7 @@ class DeviceServiceTest {
 
         Mockito.when(drMock.existsDevice(Mockito.same("0123456789123456"), Mockito.same("012345678912"))).thenReturn(true);
 
-        DeviceService deviceService = new DeviceService(drMock, srrMock, dcMock, mrMock, dsuMock);
+        DeviceService deviceService = new DeviceService(drMock, srrMock, dcMock, mrMock, dsuMock,null);
         deviceService.setUpVersion("0123456789123456", "012345678912", "1.0");
 
         Mockito.verify(drMock, Mockito.times(0)).save(Mockito.any());
@@ -54,7 +54,7 @@ class DeviceServiceTest {
         Mockito.when(dsuMock.createDefaultDeviceConfig(Mockito.same("1.0"), Mockito.any(Device.class)))
                 .thenReturn(DeviceConfig.builder().id(1L).build());
 
-        DeviceService deviceService = new DeviceService(drMock, srrMock, dcMock, mrMock, dsuMock);
+        DeviceService deviceService = new DeviceService(drMock, srrMock, dcMock, mrMock, dsuMock,null);
         deviceService.setUpVersion("0123456789123456", "012345678912", "1.0");
 
 
@@ -79,7 +79,7 @@ class DeviceServiceTest {
         MemberRepository mrMock = Mockito.mock(MemberRepository.class);
         Mockito.when(cpMock.getFirmwareFolder()).thenReturn("/");
         Mockito.when(drMock.findDeviceBy(Mockito.same("1L"), Mockito.same("1L"))).thenReturn(Optional.of(device));
-        DeviceService deviceService = new DeviceService(drMock, srrMock, dcrMock, mrMock, new DeviceUtilsService(cpMock));
+        DeviceService deviceService = new DeviceService(drMock, srrMock, dcrMock, mrMock, new DeviceUtilsService(cpMock),null);
 
         String config = "{\"analog_configs\": []}";
         validOk(deviceService, dcrMock, config);

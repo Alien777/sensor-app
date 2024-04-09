@@ -113,11 +113,11 @@ const selectConfig = (config: DeviceConfigT) => {
                     Current activated. This configuration will be send to device.
                   </q-tooltip>
                 </q-icon>
-                <q-icon v-if="!config.isCorrect" name="close" color="red">
-                  <q-tooltip>
-                    This configuration is doesn't correct with schema. Not possible to active it.
-                  </q-tooltip>
-                </q-icon>
+<!--                <q-icon v-if="!config.isCorrect" name="close" color="red">-->
+<!--                  <q-tooltip>-->
+<!--                    This configuration is doesn't correct with schema. Not possible to active it.-->
+<!--                  </q-tooltip>-->
+<!--                </q-icon>-->
               </q-item-label>
             </q-item-section>
           </q-item>

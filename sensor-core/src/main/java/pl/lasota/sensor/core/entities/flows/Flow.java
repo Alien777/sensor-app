@@ -24,7 +24,7 @@ public class Flow {
     @Column(name = "activate")
     private boolean isActivate;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "member_id", updatable = false)
     private Member member;
 

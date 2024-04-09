@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.RestClient;
 import pl.lasota.sensor.api.filter.Chain;
 import pl.lasota.sensor.api.filter.Context;
 import pl.lasota.sensor.api.filter.Filter;
@@ -29,7 +29,7 @@ public class SaveSensorValueFilter implements Filter<MessageFrame, MessageFrame>
     private final MqttPreSendLayout mqttPreSendLayout;
     private final FlowsMicroserviceEndpoint flowsMicroserviceEndpoint;
     private final DiscoveryClient discoveryClient;
-    private final RestTemplate restTemplate;
+    private final RestClient restClient;
 
     @Override
     public void execute(MessageFrame request, Context context, Chain<MessageFrame> chain) throws Exception {
@@ -60,7 +60,7 @@ public class SaveSensorValueFilter implements Filter<MessageFrame, MessageFrame>
                 }
             };
             if (fT != null) {
-                flowsMicroserviceEndpoint.sendSensorValue(fT, discoveryClient, restTemplate);
+                flowsMicroserviceEndpoint.broadcastValueOfSensorToAllInstances(fT, discoveryClient, restClient);
             }
         }
     }

@@ -159,7 +159,7 @@ onConnect(handleConnect)
         startFlow(flow.id).finally(() => props.onChangeFlow())
  " v-if="flow && !flow.activate" icon="start" class="bg-green-3">Start
       </q-btn>
-      <q-btn @click="()=>  stopFlow(flow.id).finally(() => props.onChangeFlow())" v-else-if="flow && flow.activate"
+      <q-btn @click="()=> stopFlow(flow.id).finally(() => props.onChangeFlow())" v-else-if="flow && flow.activate"
              icon="stop" class="bg-red-1">Stop
       </q-btn>
       <q-btn v-if="flow" @click="()=>  deleteFlow(flow.id).finally(() => props.onChangeFlow())"

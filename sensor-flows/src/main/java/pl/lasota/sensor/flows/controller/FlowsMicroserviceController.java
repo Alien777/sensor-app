@@ -2,23 +2,22 @@ package pl.lasota.sensor.flows.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.RestClient;
+import pl.lasota.sensor.core.apis.FlowsMicroserviceEndpoint;
 import pl.lasota.sensor.core.apis.model.flow.FlowSaveT;
 import pl.lasota.sensor.core.apis.model.flow.FlowSensorT;
 import pl.lasota.sensor.core.apis.model.flow.FlowStatusT;
+import pl.lasota.sensor.core.apis.model.flow.FlowT;
 import pl.lasota.sensor.core.entities.Member;
 import pl.lasota.sensor.core.entities.flows.Flow;
-import pl.lasota.sensor.core.apis.FlowsMicroserviceEndpoint;
-import pl.lasota.sensor.core.apis.model.flow.FlowT;
 import pl.lasota.sensor.core.exceptions.NotFoundFlowsException;
 import pl.lasota.sensor.core.exceptions.NotFoundMemberException;
 import pl.lasota.sensor.core.service.MemberService;
+import pl.lasota.sensor.flows.LocalManagerFlows;
 import pl.lasota.sensor.flows.configs.FlowProperties;
 import pl.lasota.sensor.flows.service.FlowService;
-import pl.lasota.sensor.flows.ManagerFlows;
 
 import java.util.List;
 import java.util.Optional;
@@ -29,121 +28,138 @@ import java.util.stream.Collectors;
 @Slf4j
 public class FlowsMicroserviceController implements FlowsMicroserviceEndpoint {
 
-    private final ManagerFlows managerFlows;
+    private final LocalManagerFlows localManagerFlows;
     private final FlowService flowService;
     private final MemberService ms;
     private final DiscoveryClient dc;
-    private final RestTemplate rt;
+    private final RestClient restClient;
     private final FlowProperties fp;
-    private final FlowsMicroserviceEndpoint fme;
 
     @Override
-    public FlowStatusT save(FlowSaveT flowSaveT) throws NotFoundMemberException, NotFoundFlowsException {
-        info("save flow", flowSaveT.getId());
+    public FlowStatusT save(FlowSaveT flowSaveT) throws Exception {
+        log.info("Save flow {}", flowSaveT.getId());
         Member member = ms.loggedMember();
-        Flow flows = null;
-        if (flowSaveT.getId() != null) {
-            flows = flowService.findFlows(member.getId(), flowSaveT.getId());
-        }
-        log.info("Save config: {}", flowSaveT.getConfig());
-        flowService.saveFlows(member.getId(), flowSaveT.getId(), flowSaveT.getName(), flowSaveT.getConfig());
-        if (flows != null && flows.isActivate()) {
-            managerFlows.stop(flows.getId());
-            managerFlows.start(flowSaveT.getId(), flowSaveT.getConfig());
+
+        Optional<Flow> flowsInDb = flowService.findFlows(member.getId(), flowSaveT.getId());
+        if (flowsInDb.isEmpty()) {
+            flowService.saveFlows(member.getId(), null, flowSaveT.getName(), flowSaveT.getConfig());
+        } else {
+            this.stop(flowSaveT.getId());
+            flowService.saveFlows(member.getId(), flowSaveT.getId(), flowSaveT.getName(), flowSaveT.getConfig());
+            this.start(flowSaveT.getId());
         }
         return FlowStatusT.OK;
     }
 
     @Override
     public FlowStatusT start(Long id) throws NotFoundMemberException, NotFoundFlowsException {
-        info("start flow", id);
+        log.info("Start flow id: {}", id);
         Member member = ms.loggedMember();
-        Flow flows = flowService.findFlows(member.getId(), id);
-        if (flows.isActivate()) {
-            return FlowStatusT.IS_ACTIVE_ALREADY;
+        Optional<Flow> flowsInDb = flowService.findFlows(member.getId(), id);
+        if (flowsInDb.isEmpty()) {
+            log.info("Not run flow by id: {}  because not existing in db", id);
+            return FlowStatusT.NOT_FOUND;
         }
-        return managerFlows.start(id, flows.getConfig());
+
+        Flow flow = flowsInDb.get();
+        if (localManagerFlows.contains(id)) {
+            log.info("Flow is already executing id: {} on server {}", id, fp.getInstanceId());
+            return FlowStatusT.OK;
+        }
+
+        Optional<String> idServerWhenMaybeExecute = broadcastWhoExecuteFlow(id, dc, restClient, fp.getInstanceId());
+        if (idServerWhenMaybeExecute.isPresent()) {
+            log.info("Flow is already executing id: {} on server {}", id, idServerWhenMaybeExecute.get());
+            return FlowStatusT.OK;
+        }
+
+        return localManagerFlows.start(id, flow.getConfig());
     }
+
 
     @Override
     public FlowStatusT stop(Long id) throws Exception {
-        info("stop flow", id);
+        log.info("Stop flow id: {} ", id);
         Member member = ms.loggedMember();
-        Flow flows = flowService.findFlows(member.getId(), id);
-        if (!flows.isActivate()) {
-            return FlowStatusT.NOT_ACTIVE;
+        Optional<Flow> flowsInDb = flowService.findFlows(member.getId(), id);
+        if (flowsInDb.isEmpty()) {
+            log.info("Not run flow by id: {} because not existing in db", id);
+            return FlowStatusT.NOT_FOUND;
         }
 
-        if (managerFlows.contains(id)) {
-            return managerFlows.stop(id);
-        }
-        List<String> instancesId = fme.findInstanceWhoExecute(id, fp.getInstanceId(), dc, rt);
-        boolean b = instancesId.parallelStream().map(s -> fme.stop(id, s, dc, rt))
-                .allMatch(flowStatusT -> flowStatusT == FlowStatusT.OK);
-        if (b) {
+        if (localManagerFlows.contains(id)) {
+            localManagerFlows.stop(id);
             return FlowStatusT.OK;
+        }
+
+        Optional<String> idServerWhenMaybeExecute = broadcastWhoExecuteFlow(id, dc, restClient, fp.getInstanceId());
+        Flow flow = flowsInDb.get();
+        if (idServerWhenMaybeExecute.isPresent()) {
+            return stopOnIndicateServer(flow.getId(), idServerWhenMaybeExecute.get(), dc, restClient);
         } else {
-            return FlowStatusT.ERROR;
+            return FlowStatusT.OK;
         }
     }
 
     @Override
     public FlowStatusT delete(Long id) throws NotFoundFlowsException, NotFoundMemberException {
-        info("delete flow", id);
+        log.info("delete flow  id {} ", id);
         Member member = ms.loggedMember();
-
-        if (managerFlows.contains(id)) {
-            FlowStatusT stop = managerFlows.stop(id);
-            if (stop == FlowStatusT.OK) {
-                flowService.delete(id);
-                return FlowStatusT.OK;
-            }
-            return FlowStatusT.ERROR;
+        Optional<Flow> flowsInDb = flowService.findFlows(member.getId(), id);
+        if (flowsInDb.isEmpty()) {
+            log.info("Not delete flow by id: {} because not existing in db", id);
+            return FlowStatusT.NOT_FOUND;
         }
-        List<String> instancesId = fme.findInstanceWhoExecute(id, fp.getInstanceId(), dc, rt);
-        boolean b = instancesId.parallelStream().map(s -> fme.stop(id, s, dc, rt))
-                .allMatch(flowStatusT -> flowStatusT == FlowStatusT.OK);
-        if (b) {
+        if (localManagerFlows.contains(id)) {
+            localManagerFlows.stop(id);
             flowService.delete(id);
             return FlowStatusT.OK;
-        } else {
-            return FlowStatusT.ERROR;
         }
+
+        Optional<String> idServerWhenMaybeExecute = broadcastWhoExecuteFlow(id, dc, restClient, fp.getInstanceId());
+
+        if (idServerWhenMaybeExecute.isPresent()) {
+            FlowStatusT flowStatusT = stopOnIndicateServer(id, idServerWhenMaybeExecute.get(), dc, restClient);
+            if (flowStatusT.equals(FlowStatusT.OK)) {
+                flowService.delete(id);
+                return FlowStatusT.OK;
+            } else {
+                return FlowStatusT.ERROR;
+            }
+        }
+        flowService.delete(id);
+        return FlowStatusT.OK;
     }
 
     @Override
     public FlowT get(Long id) throws NotFoundMemberException, NotFoundFlowsException {
-        info("get flow", id);
+        log.info("Get flow from {}", id);
         Member member = ms.loggedMember();
-        return FlowT.map(flowService.findFlows(member.getId(), id));
+        return FlowT.map(flowService.findFlows(member.getId(), id).orElseThrow(NotFoundFlowsException::new));
     }
 
     @Override
     public List<FlowT> get() throws NotFoundMemberException {
-        info("get all flow");
+        log.info("Get all flows");
         Member member = ms.loggedMember();
         return flowService.getAll(member.getId()).stream().map(FlowT::map).collect(Collectors.toList());
     }
 
     @Override
-    public String findInstanceWhoExecute(Long id) {
-        info("looking for {}", id);
-        if (managerFlows.contains(id)) {
+    public String doesExecuteFlowId(Long id) throws NotFoundMemberException {
+        ms.loggedMember();
+        log.info("Looking for flow if {}", id);
+        if (localManagerFlows.contains(id)) {
             return fp.getInstanceId();
         }
         return null;
     }
 
     @Override
-    public void sendSensorValue(FlowSensorT sensor) {
-        managerFlows.broadcast(sensor);
+    public void valueOfSensor(FlowSensorT sensor) throws NotFoundMemberException {
+        ms.loggedMember();
+        log.info("Receiver data form {}", sensor.getDeviceId());
+        localManagerFlows.broadcast(sensor);
     }
 
-    private void info(String message, Object... objects) {
-        Optional<ServiceInstance> first = dc.getInstances("sensor-flows")
-                .stream()
-                .filter(instance -> instance.getInstanceId().equals(fp.getInstanceId())).findFirst();
-        log.info("{} " + message, first.get().getUri(), objects);
-
-    }
 }
