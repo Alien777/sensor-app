@@ -17,4 +17,5 @@ public class MqttProperties {
     private Integer maxReconnectDelay;
     private Integer connectionTimeout;
     private Boolean automaticReconnect;
+    private Boolean unsecureRestEndpoint;
 }

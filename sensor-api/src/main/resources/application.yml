@@ -34,6 +34,7 @@ sensor:
     max-reconnect-delay: 5000
     connection-timeout: 30000
     automatic-reconnect: true
+    unsecur-rest-endpoint: true
   core:
     sensor-flows-name: sensor-flows
     firmware-folder: bin

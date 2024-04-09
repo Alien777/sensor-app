@@ -67,7 +67,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     form.addEventListener('submit', function (event) {
         event.preventDefault();
-        console.log("test");
         const formData = new FormData(form);
 
         fetch('/save', {
@@ -76,7 +75,6 @@ document.addEventListener('DOMContentLoaded', function () {
         })
             .then(response => response.text())
             .then(data => {
-                console.log("RELOAC");
                 location.reload(true);
             })
             .catch(error => {
