@@ -3,13 +3,13 @@ package pl.lasota.sensor.api.mqtt;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.RestClient;
 import pl.lasota.sensor.api.filter.FilterChain;
 import pl.lasota.sensor.api.filter.filters.BeforeValidMessageFilter;
 import pl.lasota.sensor.api.filter.filters.SaveSensorValueFilter;
 import pl.lasota.sensor.core.apis.FlowsMicroserviceEndpoint;
-import pl.lasota.sensor.core.entities.mqtt.payload.MessageType;
 import pl.lasota.sensor.core.entities.mqtt.payload.MessageFrame;
+import pl.lasota.sensor.core.entities.mqtt.payload.MessageType;
 import pl.lasota.sensor.core.service.DeviceService;
 import pl.lasota.sensor.core.service.MemberService;
 
@@ -25,7 +25,7 @@ class MessageReceiverTest {
         MqttPreSendLayout uMock = Mockito.mock(MqttPreSendLayout.class);
         FlowsMicroserviceEndpoint crtMock = Mockito.mock(FlowsMicroserviceEndpoint.class);
         DiscoveryClient dcMock = Mockito.mock(DiscoveryClient.class);
-        RestTemplate rtMock = Mockito.mock(RestTemplate.class);
+        RestClient rtMock = Mockito.mock(RestClient.class);
 
 
         Mockito.when(mfMock.getMemberId()).thenReturn("memberId_1234567");
@@ -35,6 +35,7 @@ class MessageReceiverTest {
         Mockito.when(mfMock.getMessageType()).thenReturn(MessageType.DEVICE_CONNECTED);
         Mockito.when(msMock.isMemberExistByMemberId(Mockito.same("memberId_1234567"))).thenReturn(true);
         Mockito.when(dsMock.isTokenValid("memberId_1234567", "deviceId_123", "token")).thenReturn(true);
+        Mockito.when(dsMock.isDeviceExist("memberId_1234567", "deviceId_123")).thenReturn(true);
 
 
         FilterChain filterChain = new FilterChain();

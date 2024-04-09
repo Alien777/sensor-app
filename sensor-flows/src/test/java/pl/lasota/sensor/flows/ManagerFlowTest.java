@@ -10,25 +10,27 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.SimpleAsyncTaskScheduler;
+import pl.lasota.sensor.core.apis.SensorMicroserviceEndpoint;
 import pl.lasota.sensor.core.apis.model.flow.FlowSensorAnalogT;
 import pl.lasota.sensor.core.common.User;
 import pl.lasota.sensor.core.entities.DeviceToken;
 import pl.lasota.sensor.core.entities.Member;
+import pl.lasota.sensor.core.entities.Role;
 import pl.lasota.sensor.core.entities.device.Device;
 import pl.lasota.sensor.core.entities.mqtt.payload.MessageType;
-import pl.lasota.sensor.core.apis.SensorMicroserviceEndpoint;
 import pl.lasota.sensor.core.service.DeviceService;
 import pl.lasota.sensor.core.service.DeviceUtilsService;
 import pl.lasota.sensor.core.service.MemberService;
+import pl.lasota.sensor.flows.nodes.Node;
 import pl.lasota.sensor.flows.nodes.StartFlowNode;
 import pl.lasota.sensor.flows.nodes.builder.FlowsBuilder;
 import pl.lasota.sensor.flows.nodes.builder.NodeCreatorFactory;
-import pl.lasota.sensor.flows.nodes.Node;
 import pl.lasota.sensor.flows.nodes.nodes.ListeningSensorNode;
 import pl.lasota.sensor.flows.nodes.utils.GlobalContext;
 import pl.lasota.sensor.flows.nodes.utils.SensorListeningManager;
 
 import java.time.Duration;
+import java.util.Collections;
 import java.util.Optional;
 
 class ManagerFlowTest {
@@ -66,7 +68,7 @@ class ManagerFlowTest {
         ts = new SimpleAsyncTaskScheduler();
         slm = new SensorListeningManager();
         NodeCreatorFactory ncf = new NodeCreatorFactory(ts, slm, saeMock, dsMock, msMock, dusMock);
-        globalContext = new GlobalContext(User.builder().id("memberId").build());
+        globalContext = new GlobalContext(User.builder().id("memberId").roles(Collections.singleton(Role.ROLE_USER)).build());
         factory = ncf.create(globalContext);
     }
 
@@ -259,7 +261,6 @@ class ManagerFlowTest {
     void js_override_java_variable() throws Exception {
 
         Mockito.when(dsMock.isDeviceExist(Mockito.same("memberId"), Mockito.same("deviceId"))).thenReturn(true);
-
         Mockito.when(msMock.loggedMember()).thenReturn(memberMock);
         Mockito.when(memberMock.getId()).thenReturn("memberId");
         Mockito.when(deviceMock.getCurrentDeviceToken()).thenReturn(deviceTokenMock);
@@ -299,6 +300,5 @@ class ManagerFlowTest {
         Mockito.verify(nodeEnd, Mockito.times(1)).execute(Mockito.any());
         Assertions.assertEquals(18, globalContext.getVariable("my_var_new"));
     }
-
 
 }

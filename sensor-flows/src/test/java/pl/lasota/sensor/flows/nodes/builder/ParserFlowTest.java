@@ -9,21 +9,25 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.SimpleAsyncTaskScheduler;
+import pl.lasota.sensor.core.apis.SensorMicroserviceEndpoint;
 import pl.lasota.sensor.core.entities.DeviceToken;
 import pl.lasota.sensor.core.entities.Member;
-import pl.lasota.sensor.core.exceptions.*;
 import pl.lasota.sensor.core.entities.device.Device;
+import pl.lasota.sensor.core.entities.device.DeviceConfig;
+import pl.lasota.sensor.core.entities.mqtt.payload.to.ConfigPayload;
+import pl.lasota.sensor.core.entities.mqtt.payload.to.PwmConfig;
 import pl.lasota.sensor.core.entities.sensor.Sensor;
-import pl.lasota.sensor.core.apis.SensorMicroserviceEndpoint;
+import pl.lasota.sensor.core.exceptions.*;
 import pl.lasota.sensor.core.service.DeviceService;
 import pl.lasota.sensor.core.service.DeviceUtilsService;
 import pl.lasota.sensor.core.service.MemberService;
 import pl.lasota.sensor.flows.nodes.Node;
-import pl.lasota.sensor.flows.nodes.nodes.*;
-import pl.lasota.sensor.flows.nodes.nodes.ListeningSensorNode;
 import pl.lasota.sensor.flows.nodes.nodes.AsyncNode;
+import pl.lasota.sensor.flows.nodes.nodes.ExecuteCodeNode;
+import pl.lasota.sensor.flows.nodes.nodes.ListeningSensorNode;
 import pl.lasota.sensor.flows.nodes.utils.SensorListeningManager;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -36,7 +40,6 @@ class ParserFlowTest {
     private SensorMicroserviceEndpoint saeMock;
     @Mock
     private DeviceService dsMock;
-
     @Mock
     private MemberService msMock;
     @Mock
@@ -45,12 +48,12 @@ class ParserFlowTest {
     private Sensor sensorMock;
     @Mock
     private Device deviceMock;
-
     @Mock
     private Member memberMock;
-
     @Mock
     private DeviceToken deviceTokenMock;
+    @Mock
+    private DeviceConfig deviceConfig;
 
     private NodeCreatorFactory ncf;
 
@@ -73,7 +76,8 @@ class ParserFlowTest {
         Mockito.when(deviceTokenMock.getToken()).thenReturn("token");
 
         List<Node> root = new ParserFlows().flows("""
-                [
+                {
+                "nodes": [
                 {
                     "ref": "123df",
                     "name": "ListeningSensorNode",
@@ -86,7 +90,13 @@ class ParserFlowTest {
                     },
                     "childed":[]         
                 }           
-                ]
+                ],
+                 "viewport": {
+                    "x": 1098.2806938768847,
+                    "y": 708.8455471415423,
+                    "zoom": 0.7393413459089405
+                  }
+                }
                 """, ncf.create());
 
         Assertions.assertInstanceOf(ListeningSensorNode.class, root.get(0));
@@ -104,8 +114,9 @@ class ParserFlowTest {
         Mockito.when(deviceTokenMock.getToken()).thenReturn("token");
 
         List<Node> root = new ParserFlows().flows("""
-                [
-                {
+                   {
+                  "nodes": [
+                    {
                     "ref": "root",
                     "name": "ListeningSensorNode",
                     "sensor":{
@@ -138,7 +149,13 @@ class ParserFlowTest {
                     "name": "AsyncNode",
                     "childed":[]         
                 }            
-                ]
+                ],
+                 "viewport": {
+                    "x": 1098.2806938768847,
+                    "y": 708.8455471415423,
+                    "zoom": 0.7393413459089405
+                  }
+                }
                 """, ncf.create());
 
         Assertions.assertInstanceOf(ListeningSensorNode.class, root.get(0));
@@ -152,7 +169,6 @@ class ParserFlowTest {
     }
 
 
-
     @Test
     public void flow_3_test() throws JsonProcessingException, NotFoundPinException, NotFoundDeviceConfigException, NotFoundDeviceException, FlowException, NotFoundMemberException {
         Mockito.when(dsMock.isDeviceExist(Mockito.any(), Mockito.any())).thenReturn(true);
@@ -160,7 +176,15 @@ class ParserFlowTest {
         Mockito.when(sensorMock.getDevice()).thenReturn(deviceMock);
         Mockito.when(msMock.loggedMember()).thenReturn(memberMock);
         Mockito.when(dsMock.getDevice(Mockito.any(), Mockito.any())).thenReturn(Optional.of(deviceMock));
+        Mockito.when(dsMock.currentDeviceConfig(Mockito.any(), Mockito.any())).thenReturn(deviceConfig);
+        Mockito.when(deviceConfig.getConfig()).thenReturn("{}");
+        ConfigPayload configPayload = new ConfigPayload();
+        PwmConfig pwmConfig = new PwmConfig();
+        pwmConfig.setPin(23);
+        configPayload.setPwmConfig(Collections.singletonList(pwmConfig));
+        Mockito.when(dusMock.mapConfigToObject(Mockito.any())).thenReturn(configPayload);
         Mockito.when(deviceMock.getCurrentDeviceToken()).thenReturn(deviceTokenMock);
+
         Mockito.when(deviceTokenMock.getToken()).thenReturn("token");
 
         List<Node> root = new ParserFlows().flows("""
@@ -202,7 +226,7 @@ class ParserFlowTest {
                       "name": "SendPwmValueNode",
                       "type": "default",
                       "sensor": {
-                        "pin": 22,
+                        "pin": 23,
                         "deviceId": "DDDDDDDDDDDD",
                         "valueVariable": "g_c.pwm_value"
                       },
@@ -237,9 +261,4 @@ class ParserFlowTest {
                 """, ncf.create());
 
     }
-
-
-
-
-
 }

@@ -14,6 +14,7 @@ import pl.lasota.sensor.flows.nodes.utils.NodeUtils;
 import java.util.Optional;
 
 @FlowNode
+
 public class SendPwmValueNode extends Node {
 
     private final Data data;
