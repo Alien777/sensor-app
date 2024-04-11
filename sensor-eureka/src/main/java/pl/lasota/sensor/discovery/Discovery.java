@@ -1,4 +1,4 @@
-package pl.lastota.sensor.discovery;
+package pl.lasota.sensor.discovery;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

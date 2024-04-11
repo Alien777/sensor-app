@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.quartz.*;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.UUID;
 
 @Service
@@ -17,9 +18,11 @@ public class InitJobs {
         JobDetail reactiveJob = JobBuilder.newJob(ReactiveJob.class)
                 .withIdentity("reactive_job", "flows_job")
                 .build();
+        Date startTime = DateBuilder.futureDate(30, DateBuilder.IntervalUnit.SECOND);
+
         Trigger trigger1 = TriggerBuilder.newTrigger()
                 .withIdentity("reactive_job_" + UUID.randomUUID(), "flows_job")
-                .startNow()
+                .startAt(startTime)
                 .withSchedule(SimpleScheduleBuilder.simpleSchedule()
                         .withIntervalInSeconds(30)
                         .repeatForever())

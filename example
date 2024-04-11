@@ -1,7 +1,0 @@
-{
-        "member_id":"kEbM99Pi9OFnwWAS",
-        "device_id": "DDDDDDDDDDDD",
-        "token": "a2d57835-33e8-43e2-ba87-a9606560ba3c",
-        "version_firmware": "ESP-32S",
-        "message_type": "DEVICE_CONNECTED"
-}

@@ -17,25 +17,25 @@ I want to create a simple system for remote management of devices like ESP and o
   Provides discovery for sensor-api for sensor-gui, e.g., send new config.
 - `sensor-flow`:
   Component that manages flows and their launch
-- `bin`:
-  - `esp-firmware`:
+- `firmwares`:
+  - `esp-firmwares`:
     Firmware for ESP 32. The project is written in C language for ESP IDF.
-  - `defaultConfig.json` contains the default config for firmware.
-  - `schema.json` contains the specification based on the API payload documentation for firmware.
-  - [payload](bin/payload/README.md) contains API payload between device and sensor-api.
+  - `defaultConfig.json` contains the default config for firmwares.
+  - `schema.json` contains the specification based on the API payload documentation for firmwares.
+  - [payload](documentation/Payload) contains API payload between device and sensor-api.
 
 
 ### Esp Panel GUI
 
-![img.png](readme/esp-panel.png)
+![img.png](documentation/files/esp-panel.png)
 
 ### Flow config
 
-![img.png](readme/flow-config.png)
+![img.png](documentation/files/flow-config.png)
 
 ### Device config
 
-![img.png](readme/device-config.png)
+![img.png](documentation/files/device-config.png)
 
 ### My Plan
 #### ESP32:
@@ -44,9 +44,9 @@ I want to create a simple system for remote management of devices like ESP and o
 * Support UART
 * Support I2C
 * Support SPI
-* Dynamic OTA firmware update
+* Dynamic OTA firmwares update
 * ~~Create a layout and mechanism for managing flow for devices and sensors~~
-* Add the possibility to upload firmware from the GUI
+* Add the possibility to upload firmwares from the GUI
 * Add a panel to the GUI to read logs from a connected device via USB
 * Create a flow mechanism for devices and sensors
 

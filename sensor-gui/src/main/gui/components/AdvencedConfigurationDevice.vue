@@ -99,7 +99,7 @@ const selectConfig = (config: DeviceConfigT) => {
               <s v-if="config.forVersion!==device.version">
                 <q-item-label>{{ `ID: ${config.forVersion}` }}
                   <q-tooltip>
-                    This version of config is doesn't compatibility with device firmware version
+                    This version of config is doesn't compatibility with device firmwares version
                   </q-tooltip>
                 </q-item-label>
               </s>

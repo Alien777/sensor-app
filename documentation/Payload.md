@@ -2,7 +2,7 @@
 
 This api is constant for all devices. Basic of structures of api they ensure Java classes. It is possible extend this
 api
-using [schema.json](../ESP-32S/schema.json). For example attent is optional in Java class but for version firmware
+using [schema.json](../firmwares/ESP-32S/schema.json). For example attent is optional in Java class but for version firmwares
 ESP-32S schema reduces it to values 0, 1, 2, 3
 
 ## MessageFrame
@@ -19,7 +19,7 @@ ESP-32S schema reduces it to values 0, 1, 2, 3
   - 
 - `version_firmware`:
     - **Type**: String
-    - **Description**: Specifies the firmware version of the device, crucial for compatibility checks and updates.
+    - **Description**: Specifies the firmwares version of the device, crucial for compatibility checks and updates.
 
 - `device_id`:
     - **Type**: String
