@@ -31,7 +31,7 @@ export interface FlowT {
     id: number;
     name: string;
     config: string;
-    activate: boolean;
+    isActivate: boolean;
 }
 
 export interface ErrorT {

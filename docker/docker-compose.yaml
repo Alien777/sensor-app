@@ -1,22 +1,79 @@
-version: '3.9'
+version: '3.8'
 services:
-  postgers:
+  sensor-postgres:
+    container_name: sensor-postgres-docker-compose
     image: postgres:latest
-    ports:
-      - 5432:5432
+    restart: always
     environment:
-      - POSTGRES_PASSWORD=db
-      - POSTGRES_USER=db
-      - POSTGRES_DB=sensor
-  volumes:
-    - ~/apps/postgres:/var/lib/postgresql/data
-  eureka:
-    build: ../sensor-eureka
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=postgres
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - internal-network
+  sensor-eureka:
+    container_name: sensor-eureka-docker-compose
+    build:
+      context: ../
+      dockerfile: docker/sensor-eureka.Dockerfile
+    networks:
+      - internal-network
+  sensor-flows:
+    container_name: sensor-flows-docker-compose
+    build:
+      context: ../
+      dockerfile: docker/sensor-flows.Dockerfile
+    networks:
+      - internal-network
+    depends_on:
+      sensor-postgres:
+        condition: service_started
+      sensor-eureka:
+        condition: service_started
+  sensor-api:
+    container_name: sensor-api-docker-compose
+    build:
+      context: ../
+      dockerfile: docker/sensor-api.Dockerfile
+    networks:
+      - internal-network
+    depends_on:
+      sensor-postgres:
+        condition: service_started
+      sensor-eureka:
+        condition: service_started
+  sensor-gui-backend:
+    container_name: sensor-backend-docker-compose
+    build:
+      context: ../
+      dockerfile: docker/sensor-gui-backend.Dockerfile
     ports:
-      - "8761:8761"
-  flows:
-    build: ../sensor-flows
-    environment:
-      - PORT=0
+      - "8080:8080"
+    networks:
+      - internal-network
+    depends_on:
+      sensor-postgres:
+        condition: service_started
+      sensor-eureka:
+        condition: service_started
+  sensor-gui-frontend:
+    container_name: sensor-frontend-docker-compose
+    build:
+      context: ../
+      dockerfile: docker/sensor-gui-frontend.Dockerfile
     ports:
-      - "0:0"
+      - "3000:3000"
+#    environment:
+#      - NUXT_PUBLIC_API_HOST=http://127.0.0.1:8080
+#      - NUXT_PUBLIC_API_URL=http://127.0.0.1:8080/api
+    networks:
+      - internal-network
+    depends_on:
+      sensor-gui-backend:
+        condition: service_started
+volumes:
+  postgres-data: { }
+networks:
+  internal-network:
+    driver: bridge

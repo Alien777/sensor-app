@@ -8,8 +8,8 @@
                label="Create New Flow"/>
         <q-tab v-for="flow in flows"
                :name="flow.id"
-               :icon="flow.activate?'start':'stop'"
-               :class="flow.activate?'bg-green-1':'bg-red-1'"
+               :icon="flow.isActivate?'start':'stop'"
+               :class="flow.isActivate?'bg-green-1':'bg-red-1'"
                :label="flow.name?flow.name:flow.id">
         </q-tab>
       </q-tabs>

@@ -9,12 +9,12 @@ server:
         http-only: false
 eureka:
   client:
-    registryFetchIntervalSeconds: 5 # Czas w sekundach między pobieraniem rejestrów
+    registryFetchIntervalSeconds: 5
     serviceUrl:
       defaultZone: ${EUREKA_URI:http://localhost:8761/eureka}
   instance:
-    leaseRenewalIntervalInSeconds: 10 # Częstotliwość, z jaką instancja informuje serwer Eureka, że nadal jest aktywna
-    leaseExpirationDurationInSeconds: 30 # Czas, po którym instancja jest usuwana z rejestru, jeśli nie odnowiła swojego leasu
+    leaseRenewalIntervalInSeconds: 10
+    leaseExpirationDurationInSeconds: 30
     preferIpAddress: true
     instance-id: ${spring.application.name}:${random.uuid}
 spring:
@@ -44,16 +44,14 @@ spring:
     config:
       enabled: false
 sensor:
+  internal-apis:
+    jwt:
+      secret: Gkl3uP7ATJcLNka0p7+v4hY0OcTu9Y08+QP1sFYE4PI=
+      expiration: 1440
   gui-url: http://localhost:3000
   redirect:
     login-success: http://localhost:3000/oauth2
   jwt:
     secret: Gkl3uP7ATJcLNka0p7+v4hY0OcTu9H08+QP1sFYE4PI=
     expiration: 1440
-  core:
-    sensor-flows-name: sensor-flows
-    firmware-folder: bin
-    jwt-internal:
-      secret: Gkl3uP7ATJcLNka0p7+v4hY0OcTu9Y08+QP1sFYE4PI=
-      expiration: 1440
   mqtt-ip: 192.168.1.71

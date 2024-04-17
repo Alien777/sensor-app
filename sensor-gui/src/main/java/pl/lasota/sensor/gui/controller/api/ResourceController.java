@@ -6,8 +6,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import pl.lasota.sensor.core.exceptions.NotFoundSchemaConfigException;
-import pl.lasota.sensor.gui.config.properties.SensorProperties;
+import pl.lasota.sensor.gui.config.properties.GuiProperties;
 
 @RestController()
 @RequestMapping("/api/resource")
@@ -16,11 +15,11 @@ import pl.lasota.sensor.gui.config.properties.SensorProperties;
 public class ResourceController {
 
 
-    private final SensorProperties properties;
+    private final GuiProperties properties;
 
     @GetMapping("/mqtt-server")
     @PreAuthorize("isAuthenticated()")
-    public String schemaForVersion() throws NotFoundSchemaConfigException {
+    public String schemaForVersion() {
         return properties.getMqttIp();
     }
 

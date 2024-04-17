@@ -1,28 +1,19 @@
 package pl.lasota.sensor.flows.nodes.builder;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Service;
-import pl.lasota.sensor.core.entities.Member;
-import pl.lasota.sensor.core.entities.device.Device;
-import pl.lasota.sensor.core.exceptions.*;
-import pl.lasota.sensor.core.entities.device.DeviceConfig;
-import pl.lasota.sensor.core.entities.mqtt.payload.to.ConfigPayload;
-import pl.lasota.sensor.core.apis.SensorMicroserviceEndpoint;
-import pl.lasota.sensor.core.service.DeviceService;
-import pl.lasota.sensor.core.service.DeviceUtilsService;
-import pl.lasota.sensor.core.service.MemberService;
+import pl.lasota.sensor.flows.exceptions.SensorFlowException;
 import pl.lasota.sensor.flows.nodes.Node;
 import pl.lasota.sensor.flows.nodes.nodes.*;
-import pl.lasota.sensor.flows.nodes.nodes.ListeningSensorNode;
-import pl.lasota.sensor.flows.nodes.nodes.AsyncNode;
-import pl.lasota.sensor.flows.nodes.nodes.CronNode;
-import pl.lasota.sensor.flows.nodes.nodes.SleepNode;
 import pl.lasota.sensor.flows.nodes.utils.GlobalContext;
 import pl.lasota.sensor.flows.nodes.utils.SensorListeningManager;
+import pl.lasota.sensor.internal.apis.api.SensorMicroserviceEndpoint;
+import pl.lasota.sensor.internal.apis.api.device.DeviceI;
+import pl.lasota.sensor.member.entities.Member;
+import pl.lasota.sensor.member.services.MemberService;
 
-import java.util.Optional;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -31,11 +22,10 @@ public class NodeCreatorFactory {
     private final TaskScheduler taskScheduler;
     private final SensorListeningManager slm;
     private final SensorMicroserviceEndpoint sae;
-    private final DeviceService ds;
     private final MemberService ms;
-    private final DeviceUtilsService dus;
 
-    public Factory create() throws NotFoundMemberException {
+
+    public Factory create() {
         return new Factory(new GlobalContext(ms.loggedUser()));
     }
 
@@ -68,43 +58,26 @@ public class NodeCreatorFactory {
             return new CronNode(ref, globalContext, taskScheduler, cron);
         }
 
-        public Node requestAnalogData(String ref, RequestAnalogDataNode.Data data) throws NotFoundMemberException, NotFoundDeviceException {
+        public Node requestAnalogData(String ref, RequestAnalogDataNode.Data data) {
             Member member = ms.loggedMember();
-            Optional<Device> optionalDevice = ds.getDevice(member.getId(), data.getDeviceId());
-            if (optionalDevice.isEmpty()) {
-                throw new NotFoundDeviceException();
-            }
+            DeviceI deviceI = sae.get(data.getDeviceId());
             return new RequestAnalogDataNode(ref, globalContext, data, sae);
         }
 
-        public final Node listeningSensorNode(String ref, ListeningSensorNode.Data data) throws NotFoundDeviceException, FlowException, NotFoundMemberException {
+        public final Node listeningSensorNode(String ref, ListeningSensorNode.Data data) {
             Member member = ms.loggedMember();
-            Optional<Device> optionalDevice = ds.getDevice(member.getId(), data.getDeviceId());
-            if (optionalDevice.isEmpty()) {
-                throw new NotFoundDeviceException();
-            }
+            DeviceI deviceI = sae.get(data.getDeviceId());
             return new ListeningSensorNode(ref, globalContext, data, slm);
         }
 
-        public final Node sendPwmValueNode(String ref, SendPwmValueNode.Data data) throws NotFoundDeviceException, JsonProcessingException, NotFoundPinException, NotFoundMemberException {
+        public final Node sendPwmValueNode(String ref, SendPwmValueNode.Data data) {
             Member member = ms.loggedMember();
-            Optional<Device> deviceOptional = ds.getDevice(member.getId(), data.getDeviceId());
-            if (deviceOptional.isEmpty()) {
-                throw new NotFoundDeviceException();
+            DeviceI deviceI = sae.get(data.getDeviceId());
+            List<Integer> configPwmPins = sae.getConfigPwmPins(data.getDeviceId());
+            if (!configPwmPins.contains(data.getPin())) {
+                throw new SensorFlowException("Pwm pin not found");
             }
-
-            DeviceConfig deviceConfig = ds.currentDeviceConfig(member.getId(), data.getDeviceId());
-            ConfigPayload configPayload = dus.mapConfigToObject(deviceConfig.getConfig());
-            boolean b = configPayload.getPwmConfig().stream().anyMatch(pwmConfig -> pwmConfig.getPin() == data.getPin());
-            if (!b) {
-                throw new NotFoundPinException();
-            }
-
             return new SendPwmValueNode(ref, globalContext, data, sae);
         }
-
-
     }
-
-
 }

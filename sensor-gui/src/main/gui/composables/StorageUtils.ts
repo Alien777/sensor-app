@@ -1,3 +1,6 @@
+import {configUtils} from "./ConfigUtils";
+import {useCookie} from "nuxt/app";
+
 export interface UserInfo {
     fullName: string
     id: string,

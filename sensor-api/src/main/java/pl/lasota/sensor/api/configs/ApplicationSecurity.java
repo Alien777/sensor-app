@@ -7,9 +7,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.stereotype.Service;
-import pl.lasota.sensor.core.apis.security.InternalAuthService;
-import pl.lasota.sensor.core.apis.security.InternalConfigSecurity;
-import pl.lasota.sensor.core.apis.security.InternalJwtOncePerRequestFilter;
+import pl.lasota.sensor.internal.apis.security.InternalAuthService;
+import pl.lasota.sensor.internal.apis.security.InternalConfigSecurity;
+import pl.lasota.sensor.internal.apis.security.InternalJwtOncePerRequestFilter;
 
 import java.util.List;
 
@@ -22,9 +22,8 @@ public class ApplicationSecurity {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        InternalConfigSecurity internalConfigSecurity = new InternalConfigSecurity(new InternalJwtOncePerRequestFilter(internalAuthService, List.of("/api/sensor/message")));
+        InternalConfigSecurity internalConfigSecurity = new InternalConfigSecurity(new InternalJwtOncePerRequestFilter(internalAuthService, List.of("/api/**")));
         return internalConfigSecurity.securityFilterChain(http)
-                .authorizeHttpRequests(r -> r.requestMatchers("/api/sensor/message").permitAll().anyRequest().authenticated())
                 .build();
     }
 }

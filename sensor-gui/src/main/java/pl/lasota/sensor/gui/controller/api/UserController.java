@@ -7,8 +7,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import pl.lasota.sensor.core.exceptions.NotFoundMemberException;
-import pl.lasota.sensor.core.service.MemberService;
+import pl.lasota.sensor.member.services.MemberService;
 
 import java.util.List;
 
@@ -23,7 +22,7 @@ public class UserController {
 
     @GetMapping("/member-key")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<List<String>> getmemberId() throws NotFoundMemberException {
+    public ResponseEntity<List<String>> getmemberId()  {
         return ResponseEntity.ok(List.of(service.loggedMember().getId()));
     }
 }

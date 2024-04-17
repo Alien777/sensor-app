@@ -5,7 +5,8 @@ import lombok.Setter;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Component;
-import pl.lasota.sensor.core.common.User;
+import pl.lasota.sensor.member.User;
+
 
 @Component
 @Scope(value = "session", proxyMode = ScopedProxyMode.TARGET_CLASS)

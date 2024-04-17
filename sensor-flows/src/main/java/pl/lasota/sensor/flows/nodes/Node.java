@@ -4,13 +4,12 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import pl.lasota.sensor.core.exceptions.FlowRuntimeException;
+import pl.lasota.sensor.flows.exceptions.SensorFlowException;
 import pl.lasota.sensor.flows.nodes.utils.GlobalContext;
 import pl.lasota.sensor.flows.nodes.utils.LocalContext;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -23,7 +22,7 @@ public abstract class Node {
 
     protected final GlobalContext globalContext;
 
-    public void execute(LocalContext localContext) throws FlowRuntimeException {
+    public void execute(LocalContext localContext) {
         for (Node node : nodes) {
             if (globalContext.isStopped()) {
                 break;
@@ -34,7 +33,7 @@ public abstract class Node {
                 node.execute(localContext);
             } catch (Exception e) {
                 log.error("Occurred error during executing node {} from {} to {}", id, this.getClass().getName(), node.getClass().getName());
-                throw new RuntimeException(e);
+                throw new SensorFlowException(e, "Occurred error during executing node {} from {} ", id, this.getClass().getName());
             }
         }
     }

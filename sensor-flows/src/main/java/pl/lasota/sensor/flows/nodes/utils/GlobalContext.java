@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import pl.lasota.sensor.core.common.User;
+import pl.lasota.sensor.member.User;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

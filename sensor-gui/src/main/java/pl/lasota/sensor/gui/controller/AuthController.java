@@ -9,8 +9,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import pl.lasota.sensor.gui.security.AuthService;
 import pl.lasota.sensor.gui.model.UserInfo;
+import pl.lasota.sensor.gui.security.AuthService;
 
 @Controller
 @RequiredArgsConstructor
@@ -20,7 +20,7 @@ public class AuthController {
     private final AuthService authService;
 
     @GetMapping("/token")
-    public ResponseEntity<String> getToken() {
+    public ResponseEntity<String> getToken(HttpServletRequest request) {
         String token = authService.getToken();
         return ResponseEntity.ok(token);
     }
@@ -36,8 +36,4 @@ public class AuthController {
     public ResponseEntity<UserInfo> getUserDetails() {
         return ResponseEntity.ok(authService.getUserDetails());
     }
-
-
-
-
 }

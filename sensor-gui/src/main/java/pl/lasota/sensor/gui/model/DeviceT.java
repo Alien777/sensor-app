@@ -1,10 +1,7 @@
 package pl.lasota.sensor.gui.model;
 
 import lombok.Data;
-import pl.lasota.sensor.core.entities.device.Device;
-import pl.lasota.sensor.core.entities.device.DeviceTemporary;
-
-import java.util.UUID;
+import pl.lasota.sensor.internal.apis.api.device.DeviceI;
 
 @Data
 public class DeviceT {
@@ -15,24 +12,13 @@ public class DeviceT {
     private boolean hasConfig;
     private String token;
 
-    public static DeviceT map(Device device, boolean hasConfig) {
-
+    public static DeviceT map(DeviceI device) {
         DeviceT deviceT = new DeviceT();
-        deviceT.id = device.getId();
-        deviceT.version = device.getVersion();
-        deviceT.name = device.getName();
-        deviceT.hasConfig = hasConfig;
-        deviceT.token = device.getCurrentDeviceToken().getToken();
-        return deviceT;
-
-    }
-
-    public static DeviceT map(DeviceTemporary device) {
-        DeviceT deviceT = new DeviceT();
-        deviceT.name = device.getName();
-        deviceT.id = UUID.randomUUID().toString();
-        deviceT.hasConfig = false;
-        deviceT.token = device.getCurrentDeviceToken().getToken();
+        deviceT.id = device.id();
+        deviceT.version = device.currentVersion();
+        deviceT.name = device.name();
+        deviceT.hasConfig = device.hasConfig();
+        deviceT.token = device.token();
         return deviceT;
     }
 }

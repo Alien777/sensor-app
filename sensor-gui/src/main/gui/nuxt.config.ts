@@ -1,11 +1,11 @@
 import {defineNuxtConfig} from "nuxt/config";
 
 export default defineNuxtConfig({
-
+    devtools: {enabled: true},
     runtimeConfig: {
         public: {
-            apiUrl: 'http://localhost:8080/api',
             apiHost: 'http://localhost:8080',
+            apiUrl: 'http://localhost:8080/api',
         }
     },
     css: [

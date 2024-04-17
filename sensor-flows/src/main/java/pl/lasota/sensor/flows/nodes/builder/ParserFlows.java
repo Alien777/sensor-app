@@ -6,13 +6,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import pl.lasota.sensor.core.exceptions.*;
-import pl.lasota.sensor.core.entities.mqtt.payload.MessageType;
+import pl.lasota.sensor.flows.exceptions.SensorFlowException;
 import pl.lasota.sensor.flows.nodes.Node;
 import pl.lasota.sensor.flows.nodes.nodes.AsyncNode;
+import pl.lasota.sensor.flows.nodes.nodes.ListeningSensorNode;
 import pl.lasota.sensor.flows.nodes.nodes.RequestAnalogDataNode;
 import pl.lasota.sensor.flows.nodes.nodes.SendPwmValueNode;
-import pl.lasota.sensor.flows.nodes.nodes.ListeningSensorNode;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -24,21 +23,25 @@ import static pl.lasota.sensor.flows.nodes.utils.NodeUtils.isRoot;
 @Slf4j
 public class ParserFlows {
 
-    public List<Node> flows(String flowsJson, NodeCreatorFactory.Factory factory) throws JsonProcessingException, NotFoundPinException, NotFoundDeviceConfigException, NotFoundDeviceException, FlowException, NotFoundMemberException {
+    public List<Node> flows(String flowsJson, NodeCreatorFactory.Factory factory) {
         log.info("Parse flow to node {} ", flowsJson);
-        final Map<String, RawNode> nodesRaw = new HashMap<>();
-        ObjectMapper om = new ObjectMapper();
-        JsonNode jsonNode = om.readTree(flowsJson);
-        JsonNode nodes = jsonNode.findValue("nodes");
-        for (JsonNode node : nodes) {
-            String ref = ref(node);
-            String name = name(node);
-            List<String> childed = childed(node);
-            Node n = parseNode(ref, name, node, factory);
-            RawNode rawNode = new RawNode(n, childed, ref);
-            nodesRaw.put(ref, rawNode);
+        try {
+            final Map<String, RawNode> nodesRaw = new HashMap<>();
+            ObjectMapper om = new ObjectMapper();
+            JsonNode jsonNode = om.readTree(flowsJson);
+            JsonNode nodes = jsonNode.findValue("nodes");
+            for (JsonNode node : nodes) {
+                String ref = ref(node);
+                String name = name(node);
+                List<String> childed = childed(node);
+                Node n = parseNode(ref, name, node, factory);
+                RawNode rawNode = new RawNode(n, childed, ref);
+                nodesRaw.put(ref, rawNode);
+            }
+            return createStructured(nodesRaw);
+        } catch (JsonProcessingException e) {
+            throw new SensorFlowException("Error parsing flow", e);
         }
-        return createStructured(nodesRaw);
     }
 
     private List<Node> createStructured(Map<String, RawNode> nodesRaw) {
@@ -70,7 +73,7 @@ public class ParserFlows {
         }).collect(Collectors.toList());
     }
 
-    private Node parseNode(String ref, String name, JsonNode root, NodeCreatorFactory.Factory factory) throws NotFoundPinException, NotFoundDeviceConfigException, JsonProcessingException, NotFoundDeviceException, FlowException, NotFoundMemberException {
+    private Node parseNode(String ref, String name, JsonNode root, NodeCreatorFactory.Factory factory) {
         JsonNode node = root.get("sensor");
         switch (name) {
             case "SendPwmValueNode" -> {
@@ -86,7 +89,7 @@ public class ParserFlows {
             }
             case "ListeningSensorNode" -> {
                 String deviceId = fString(node, "deviceId");
-                MessageType type = MessageType.valueOf(fString(node, "messageType").toUpperCase());
+                String type = fString(node, "messageType").toUpperCase();
                 ListeningSensorNode.Data data = ListeningSensorNode.Data.create(deviceId, type);
                 return factory.listeningSensorNode(ref, data);
             }

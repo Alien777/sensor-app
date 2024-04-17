@@ -2,14 +2,14 @@ package pl.lasota.sensor.flows.nodes.nodes;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import pl.lasota.sensor.core.apis.SensorMicroserviceEndpoint;
-import pl.lasota.sensor.core.apis.model.sensor.SendPwm;
-import pl.lasota.sensor.core.exceptions.FlowRuntimeException;
+import pl.lasota.sensor.flows.exceptions.SensorFlowException;
 import pl.lasota.sensor.flows.nodes.FlowNode;
 import pl.lasota.sensor.flows.nodes.Node;
 import pl.lasota.sensor.flows.nodes.utils.GlobalContext;
 import pl.lasota.sensor.flows.nodes.utils.LocalContext;
 import pl.lasota.sensor.flows.nodes.utils.NodeUtils;
+import pl.lasota.sensor.internal.apis.api.SensorMicroserviceEndpoint;
+import pl.lasota.sensor.internal.apis.api.device.SendPwmI;
 
 import java.util.Optional;
 
@@ -31,10 +31,10 @@ public class SendPwmValueNode extends Node {
         Optional<Long> value = NodeUtils.getValue(data.valueVariable, localContext, globalContext, Long.class);
         if (value.isPresent()) {
             try {
-                sensorMicroserviceEndpoint.sendPwmValueToDevice(new SendPwm(data.deviceId, data.pin, value.get()));
+                sensorMicroserviceEndpoint.sendPwmValueToDevice(new SendPwmI(data.deviceId, data.pin, value.get()));
                 super.execute(localContext);
             } catch (Exception e) {
-                throw new FlowRuntimeException(e);
+                throw new SensorFlowException("Occurred problem with send pwm value to device", e);
             }
         }
     }

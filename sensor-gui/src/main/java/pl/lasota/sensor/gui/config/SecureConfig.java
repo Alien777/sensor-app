@@ -10,10 +10,15 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
-import pl.lasota.sensor.gui.security.SensorAuthenticationSuccessHandler;
-import pl.lasota.sensor.gui.security.JwtOncePerRequestFilter;
-import pl.lasota.sensor.gui.config.properties.SensorProperties;
+import pl.lasota.sensor.gui.config.properties.GuiProperties;
 import pl.lasota.sensor.gui.controller.GlobalExceptionHandler;
+import pl.lasota.sensor.gui.security.JwtOncePerRequestFilter;
+import pl.lasota.sensor.gui.security.SensorAuthenticationSuccessOAuthHandler;
+import pl.lasota.sensor.internal.apis.security.InternalAuthService;
+import pl.lasota.sensor.internal.apis.security.InternalConfigSecurity;
+import pl.lasota.sensor.internal.apis.security.InternalJwtOncePerRequestFilter;
+
+import java.util.List;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
@@ -25,12 +30,17 @@ public class SecureConfig {
 
     private final JwtOncePerRequestFilter jwtOncePerRequestFilter;
     private final GlobalExceptionHandler authenticationEntryPoint;
-    private final SensorAuthenticationSuccessHandler sensorAuthenticationSuccessHandler;
-    private final SensorProperties properties;
+    private final SensorAuthenticationSuccessOAuthHandler sensorAuthenticationSuccessOAuthHandler;
+    private final InternalAuthService internalAuthService;
+    private final GuiProperties properties;
+
+    public final static String[] OPENED_PATHS = {"/api/auth/token", "/api-internal/**"};
+    public final static String LOGIN_PATH = "/api/auth/login";
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        return http
+        InternalConfigSecurity internalConfigSecurity = new InternalConfigSecurity(new InternalJwtOncePerRequestFilter(internalAuthService, List.of("/api/**")));
+        return internalConfigSecurity.securityFilterChain(http)
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(request -> {
                     var corsConfiguration = new CorsConfiguration();
@@ -43,17 +53,17 @@ public class SecureConfig {
                 .exceptionHandling(e -> e
                         .authenticationEntryPoint(authenticationEntryPoint))
                 .authorizeHttpRequests(auth -> {
-                    auth.requestMatchers("/api/auth/token")
+                    auth.requestMatchers(OPENED_PATHS)
                             .permitAll();
                     auth.anyRequest()
                             .authenticated();
                 })
                 .logout(AbstractHttpConfigurer::disable)
                 .oauth2Login(a -> a
-                        .successHandler(sensorAuthenticationSuccessHandler))
-                .formLogin(AbstractHttpConfigurer::disable)
+                        .successHandler(sensorAuthenticationSuccessOAuthHandler))
                 .httpBasic(withDefaults())
                 .addFilterBefore(jwtOncePerRequestFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
+
     }
 }

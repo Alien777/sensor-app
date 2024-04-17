@@ -1,6 +1,7 @@
 package pl.lasota.sensor.flows.nodes.nodes;
 
-import pl.lasota.sensor.core.exceptions.FlowRuntimeException;
+
+import pl.lasota.sensor.flows.exceptions.SensorFlowException;
 import pl.lasota.sensor.flows.nodes.FlowNode;
 import pl.lasota.sensor.flows.nodes.Node;
 import pl.lasota.sensor.flows.nodes.utils.GlobalContext;
@@ -23,7 +24,7 @@ public class SleepNode extends Node {
             Thread.sleep(Duration.ofSeconds(sleepTimeSeconds));
             super.execute(localContext);
         } catch (InterruptedException e) {
-            throw new FlowRuntimeException(e);
+            throw new SensorFlowException("Occurred problem with interrupt", e);
         }
     }
 

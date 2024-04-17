@@ -1,11 +1,8 @@
 package pl.lasota.sensor.flows.nodes.nodes;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cglib.core.Local;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.support.CronTrigger;
-import pl.lasota.sensor.core.exceptions.FlowException;
-import pl.lasota.sensor.core.exceptions.FlowRuntimeException;
 import pl.lasota.sensor.flows.nodes.FlowNode;
 import pl.lasota.sensor.flows.nodes.Node;
 import pl.lasota.sensor.flows.nodes.StartFlowNode;
@@ -14,7 +11,6 @@ import pl.lasota.sensor.flows.nodes.utils.LocalContext;
 
 import java.util.Map;
 import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 
 @Slf4j

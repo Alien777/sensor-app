@@ -1,5 +1,5 @@
 <template>
-  redirect...
+  redirect
 </template>
 
 <script setup lang="ts">

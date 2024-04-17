@@ -12,7 +12,6 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import pl.lasota.sensor.core.exceptions.SensorException;
-import pl.lasota.sensor.gui.config.properties.SensorProperties;
 import pl.lasota.sensor.gui.model.ErrorResponseT;
 
 import java.io.IOException;
@@ -22,20 +21,18 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class GlobalExceptionHandler implements AuthenticationEntryPoint {
 
-    private final SensorProperties properties;
-
     @ExceptionHandler(value = SensorException.class)
     public ResponseEntity<ErrorResponseT> blogNotFoundException(SensorException se) {
-        ErrorResponseT errorResponseT = new ErrorResponseT(se.getCode(), se.getDetails());
-        log.error("Sensor exception error {}, {}", se.getCode(), se.getDetails(), se);
+        ErrorResponseT errorResponseT = new ErrorResponseT(se.getMessage(), se.getDetails());
+        log.error("Sensor exception error {}, {}", se.getMessage(), se.getDetails(), se);
         return new ResponseEntity<>(errorResponseT, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler(value = Exception.class)
     public ResponseEntity<ErrorResponseT> databaseConnectionFailsException(Exception e) {
         log.error("Internal error ", e);
-        ErrorResponseT errorResponseT = new ErrorResponseT("EX", "Contact with admin");
-        log.error("Sensor exception error {}", "EX", e);
+        ErrorResponseT errorResponseT = new ErrorResponseT(e.getMessage(), "Contact with admin");
+        log.error("Sensor exception error {}", e.getMessage(), e);
         return new ResponseEntity<>(errorResponseT, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 

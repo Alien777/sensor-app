@@ -7,12 +7,12 @@ import org.quartz.JobExecutionException;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.web.client.RestClient;
-import pl.lasota.sensor.core.apis.FlowsMicroserviceEndpoint;
-import pl.lasota.sensor.core.apis.security.InternalAuthService;
-import pl.lasota.sensor.core.entities.flows.Flow;
-import pl.lasota.sensor.flows.LocalManagerFlows;
-import pl.lasota.sensor.flows.configs.FlowProperties;
-import pl.lasota.sensor.flows.service.FlowService;
+import pl.lasota.sensor.flows.properties.FlowsProperties;
+import pl.lasota.sensor.flows.services.LocalManagerFlows;
+import pl.lasota.sensor.flows.entities.Flow;
+import pl.lasota.sensor.flows.services.FlowService;
+import pl.lasota.sensor.internal.apis.api.FlowsMicroserviceEndpoint;
+import pl.lasota.sensor.internal.apis.security.InternalAuthService;
 
 import java.util.List;
 import java.util.Optional;
@@ -24,7 +24,7 @@ public class ReactiveJob extends QuartzJobBean {
     private final FlowService flowService;
     private final DiscoveryClient dc;
     private final RestClient rt;
-    private final FlowProperties fp;
+    private final FlowsProperties fp;
     private final FlowsMicroserviceEndpoint fme;
     private final LocalManagerFlows mf;
     private final InternalAuthService ms;

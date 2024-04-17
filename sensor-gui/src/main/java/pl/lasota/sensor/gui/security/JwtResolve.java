@@ -1,13 +1,12 @@
 package pl.lasota.sensor.gui.security;
 
 
-import io.jsonwebtoken.*;
+import io.jsonwebtoken.Jwts;
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.stereotype.Component;
-import pl.lasota.sensor.core.common.User;
-import pl.lasota.sensor.gui.config.properties.SensorProperties;
+import pl.lasota.sensor.gui.config.properties.GuiProperties;
 import pl.lasota.sensor.gui.exceptions.AuthException;
+import pl.lasota.sensor.member.User;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
@@ -15,13 +14,13 @@ import java.util.Date;
 @Component
 @RequiredArgsConstructor
 public class JwtResolve {
-    private final SensorProperties sensorProperties;
+    private final GuiProperties guiProperties;
 
     public String generateToken(User user) {
-        Long expiration = sensorProperties.getJwt()
+        Long expiration = guiProperties.getJwt()
                 .expiration();
 
-        SecretKey secretAsKey = sensorProperties.getJwt()
+        SecretKey secretAsKey = guiProperties.getJwt()
                 .getSecretAsKey();
         return Jwts.builder()
                 .claim("id", user.getId())
@@ -35,7 +34,7 @@ public class JwtResolve {
 
     public void parseToken(String token) throws AuthException {
 
-        SecretKey secretAsKey = sensorProperties.getJwt()
+        SecretKey secretAsKey = guiProperties.getJwt()
                 .getSecretAsKey();
         try {
             Jwts.parser()

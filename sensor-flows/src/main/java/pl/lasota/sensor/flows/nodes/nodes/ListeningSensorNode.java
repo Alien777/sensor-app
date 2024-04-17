@@ -3,13 +3,12 @@ package pl.lasota.sensor.flows.nodes.nodes;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import pl.lasota.sensor.core.apis.model.flow.FlowSensorAnalogT;
-import pl.lasota.sensor.core.apis.model.flow.FlowSensorT;
-import pl.lasota.sensor.core.entities.mqtt.payload.MessageType;
 import pl.lasota.sensor.flows.nodes.FlowNode;
 import pl.lasota.sensor.flows.nodes.Node;
 import pl.lasota.sensor.flows.nodes.StartFlowNode;
 import pl.lasota.sensor.flows.nodes.utils.*;
+import pl.lasota.sensor.internal.apis.api.flows.FlowSensorAnalogI;
+import pl.lasota.sensor.internal.apis.api.flows.FlowSensorI;
 
 @FlowNode
 @Slf4j
@@ -28,10 +27,6 @@ public class ListeningSensorNode extends Node implements StartFlowNode, SensorLi
     @Override
     public boolean start() {
         try {
-            boolean fromEsp = MessageType.isFromDevice(data.forMessageType);
-            if (!fromEsp) {
-                return false;
-            }
             slm.addClient(keySensor, this);
         } catch (Exception e) {
             log.error("Problem with start node ", e);
@@ -41,7 +36,7 @@ public class ListeningSensorNode extends Node implements StartFlowNode, SensorLi
     }
 
     @Override
-    public void onReceiving(FlowSensorT sensor) {
+    public void onReceiving(FlowSensorI sensor) {
         try {
             if (globalContext.isStopped()) {
                 return;
@@ -57,17 +52,17 @@ public class ListeningSensorNode extends Node implements StartFlowNode, SensorLi
     }
 
 
-    private boolean analyze(FlowSensorT sensor, LocalContext localContext) {
+    private boolean analyze(FlowSensorI sensor, LocalContext localContext) {
         if (!sensor.getMessageType().equals(data.forMessageType)) {
             return false;
         }
 
         return switch (sensor.getMessageType()) {
-            case DEVICE_CONNECTED -> {
+            case "DEVICE_CONNECTED" -> {
                 yield true;
             }
-            case ANALOG -> {
-                FlowSensorAnalogT s = (FlowSensorAnalogT) sensor;
+            case "ANALOG" -> {
+                FlowSensorAnalogI s = (FlowSensorAnalogI) sensor;
                 localContext.getVariables().put(id, s);
                 yield true;
             }
@@ -93,6 +88,6 @@ public class ListeningSensorNode extends Node implements StartFlowNode, SensorLi
     @Getter
     public static class Data {
         private final String deviceId;
-        private final MessageType forMessageType;
+        private final String forMessageType;
     }
 }

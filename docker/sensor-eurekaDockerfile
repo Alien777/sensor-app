@@ -1,4 +1,0 @@
-FROM openjdk:21
-COPY target/*.jar eureka.jar
-COPY ../sensor-eureka/src/main/resources/application.yml /sensor/eureka/application.yml
-ENTRYPOINT ["java","-jar","eureka.jar","--spring.config.location=file:/app/eureka/application.yml"]

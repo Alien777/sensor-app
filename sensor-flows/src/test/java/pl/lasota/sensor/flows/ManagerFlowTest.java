@@ -10,17 +10,6 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.SimpleAsyncTaskScheduler;
-import pl.lasota.sensor.core.apis.SensorMicroserviceEndpoint;
-import pl.lasota.sensor.core.apis.model.flow.FlowSensorAnalogT;
-import pl.lasota.sensor.core.common.User;
-import pl.lasota.sensor.core.entities.DeviceToken;
-import pl.lasota.sensor.core.entities.Member;
-import pl.lasota.sensor.core.entities.Role;
-import pl.lasota.sensor.core.entities.device.Device;
-import pl.lasota.sensor.core.entities.mqtt.payload.MessageType;
-import pl.lasota.sensor.core.service.DeviceService;
-import pl.lasota.sensor.core.service.DeviceUtilsService;
-import pl.lasota.sensor.core.service.MemberService;
 import pl.lasota.sensor.flows.nodes.Node;
 import pl.lasota.sensor.flows.nodes.StartFlowNode;
 import pl.lasota.sensor.flows.nodes.builder.FlowsBuilder;
@@ -28,36 +17,32 @@ import pl.lasota.sensor.flows.nodes.builder.NodeCreatorFactory;
 import pl.lasota.sensor.flows.nodes.nodes.ListeningSensorNode;
 import pl.lasota.sensor.flows.nodes.utils.GlobalContext;
 import pl.lasota.sensor.flows.nodes.utils.SensorListeningManager;
+import pl.lasota.sensor.internal.apis.api.SensorMicroserviceEndpoint;
+import pl.lasota.sensor.internal.apis.api.flows.FlowSensorAnalogI;
+import pl.lasota.sensor.member.User;
+import pl.lasota.sensor.member.entities.Member;
+import pl.lasota.sensor.member.entities.Role;
+import pl.lasota.sensor.member.services.MemberService;
 
 import java.time.Duration;
 import java.util.Collections;
-import java.util.Optional;
 
 class ManagerFlowTest {
     private TaskScheduler ts;
+
     private SensorListeningManager slm;
+
     @Mock
     private SensorMicroserviceEndpoint saeMock;
-    @Mock
-    private DeviceService dsMock;
 
     @Mock
     private MemberService msMock;
 
     @Mock
-    private DeviceUtilsService dusMock;
-
-    @Mock
-    private Device deviceMock;
-
-    @Mock
     private Member memberMock;
 
     @Mock
-    private DeviceToken deviceTokenMock;
-
-    @Mock
-    private FlowSensorAnalogT sensorMock;
+    private FlowSensorAnalogI sensorMock;
 
     private NodeCreatorFactory.Factory factory;
     private GlobalContext globalContext;
@@ -67,7 +52,7 @@ class ManagerFlowTest {
         MockitoAnnotations.openMocks(this);
         ts = new SimpleAsyncTaskScheduler();
         slm = new SensorListeningManager();
-        NodeCreatorFactory ncf = new NodeCreatorFactory(ts, slm, saeMock, dsMock, msMock, dusMock);
+        NodeCreatorFactory ncf = new NodeCreatorFactory(ts, slm, saeMock, msMock);
         globalContext = new GlobalContext(User.builder().id("memberId").roles(Collections.singleton(Role.ROLE_USER)).build());
         factory = ncf.create(globalContext);
     }
@@ -76,18 +61,11 @@ class ManagerFlowTest {
     void listening_sensor_execute_test() throws Exception {
 
         Mockito.when(msMock.loggedMember()).thenReturn(memberMock);
-
         Mockito.when(memberMock.getId()).thenReturn("memberId");
-        Mockito.when(deviceMock.getCurrentDeviceToken()).thenReturn(deviceTokenMock);
-        Mockito.when(deviceTokenMock.getToken()).thenReturn("token");
-        Mockito.when(memberMock.getId()).thenReturn("memberId");
-        Mockito.when(dsMock.getDevice(Mockito.same("memberId"), Mockito.same("deviceId")))
-                .thenReturn(Optional.of(deviceMock));
-
         Mockito.when(sensorMock.getDeviceId()).thenReturn("deviceId");
-        Mockito.when(sensorMock.getMessageType()).thenReturn(MessageType.ANALOG);
+        Mockito.when(sensorMock.getMessageType()).thenReturn("ANALOG");
 
-        Node root = factory.listeningSensorNode("id", ListeningSensorNode.Data.create("deviceId", MessageType.ANALOG));
+        Node root = factory.listeningSensorNode("id", ListeningSensorNode.Data.create("deviceId", "ANALOG"));
         NodeMock node = Mockito.mock(NodeMock.class);
         FlowsBuilder.root(root)
                 .add(root, node);
@@ -102,18 +80,9 @@ class ManagerFlowTest {
     @Test
     void cron_node_execute_test() throws Exception {
 
-        Mockito.when(dsMock.isDeviceExist(Mockito.same("memberId"), Mockito.same("deviceId"))).thenReturn(true);
-
         Mockito.when(memberMock.getId()).thenReturn("memberId");
-        Mockito.when(deviceMock.getCurrentDeviceToken()).thenReturn(deviceTokenMock);
-        Mockito.when(deviceTokenMock.getToken()).thenReturn("token");
-        Mockito.when(memberMock.getId()).thenReturn("memberId");
-        Mockito.when(dsMock.getDevice(Mockito.same("memberId"), Mockito.same("deviceId")))
-                .thenReturn(Optional.of(deviceMock));
-
-
         Mockito.when(sensorMock.getDeviceId()).thenReturn("deviceId");
-        Mockito.when(sensorMock.getMessageType()).thenReturn(MessageType.ANALOG);
+        Mockito.when(sensorMock.getMessageType()).thenReturn("ANALOG");
 
         Node root = factory.cronNode("id", "0/1 * * ? * *");
         NodeMock node = Mockito.mock(NodeMock.class);
@@ -128,18 +97,9 @@ class ManagerFlowTest {
     @Test
     void cron_node_execute_stop_test() throws Exception {
 
-        Mockito.when(dsMock.isDeviceExist(Mockito.same("memberId"), Mockito.same("deviceId"))).thenReturn(true);
-
         Mockito.when(memberMock.getId()).thenReturn("memberId");
-        Mockito.when(deviceMock.getCurrentDeviceToken()).thenReturn(deviceTokenMock);
-        Mockito.when(deviceTokenMock.getToken()).thenReturn("token");
-        Mockito.when(memberMock.getId()).thenReturn("memberId");
-        Mockito.when(dsMock.getDevice(Mockito.same("memberId"), Mockito.same("deviceId")))
-                .thenReturn(Optional.of(deviceMock));
-
-
         Mockito.when(sensorMock.getDeviceId()).thenReturn("deviceId");
-        Mockito.when(sensorMock.getMessageType()).thenReturn(MessageType.ANALOG);
+        Mockito.when(sensorMock.getMessageType()).thenReturn("ANALOG");
 
         Node root = factory.cronNode("id", "0/1 * * ? * *");
         NodeMock node = Mockito.mock(NodeMock.class);
@@ -152,25 +112,14 @@ class ManagerFlowTest {
         Mockito.verify(node, Mockito.times(3)).execute(Mockito.any());
     }
 
-
     @Test
     void cron_node_execute_new_thread_test() throws Exception {
-
-        Mockito.when(dsMock.isDeviceExist(Mockito.same("memberId"), Mockito.same("deviceId"))).thenReturn(true);
-
         Mockito.when(msMock.loggedMember()).thenReturn(memberMock);
         Mockito.when(memberMock.getId()).thenReturn("memberId");
-        Mockito.when(deviceMock.getCurrentDeviceToken()).thenReturn(deviceTokenMock);
-        Mockito.when(deviceTokenMock.getToken()).thenReturn("token");
-        Mockito.when(memberMock.getId()).thenReturn("memberId");
-        Mockito.when(dsMock.getDevice(Mockito.same("memberId"), Mockito.same("deviceId")))
-                .thenReturn(Optional.of(deviceMock));
-
-
         Mockito.when(sensorMock.getDeviceId()).thenReturn("deviceId");
-        Mockito.when(sensorMock.getMessageType()).thenReturn(MessageType.ANALOG);
+        Mockito.when(sensorMock.getMessageType()).thenReturn("ANALOG");
 
-        Node root = factory.listeningSensorNode("id", ListeningSensorNode.Data.create("deviceId",   MessageType.ANALOG));
+        Node root = factory.listeningSensorNode("id", ListeningSensorNode.Data.create("deviceId", "ANALOG"));
         Node async = factory.asyncNodeCreator("id1");
         Node sleep = factory.sleepNode("id3", 1);
 
@@ -193,25 +142,16 @@ class ManagerFlowTest {
 
     }
 
-
     @Test
     void js_condition_true_variable_test() throws Exception {
 
-        Mockito.when(dsMock.isDeviceExist(Mockito.same("memberId"), Mockito.same("deviceId"))).thenReturn(true);
 
         Mockito.when(msMock.loggedMember()).thenReturn(memberMock);
         Mockito.when(memberMock.getId()).thenReturn("memberId");
-        Mockito.when(deviceMock.getCurrentDeviceToken()).thenReturn(deviceTokenMock);
-        Mockito.when(deviceTokenMock.getToken()).thenReturn("token");
-        Mockito.when(memberMock.getId()).thenReturn("memberId");
-        Mockito.when(dsMock.getDevice(Mockito.same("memberId"), Mockito.same("deviceId")))
-                .thenReturn(Optional.of(deviceMock));
-
-
         Mockito.when(sensorMock.getDeviceId()).thenReturn("deviceId");
-        Mockito.when(sensorMock.getMessageType()).thenReturn(MessageType.ANALOG);
+        Mockito.when(sensorMock.getMessageType()).thenReturn("ANALOG");
 
-        Node root = factory.listeningSensorNode("id", ListeningSensorNode.Data.create("deviceId",   MessageType.ANALOG));
+        Node root = factory.listeningSensorNode("id", ListeningSensorNode.Data.create("deviceId", "ANALOG"));
         Node executeIfNode = factory.executeCodeNode("id1", "result=true");
         NodeMock nodeEnd = Mockito.mock(NodeMock.class);
 
@@ -228,21 +168,14 @@ class ManagerFlowTest {
     @Test
     void js_condition_false_variable_test() throws Exception {
 
-        Mockito.when(dsMock.isDeviceExist(Mockito.same("memberId"), Mockito.same("deviceId"))).thenReturn(true);
 
         Mockito.when(msMock.loggedMember()).thenReturn(memberMock);
         Mockito.when(memberMock.getId()).thenReturn("memberId");
-        Mockito.when(deviceMock.getCurrentDeviceToken()).thenReturn(deviceTokenMock);
-        Mockito.when(deviceTokenMock.getToken()).thenReturn("token");
-        Mockito.when(memberMock.getId()).thenReturn("memberId");
-        Mockito.when(dsMock.getDevice(Mockito.same("memberId"), Mockito.same("deviceId")))
-                .thenReturn(Optional.of(deviceMock));
-
         Mockito.when(sensorMock.getDeviceId()).thenReturn("deviceId");
-        Mockito.when(sensorMock.getMessageType()).thenReturn(MessageType.ANALOG);
+        Mockito.when(sensorMock.getMessageType()).thenReturn("ANALOG");
 
 
-        Node root = factory.listeningSensorNode("id", ListeningSensorNode.Data.create("deviceId",  MessageType.DEVICE_CONNECTED));
+        Node root = factory.listeningSensorNode("id", ListeningSensorNode.Data.create("deviceId", "DEVICE_CONNECTED"));
         globalContext.getVariables().put("my_var", false);
         Node executeIfNode = factory.executeCodeNode("id1", "result = g_c.my_var");
         NodeMock nodeEnd = Mockito.mock(NodeMock.class);
@@ -260,22 +193,13 @@ class ManagerFlowTest {
     @Test
     void js_override_java_variable() throws Exception {
 
-        Mockito.when(dsMock.isDeviceExist(Mockito.same("memberId"), Mockito.same("deviceId"))).thenReturn(true);
         Mockito.when(msMock.loggedMember()).thenReturn(memberMock);
         Mockito.when(memberMock.getId()).thenReturn("memberId");
-        Mockito.when(deviceMock.getCurrentDeviceToken()).thenReturn(deviceTokenMock);
-        Mockito.when(deviceTokenMock.getToken()).thenReturn("token");
-        Mockito.when(memberMock.getId()).thenReturn("memberId");
-        Mockito.when(dsMock.getDevice(Mockito.same("memberId"), Mockito.same("deviceId")))
-                .thenReturn(Optional.of(deviceMock));
-
-
         Mockito.when(sensorMock.getDeviceId()).thenReturn("deviceId");
-        Mockito.when(sensorMock.getMessageType()).thenReturn(MessageType.ANALOG);
+        Mockito.when(sensorMock.getMessageType()).thenReturn("ANALOG");
 
         globalContext.getVariables().put("my_var", true);
-
-        Node root = factory.listeningSensorNode("id1", ListeningSensorNode.Data.create("deviceId", MessageType.ANALOG));
+        Node root = factory.listeningSensorNode("id1", ListeningSensorNode.Data.create("deviceId", "ANALOG"));
 
         Node executeCodeNode = factory.executeCodeNode("id2", """
                 g_c.my_var=12

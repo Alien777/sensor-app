@@ -1,7 +1,7 @@
 package pl.lasota.sensor.gui.model;
 
 import lombok.Data;
-import pl.lasota.sensor.core.entities.device.DeviceConfig;
+import pl.lasota.sensor.internal.apis.api.device.ConfigI;
 
 import java.time.OffsetDateTime;
 
@@ -13,12 +13,12 @@ public class ConfigT {
     private String forVersion;
     private OffsetDateTime time;
 
-    public static ConfigT map(DeviceConfig dc, String schema) {
+    public static ConfigT map(ConfigI dc, String schema) {
         ConfigT configT = new ConfigT();
-        configT.id = dc.getId();
-        configT.config = dc.getConfig();
-        configT.forVersion = dc.getForVersion();
-        configT.time = dc.getTime();
+        configT.id = dc.id();
+        configT.config = dc.config();
+        configT.forVersion = dc.forVersion();
+        configT.time = dc.time();
         configT.schema = schema;
         return configT;
     }

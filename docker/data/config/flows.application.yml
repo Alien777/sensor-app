@@ -1,0 +1,56 @@
+eureka:
+  client:
+    registryFetchIntervalSeconds: 5 # Czas w sekundach między pobieraniem rejestrów
+    serviceUrl:
+      defaultZone: ${EUREKA_URI:http://sensor-eureka:8761/eureka}
+  instance:
+    leaseRenewalIntervalInSeconds: 10 # Częstotliwość, z jaką instancja informuje serwer Eureka, że nadal jest aktywna
+    leaseExpirationDurationInSeconds: 30 # Czas, po którym instancja jest usuwana z rejestru, jeśli nie odnowiła swojego leasu
+    preferIpAddress: true
+    instance-id: ${spring.application.name}:${random.uuid}
+spring:
+  application:
+    name: sensor-flows
+  datasource:
+    url: jdbc:postgresql://sensor-postgres:5432/postgres
+    username: postgres
+    password: postgres
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: false
+    open-in-view: false
+
+  cloud:
+    config:
+      enabled: false
+  quartz:
+    job-store-type: jdbc
+    jdbc:
+      initialize-schema: always
+    properties:
+      org:
+        quartz:
+          scheduler:
+            instanceName: ${spring.application.name}
+            instanceId: AUTO
+          jobStore:
+            useProperties: true
+            misfireThreshold: 30000
+            class: org.springframework.scheduling.quartz.LocalDataSourceJobStore
+            driverDelegateClass: org.quartz.impl.jdbcjobstore.PostgreSQLDelegate
+            isClustered: true
+            clusterCheckinInterval: 2000
+sensor:
+  core:
+    sensor-flows-name: sensor-flows
+    firmware-folder: firmwares
+    jwt-internal:
+      secret: Gkl3uP7ATJcLNka0p7+v4hY0OcTu9Y08+QP1sFYE4PI=
+      expiration: 1440
+server:
+  port: 0

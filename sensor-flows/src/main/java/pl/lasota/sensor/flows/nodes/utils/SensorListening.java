@@ -1,10 +1,10 @@
 package pl.lasota.sensor.flows.nodes.utils;
 
-import pl.lasota.sensor.core.apis.model.flow.FlowSensorT;
+import pl.lasota.sensor.internal.apis.api.flows.FlowSensorI;
 
 public interface SensorListening {
 
-    void onReceiving(FlowSensorT sensor);
+    void onReceiving(FlowSensorI sensor);
 }
 
 

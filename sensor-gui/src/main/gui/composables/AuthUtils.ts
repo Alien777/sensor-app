@@ -1,5 +1,7 @@
 import {storageUtils, type UserInfo} from "~/composables/StorageUtils";
 import {simpleAuth} from "~/composables/ClientLogout";
+import {fetchUtils} from "./FetchUtils";
+import {navigateTo} from "nuxt/app";
 
 export const authUtils = (runtimeConfig: any) => {
     let {fetchApi} = fetchUtils(runtimeConfig);
@@ -7,13 +9,13 @@ export const authUtils = (runtimeConfig: any) => {
     const {setToken, setUser, clear, getToken, getUser, getCookieApp} = storageUtils(runtimeConfig);
 
     const logout = () => {
-        fetchApi('/auth/logout', {method: 'delete'}).finally(() => simpleLogout())
+        fetchApi('/auth/logout', getToken(), {method: 'delete'}).finally(() => simpleLogout())
     }
 
     const mainAuthProcess = async () => {
         const navigate = await authProcess();
         if (navigate) {
-            return  navigate;
+            return navigate;
         }
         return null;
     }
@@ -47,15 +49,15 @@ export const authUtils = (runtimeConfig: any) => {
             return true;
         }
         try {
-            const r = await fetchApi(`/auth/token`, {method: 'get'});
+            const r = await fetchApi(`/auth/token`, getToken(), {method: 'get'});
             if (r.error.value) {
-                throw new Error("Problem with token request");
+                return;
             }
             const token = r.data.value as string;
             setToken(token);
-            const u = await fetchApi('/auth/user-details', {method: 'get'});
+            const u = await fetchApi('/auth/user-details', token, {method: 'get'});
             if (u.error.value) {
-                throw new Error("Problem with user details request");
+                return;
             }
             let user = u.data.value as UserInfo;
             setUser(user);
@@ -92,6 +94,22 @@ export const authUtils = (runtimeConfig: any) => {
         return !!(user && user.roles && user.roles.includes(role));
     };
 
+    const basicLogin = (username: string, password: string) => {
+        fetchApi('/auth/login', null, {
+            method: 'POST',
+            headers: {
+                Authorization: `Basic ${btoa(username + ':' + password)}`
+            }
+        }).then((re) => {
+            if(re.error.value)
+            {
+                navigateTo("/auth-error");
+            }else {
+                navigateTo("/oauth2");
+            }
+        })
+    }
+
 
     return {
         auth: mainAuthProcess,
@@ -99,6 +117,7 @@ export const authUtils = (runtimeConfig: any) => {
         username,
         memberId,
         isAuth,
+        basicLogin,
         logout
     }
 }

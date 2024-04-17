@@ -7,9 +7,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.stereotype.Service;
-import pl.lasota.sensor.core.apis.security.InternalAuthService;
-import pl.lasota.sensor.core.apis.security.InternalConfigSecurity;
-import pl.lasota.sensor.core.apis.security.InternalJwtOncePerRequestFilter;
+import pl.lasota.sensor.internal.apis.security.InternalAuthService;
+import pl.lasota.sensor.internal.apis.security.InternalConfigSecurity;
+import pl.lasota.sensor.internal.apis.security.InternalJwtOncePerRequestFilter;
 
 @Configuration
 @Service

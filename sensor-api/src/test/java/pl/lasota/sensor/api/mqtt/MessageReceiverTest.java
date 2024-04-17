@@ -1,17 +1,19 @@
 package pl.lasota.sensor.api.mqtt;
 
+
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.web.client.RestClient;
-import pl.lasota.sensor.api.filter.FilterChain;
-import pl.lasota.sensor.api.filter.filters.BeforeValidMessageFilter;
-import pl.lasota.sensor.api.filter.filters.SaveSensorValueFilter;
-import pl.lasota.sensor.core.apis.FlowsMicroserviceEndpoint;
-import pl.lasota.sensor.core.entities.mqtt.payload.MessageFrame;
-import pl.lasota.sensor.core.entities.mqtt.payload.MessageType;
-import pl.lasota.sensor.core.service.DeviceService;
-import pl.lasota.sensor.core.service.MemberService;
+import pl.lasota.sensor.api.apis.mqtt.MqttPreSendLayout;
+import pl.lasota.sensor.api.payload.MessageFrame;
+import pl.lasota.sensor.api.payload.MessageType;
+import pl.lasota.sensor.api.process.FilterChain;
+import pl.lasota.sensor.api.process.filters.BeforeValidMessageFilter;
+import pl.lasota.sensor.api.process.filters.SaveSensorValueFilter;
+import pl.lasota.sensor.api.services.DeviceService;
+import pl.lasota.sensor.internal.apis.api.FlowsMicroserviceEndpoint;
+import pl.lasota.sensor.member.services.MemberService;
 
 
 class MessageReceiverTest {
@@ -39,7 +41,7 @@ class MessageReceiverTest {
 
 
         FilterChain filterChain = new FilterChain();
-        BeforeValidMessageFilter beforeValidMessageFilter = new BeforeValidMessageFilter(msMock, dsMock);
+        BeforeValidMessageFilter beforeValidMessageFilter = new BeforeValidMessageFilter(dsMock);
         SaveSensorValueFilter saveSensorValueFilter = new SaveSensorValueFilter(dsMock, uMock, crtMock, dcMock, rtMock);
         filterChain
                 .addFilter(beforeValidMessageFilter)
@@ -51,6 +53,4 @@ class MessageReceiverTest {
                 Mockito.same("deviceId_123"));
 
     }
-
-
 }

@@ -7,7 +7,7 @@ let global_id: number = 0
 /**
  * @returns {string} - A unique id.
  */
-function getId(name: string) {
+function getId(name: string): string {
     return `${name}_${global_id++}`
 }
 
@@ -30,7 +30,6 @@ export default function useDragAndDrop() {
     const {
         viewport,
         defaultViewport,
-        connectionPosition,
         addNodes,
         addEdges,
         screenToFlowCoordinate,
@@ -109,7 +108,7 @@ export default function useDragAndDrop() {
 
         const wrap = defineComponent({
             name: 'NodeWrap',
-            setup(props, {slots}) {
+            setup(props: any, {slots}) {
                 const copyIdToClipboard = () => {
                     navigator.clipboard.writeText(id).then(() => {
                     }).catch(err => {

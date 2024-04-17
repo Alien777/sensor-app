@@ -13,12 +13,18 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Service;
-import pl.lasota.sensor.core.entities.Member;
-import pl.lasota.sensor.gui.security.model.SessionStorage;
-import pl.lasota.sensor.core.common.User;
 import pl.lasota.sensor.gui.exceptions.AuthException;
 import pl.lasota.sensor.gui.model.UserInfo;
+import pl.lasota.sensor.gui.security.model.SessionStorage;
+import pl.lasota.sensor.member.User;
+import pl.lasota.sensor.member.entities.Member;
+import pl.lasota.sensor.member.entities.Provider;
+import pl.lasota.sensor.member.services.MemberService;
 
+import javax.security.sasl.AuthenticationException;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.List;
 
 @Service
@@ -27,6 +33,7 @@ import java.util.List;
 public class AuthService {
     private final SessionStorage sessionStorage;
     private final JwtResolve jwtResolve;
+    private final MemberService memberService;
 
     public UserInfo getUserDetails() {
 
@@ -61,37 +68,46 @@ public class AuthService {
         response.addCookie(cookie);
     }
 
+    public void login(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        final String authorization = request.getHeader("Authorization");
+        if (authorization != null && authorization.toLowerCase().startsWith("basic")) {
+            String base64Credentials = authorization.substring("Basic".length()).trim();
+            byte[] credDecoded = Base64.getDecoder().decode(base64Credentials);
+            String credentials = new String(credDecoded, StandardCharsets.UTF_8);
+            // credentials = username:password
 
-    public void auth(HttpServletRequest request) throws AuthException {
+            final String[] values = credentials.split(":", 2);
+            try {
+                Member member = memberService.findByEmailAndProvider(values[0], Provider.LOCAL);
+                boolean b = memberService.checkCredential(values[0], values[1], Provider.LOCAL);
+                if (!b) {
+                    throw new AuthenticationException();
+                }
+                createSession(member);
+
+            } catch (SecurityException e) {
+                throw new AuthenticationException();
+            }
+        }
+    }
+
+
+    public void checkAuth(HttpServletRequest request) throws AuthException {
         String token = extractBearerToken(request);
-        if (token == null && sessionStorage.isEmpty()) {
-            log.info("Anonymous access for system");
-            return;
+        if (token == null || sessionStorage.isEmpty()) {
+            log.info("Token or session storage is empty {}", request.getServletPath());
+            throw new AuthException("Token or session storage is empty " + request.getServletPath());
         }
 
-        if (token == null && !sessionStorage.isEmpty()) {
-            log.info("Anonymous access for system");
-            return;
-        }
+        jwtResolve.parseToken(token);
+        User user = sessionStorage.getUser();
 
-        if (token != null && sessionStorage.isEmpty()) {
-            throw new AuthException("Token is not empty, but session is not empty");
-        }
+        Authentication authentication = new UsernamePasswordAuthenticationToken(user,
+                sessionStorage.getToken(),
+                user.getGrantedRoles());
 
-        if (token != null && !sessionStorage.isEmpty()) {
-            jwtResolve.parseToken(token);
-            User user = sessionStorage.getUser();
-
-            Authentication authentication = new UsernamePasswordAuthenticationToken(user,
-                    sessionStorage.getToken(),
-                    user.getGrantedRoles());
-
-            SecurityContextHolder.getContext()
-                    .setAuthentication(authentication);
-            return;
-        }
-
-        throw new AuthException("Other auth problem");
+        SecurityContextHolder.getContext()
+                .setAuthentication(authentication);
 
     }
 
