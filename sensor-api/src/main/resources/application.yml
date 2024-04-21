@@ -1,11 +1,11 @@
 eureka:
   client:
-    registryFetchIntervalSeconds: 5 # Czas w sekundach między pobieraniem rejestrów
+    registryFetchIntervalSeconds: 5
     serviceUrl:
       defaultZone: ${EUREKA_URI:http://localhost:8761/eureka}
   instance:
-    leaseRenewalIntervalInSeconds: 10 # Częstotliwość, z jaką instancja informuje serwer Eureka, że nadal jest aktywna
-    leaseExpirationDurationInSeconds: 30 # Czas, po którym instancja jest usuwana z rejestru, jeśli nie odnowiła swojego leasu
+    leaseRenewalIntervalInSeconds: 10
+    leaseExpirationDurationInSeconds: 30
     preferIpAddress: true
     instance-id: ${spring.application.name}:${random.uuid}
 spring:

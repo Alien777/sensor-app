@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import pl.lasota.sensor.gui.config.properties.GuiProperties;
+import pl.lasota.sensor.internal.apis.api.SensorMicroserviceEndpoint;
 
 @RestController()
 @RequestMapping("/api/resource")
@@ -15,12 +16,12 @@ import pl.lasota.sensor.gui.config.properties.GuiProperties;
 public class ResourceController {
 
 
-    private final GuiProperties properties;
+    private final SensorMicroserviceEndpoint sme;
 
     @GetMapping("/mqtt-server")
     @PreAuthorize("isAuthenticated()")
     public String schemaForVersion() {
-        return properties.getMqttIp();
+        return sme.getMqttIp();
     }
 
 }

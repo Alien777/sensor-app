@@ -20,6 +20,15 @@ eureka:
 spring:
   application:
     name: sensor-gui
+#  config:
+#    import: file:/home/${USER}/Documents/container/sensor/oauth-config.yml
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            clientId: clientId
+            clientSecret: clientSecret
   datasource:
     url: jdbc:postgresql://sensor-postgres:5432/postgres
     username: postgres
@@ -30,22 +39,18 @@ spring:
     properties:
       hibernate:
         format_sql: true
-        dialect: org.hibernate.dialect.PostgreSQLDialect
     show-sql: false
   cloud:
     config:
       enabled: false
 sensor:
-  gui-url: http://127.0.0.1:3000
+  internal-apis:
+    jwt:
+      secret: Gkl3uP7ATJcLNka0p7+v4hY0OcTu9Y08+QP1sFYE4PI=
+      expiration: 1440
+  gui-url: http://localhost:3000
   redirect:
-    login-success: http://127.0.0.1:3000/oauth2
+    login-success: http://localhost:3000/oauth2
   jwt:
     secret: Gkl3uP7ATJcLNka0p7+v4hY0OcTu9H08+QP1sFYE4PI=
     expiration: 1440
-  core:
-    sensor-flows-name: sensor-flows
-    firmware-folder: firmwares
-    jwt-internal:
-      secret: Gkl3uP7ATJcLNka0p7+v4hY0OcTu9Y08+QP1sFYE4PI=
-      expiration: 1440
-  mqtt-ip: 192.168.1.71

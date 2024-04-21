@@ -7,6 +7,7 @@ import pl.lasota.sensor.api.apis.mappper.Mapper;
 import pl.lasota.sensor.api.apis.mqtt.MqttPreSendLayout;
 import pl.lasota.sensor.api.entities.DeviceConfig;
 import pl.lasota.sensor.api.exception.SensorApiException;
+import pl.lasota.sensor.api.properties.ApiProperties;
 import pl.lasota.sensor.api.services.DeviceService;
 import pl.lasota.sensor.api.services.DeviceUtilsService;
 import pl.lasota.sensor.internal.apis.api.SensorMicroserviceEndpoint;
@@ -25,6 +26,7 @@ public class SensorMicroserviceController implements SensorMicroserviceEndpoint 
     private final MqttPreSendLayout mqttPreSendLayout;
     private final MemberService ms;
     private final DeviceService ds;
+    private final ApiProperties ap;
     private final DeviceUtilsService dsu;
 
     @Override
@@ -126,6 +128,11 @@ public class SensorMicroserviceController implements SensorMicroserviceEndpoint 
     public List<String> getConfigMessageType(String deviceId) {
         Member member = ms.loggedMember();
         return ds.getMessageType(member.getId(), deviceId).stream().map(Enum::name).toList();
+    }
+
+    @Override
+    public String getMqttIp() {
+        return ap.getMqtt().getUrl();
     }
 
 }

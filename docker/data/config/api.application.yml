@@ -21,29 +21,27 @@ spring:
     properties:
       hibernate:
         format_sql: true
-        dialect: org.hibernate.dialect.PostgreSQLDialect
     show-sql: false
     open-in-view: false
   cloud:
     config:
       enabled: false
-
 sensor:
-  mqtt:
-    client-id: ${random.uuid}
-    url: tcp://127.0.0.1:1883
-    topic: $share/mygroup/server
-    username: mqttUserServer
-    password: mqtt
-    max-reconnect-delay: 5000
-    connection-timeout: 30000
-    automatic-reconnect: true
-    unsecur-rest-endpoint: true
-  core:
-    sensor-flows-name: sensor-flows
-    firmware-folder: firmwares
-    jwt-internal:
+  internal-apis:
+    jwt:
       secret: Gkl3uP7ATJcLNka0p7+v4hY0OcTu9Y08+QP1sFYE4PI=
       expiration: 1440
+  api:
+    firmware-folder: firmwares
+    mqtt:
+      client-id: ${random.uuid}
+      url: tcp://127.0.0.1:1883
+      topic: $share/mygroup/server
+      username: mqttUserServer
+      password: mqtt
+      max-reconnect-delay: 5000
+      connection-timeout: 30000
+      automatic-reconnect: true
+      unsecur-rest-endpoint: true
 server:
   port: 0

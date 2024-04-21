@@ -64,9 +64,6 @@ services:
       dockerfile: docker/sensor-gui-frontend.Dockerfile
     ports:
       - "3000:3000"
-#    environment:
-#      - NUXT_PUBLIC_API_HOST=http://127.0.0.1:8080
-#      - NUXT_PUBLIC_API_URL=http://127.0.0.1:8080/api
     networks:
       - internal-network
     depends_on:

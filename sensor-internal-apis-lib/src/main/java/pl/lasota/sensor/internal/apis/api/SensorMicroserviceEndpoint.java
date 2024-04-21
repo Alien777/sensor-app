@@ -62,4 +62,8 @@ public interface SensorMicroserviceEndpoint {
 
     @RequestMapping(method = RequestMethod.GET, value = path + "/{deviceId}/config/message-type")
     List<String> getConfigMessageType(@RequestParam(value = "deviceId") String deviceId);
+
+    @RequestMapping(method = RequestMethod.POST, value = path + "/mqtt-ip")
+    String getMqttIp();
+
 }
