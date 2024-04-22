@@ -35,7 +35,7 @@ sensor:
     firmware-folder: firmwares
     mqtt:
       client-id: ${random.uuid}
-      url: tcp://127.0.0.1:1883
+      url: tcp://sensor-eclipse-mqtt:1883
       topic: $share/mygroup/server
       username: mqttUserServer
       password: mqtt

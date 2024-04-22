@@ -1,5 +1,14 @@
 version: '3.8'
 services:
+  sensor-eclipse-mqtt:
+    container_name: sensor-eclipse-mqtt-docker-compose
+    build:
+      context: ../
+      dockerfile: docker/eclipse-mqtt.Dockerfile
+    ports:
+      - "1883:1883"
+    networks:
+      - internal-network
   sensor-postgres:
     container_name: sensor-postgres-docker-compose
     image: postgres:latest
@@ -42,6 +51,8 @@ services:
       sensor-postgres:
         condition: service_started
       sensor-eureka:
+        condition: service_started
+      sensor-eclipse-mqtt:
         condition: service_started
   sensor-gui-backend:
     container_name: sensor-backend-docker-compose
