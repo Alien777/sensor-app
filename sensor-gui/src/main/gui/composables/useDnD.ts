@@ -1,6 +1,8 @@
 import {type Edge, type GraphNode, useVueFlow, type XYPosition} from '@vue-flow/core'
 import {ref, watch} from 'vue'
 import type {Node, NodeDraggable} from "~/composables/api/StructureApp";
+import NodeModal from "~/components/flows/nodes/NodeModal.vue";
+import {draggableItems} from "~/composables/api/StructureApp";
 
 let global_id: number = 0
 
@@ -32,6 +34,7 @@ export default function useDragAndDrop() {
         defaultViewport,
         addNodes,
         addEdges,
+        removeNodes,
         screenToFlowCoordinate,
         onNodesInitialized,
         updateNode
@@ -88,7 +91,6 @@ export default function useDragAndDrop() {
     function setViewPort(view: any) {
         viewport.value = view;
         defaultViewport.value = view;
-
     }
 
     function insertEdge(edge: Edge) {
@@ -101,31 +103,32 @@ export default function useDragAndDrop() {
         if (max_id != null && max_id >= global_id) {
             global_id = max_id + 1;
         }
-
         const component = defineAsyncComponent(() =>
             import(`~/components/flows/nodes/${insert.name}.vue`)
         )
 
+
         const wrap = defineComponent({
             name: 'NodeWrap',
-            setup(props: any, {slots}) {
-                const copyIdToClipboard = () => {
-                    navigator.clipboard.writeText(id).then(() => {
-                    }).catch(err => {
-                        console.error('Failed to copy ID to clipboard', err);
-                    });
-                };
-                return () =>
-                    h('div', {style: {height: '100%', width: '100%'}}, [
-                        h('strong', {onClick: copyIdToClipboard}, id),
-                        h(component, {
-                            id: id,
-                            sensor: insert.sensor
-                        }, slots.default ? slots.default() : [])]
+
+            setup() {
+                return () => {
+                    return h('div', {style: {height: '100%', width: '100%'}}, [
+                        h(NodeModal, {
+                                id: id,
+                                node: insert,
+                                deleteNodeFunction: (id: string) => removeNodes({id: id} as any),
+                                nodeDefault: draggableItems.value.filter(value => value.name === insert.name)[0]
+                            },
+                            h(component, {
+                                id: id,
+                                sensor: insert.sensor
+                            })
+                        )]
                     );
+                }
             },
         });
-
 
         const newNode: any | Node | Node[] | ((nodes: GraphNode[]) => Node | Node[]) = {
             id: id,

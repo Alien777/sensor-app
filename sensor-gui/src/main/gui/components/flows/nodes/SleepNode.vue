@@ -31,7 +31,7 @@ function handleUpdate() {
     sensor: {
       sleepTimeSeconds: sleepTimeSeconds
     }
-  })
+  } as any)
 }
 </script>
 

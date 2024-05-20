@@ -72,7 +72,7 @@ void config_json(Message *message)
     for (int i = 0; i < message->pwm_configs_size; i++)
     {
 
-        ESP_LOGE("TASK", "Config pwm from pin %d %d", message->pwm_configs[i].pin, message->pwm_configs[i].channel);
+        ESP_LOGE("TASK", "Config pwm from pin %d %d", message->pwm_configs[i].pin, i);
 
         ledc_timer_config_t ledc_timer = {
             .duty_resolution = message->pwm_configs[i].resolution,

@@ -42,9 +42,12 @@ public class FlowsMicroserviceController implements FlowsMicroserviceEndpoint {
         if (flowsInDb.isEmpty()) {
             flowService.saveFlows(member.getId(), null, flowSaveI.name(), flowSaveI.config());
         } else {
+            boolean isRunning = flowsInDb.get().isActivate();
             this.stop(flowSaveI.id());
             flowService.saveFlows(member.getId(), flowSaveI.id(), flowSaveI.name(), flowSaveI.config());
-            this.start(flowSaveI.id());
+            if (isRunning) {
+                this.start(flowSaveI.id());
+            }
         }
         return FlowStatusI.OK;
     }

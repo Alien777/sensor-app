@@ -65,7 +65,7 @@ function handleUpdate() {
       deviceId: deviceId,
       messageType: messageType
     }
-  })
+  } as any)
 }
 </script>
 

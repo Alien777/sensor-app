@@ -11,7 +11,7 @@ const props = defineProps({
   sensor: {
     type: Object as () => any,
     required: false,
-  },
+  } as any,
 })
 
 onMounted(() => {
@@ -32,7 +32,7 @@ function handleUpdate() {
     sensor: {
       cron: cron
     }
-  })
+  } as any)
 }
 </script>
 

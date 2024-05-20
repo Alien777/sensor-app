@@ -1,15 +1,19 @@
 <script setup lang="ts">
 import {defineProps, onMounted, ref} from 'vue'
 import {type Edge, MarkerType, useVueFlow, VueFlow} from '@vue-flow/core'
-import {type ConfigNode, type FlowT, type Node, type NodeDraggable} from "~/composables/api/StructureApp";
+import {
+  type ConfigNode,
+  draggableItems,
+  type FlowT,
+  type Node,
+  type NodeDraggable
+} from "~/composables/api/StructureApp";
 import DropzoneBackground from "~/components/flows/DropzoneBackground.vue";
 import useDragAndDrop from "~/composables/useDnD";
 import {MiniMap} from "@vue-flow/minimap";
 import {flowApi} from "~/composables/api/FlowApi";
-import {Notify} from "quasar";
-import {useQuasar} from 'quasar'
+import {Notify, useQuasar} from "quasar";
 
-const q = useQuasar()
 
 definePageMeta({
   layout: "panel",
@@ -18,17 +22,8 @@ definePageMeta({
 
 
 const {onDragStart} = useDragAndDrop();
-const draggableItems = ref([
-  {type: 'input', name: 'ListeningSensorNode'},
-  {type: 'input', name: 'CronNode'},
-  {type: 'default', name: 'SendPwmValueNode'},
-  {type: 'default', name: 'RequestAnalogDataNode'},
-  {type: 'default', name: 'ExecuteCodeNode'},
-  {type: 'default', name: 'AsyncNode'},
-  {type: 'default', name: 'SleepNode'}
-]);
-const {setViewPort, onDragOver, onDrop, onDragLeave, isDragOver, insertNode, insertEdge} = useDragAndDrop()
-const val = 200
+
+const {onDragOver, onDrop, onDragLeave, isDragOver, insertNode, insertEdge} = useDragAndDrop()
 const innerTab = ref('')
 const splitterModel = ref(200)
 const {onConnect, addEdges, toObject, setViewport} = useVueFlow()
@@ -119,7 +114,7 @@ const onSave = () => {
     return;
   }
   const nodes = toObject();
-  console.log(nodes)
+
   const nod = nodes.nodes.map((value: any) => {
     return {
       ref: value.id,
@@ -198,7 +193,7 @@ const $q = useQuasar();
           <div v-for="item in draggableItems.filter(v => v.type==='input')" :key="item.name"
                :class="`vue-flow__node-${item.type}`"
                :draggable="true" @dragstart="onDragStart($event, {type: item.type, name: item.name} as NodeDraggable)">
-            {{ item.name }}
+            {{ item.readableName }}
           </div>
         </q-card-section>
       </q-card>
@@ -210,13 +205,13 @@ const $q = useQuasar();
           <div v-for="item in draggableItems.filter(v => v.type==='default')" :key="item.name"
                :class="`vue-flow__node-${item.type}`"
                :draggable="true" @dragstart="onDragStart($event, {type: item.type,name: item.name} as NodeDraggable)">
-            {{ item.name }}
+            {{ item.readableName }}
           </div>
         </q-card-section>
       </q-card>
     </template>
     <template v-slot:after>
-      <VueFlow :nodes="nodes" :edges="edges" :default-edge-options="{
+      <VueFlow :nodes="nodes" :edges="edges" delete-key-code=false :default-edge-options="{
       type: 'step',
       style: { stroke: 'black' },
       markerEnd: MarkerType.ArrowClosed,
@@ -286,10 +281,6 @@ const $q = useQuasar();
     flex-direction: row;
     gap: 5px
   }
-}
-
-.save-restore-controls {
-  font-size: 12px
 }
 
 .save-restore-controls button {

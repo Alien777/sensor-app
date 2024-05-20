@@ -32,7 +32,7 @@ function handleUpdate() {
     sensor: {
       code: code
     }
-  })
+  } as any)
 }
 </script>
 

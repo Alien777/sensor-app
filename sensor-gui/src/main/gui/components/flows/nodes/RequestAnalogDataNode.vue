@@ -63,7 +63,7 @@ function handleUpdate() {
       deviceId: deviceId,
       pin: pin
     }
-  })
+  } as any)
 }
 </script>
 

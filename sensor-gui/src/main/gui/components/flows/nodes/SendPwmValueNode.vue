@@ -69,7 +69,7 @@ function handleUpdate() {
       pin: pin,
       valueVariable: valueVariable
     }
-  })
+  } as any)
 }
 </script>
 

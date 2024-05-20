@@ -48,7 +48,7 @@ I want to create a simple system for remote management of devices like ESP and o
 * ~~Create a layout and mechanism for managing flow for devices and sensors~~
 * Add the possibility to upload firmwares from the GUI
 * Add a panel to the GUI to read logs from a connected device via USB
-* Create a flow mechanism for devices and sensors
+* ~~Create a flow mechanism for devices and sensors~~
 
 ### Technologies
 

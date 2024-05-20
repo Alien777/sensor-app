@@ -1,4 +1,5 @@
 import dayjs from "dayjs";
+import {ref} from "vue";
 
 export enum StatusOfFlow {
     OK = "OK",
@@ -25,6 +26,8 @@ export interface NodeDraggable {
     name: string;
     type: string;
     sensor: any;
+    readableName: string;
+    description: string;
 }
 
 export interface FlowT {
@@ -76,3 +79,13 @@ export function timeToDate(d: DeviceConfigT): DeviceConfigT {
 export function formatTime(time: Date) {
     return dayjs(time).format("HH:mm:ss DD-mm-YYYY")
 }
+
+export const draggableItems = ref([
+    {type: 'input', name: 'ListeningSensorNode', readableName: "Listening events", description: "fires up when it receives a message"},
+    {type: 'input', name: 'CronNode', readableName: "Cron executor"},
+    {type: 'default', name: 'SendPwmValueNode', readableName: "Send PWM to Device"},
+    {type: 'default', name: 'RequestAnalogDataNode', readableName: "Analog data query"},
+    {type: 'default', name: 'ExecuteCodeNode', readableName: "Custom code"},
+    {type: 'default', name: 'AsyncNode', readableName: "Execute as none block flow"},
+    {type: 'default', name: 'SleepNode', readableName: "Sleep flow"}
+]);
