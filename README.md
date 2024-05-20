@@ -22,7 +22,7 @@ I want to create a simple system for remote management of devices like ESP and o
     Firmware for ESP 32. The project is written in C language for ESP IDF.
   - `defaultConfig.json` contains the default config for firmwares.
   - `schema.json` contains the specification based on the API payload documentation for firmwares.
-  - [payload](documentation/README) contains API payload between device and sensor-api.
+  - [payload](documentation/README.md) contains API payload between device and sensor-api.
 
 
 ### Esp Panel GUI
