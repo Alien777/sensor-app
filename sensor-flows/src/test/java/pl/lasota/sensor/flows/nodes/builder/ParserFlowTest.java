@@ -6,13 +6,13 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import org.springframework.scheduling.TaskScheduler;
-import org.springframework.scheduling.concurrent.SimpleAsyncTaskScheduler;
+import org.springframework.context.ApplicationContext;
 import pl.lasota.sensor.flows.nodes.Node;
 import pl.lasota.sensor.flows.nodes.nodes.AsyncNode;
 import pl.lasota.sensor.flows.nodes.nodes.ExecuteCodeNode;
 import pl.lasota.sensor.flows.nodes.nodes.ListeningSensorNode;
-import pl.lasota.sensor.flows.nodes.utils.SensorListeningManager;
+import pl.lasota.sensor.flows.nodes.utils.GlobalContext;
+import pl.lasota.sensor.flows.properties.FlowsProperties;
 import pl.lasota.sensor.internal.apis.api.SensorMicroserviceEndpoint;
 import pl.lasota.sensor.member.entities.Member;
 import pl.lasota.sensor.member.services.MemberService;
@@ -21,10 +21,14 @@ import java.util.Collections;
 import java.util.List;
 
 class ParserFlowTest {
+    @Mock
+    private ApplicationContext ac;
 
-    private TaskScheduler ts;
+    @Mock
+    private FlowsProperties fp;
 
-    private SensorListeningManager slm;
+    @Mock
+    private GlobalContext gc;
 
     @Mock
     private SensorMicroserviceEndpoint saeMock;
@@ -35,20 +39,18 @@ class ParserFlowTest {
     @Mock
     private Member memberMock;
 
-    private NodeCreatorFactory ncf;
 
     @BeforeEach
     public void setup() {
         MockitoAnnotations.openMocks(this);
-        ts = new SimpleAsyncTaskScheduler();
-        slm = new SensorListeningManager();
-        ncf = new NodeCreatorFactory(ts, slm, saeMock, msMock);
+        Mockito.when(fp.getScanNodes()).thenReturn(new String[]{"pl.lasota.sensor.flows.nodes.nodes"});
     }
 
     @Test
     public void root_flow_test() {
         Mockito.when(msMock.loggedMember()).thenReturn(memberMock);
-        List<Node> root = new ParserFlows().flows("""
+
+        List<Node> root = new ParserFlows(fp, ac).flows("""
                 {
                 "nodes": [
                 {
@@ -70,7 +72,7 @@ class ParserFlowTest {
                     "zoom": 0.7393413459089405
                   }
                 }
-                """, ncf.create());
+                """, gc);
 
         Assertions.assertInstanceOf(ListeningSensorNode.class, root.get(0));
     }
@@ -80,7 +82,7 @@ class ParserFlowTest {
     public void flow_1_test() {
 
         Mockito.when(msMock.loggedMember()).thenReturn(memberMock);
-        List<Node> root = new ParserFlows().flows("""
+        List<Node> root = new ParserFlows(fp, ac).flows("""
                    {
                   "nodes": [
                     {
@@ -123,7 +125,7 @@ class ParserFlowTest {
                     "zoom": 0.7393413459089405
                   }
                 }
-                """, ncf.create());
+                """, gc);
 
         Assertions.assertInstanceOf(ListeningSensorNode.class, root.get(0));
         Assertions.assertInstanceOf(ExecuteCodeNode.class, root.get(0).getNodes().get(0));
@@ -139,8 +141,10 @@ class ParserFlowTest {
     public void flow_3_test() {
 
         Mockito.when(msMock.loggedMember()).thenReturn(memberMock);
+        Mockito.when(ac.getBean(SensorMicroserviceEndpoint.class)).thenReturn(saeMock);
         Mockito.when(saeMock.getConfigPwmPins(Mockito.any())).thenReturn(Collections.singletonList(23));
-        List<Node> root = new ParserFlows().flows("""
+
+        List<Node> root = new ParserFlows(fp, ac).flows("""
                 {
                   "nodes": [
                     {
@@ -211,7 +215,7 @@ class ParserFlowTest {
                     "zoom": 0.7393413459089405
                   }
                 }
-                """, ncf.create());
+                """, gc);
 
     }
 }

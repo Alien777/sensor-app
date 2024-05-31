@@ -1,7 +1,9 @@
 package pl.lasota.sensor.flows.nodes.nodes;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import org.springframework.context.ApplicationContext;
 import pl.lasota.sensor.flows.exceptions.SensorFlowException;
 import pl.lasota.sensor.flows.nodes.FlowNode;
 import pl.lasota.sensor.flows.nodes.Node;
@@ -10,16 +12,25 @@ import pl.lasota.sensor.flows.nodes.utils.LocalContext;
 import pl.lasota.sensor.internal.apis.api.SensorMicroserviceEndpoint;
 import pl.lasota.sensor.internal.apis.api.device.SendForAnalogDataI;
 
+import static pl.lasota.sensor.flows.nodes.builder.ParserFlows.fInteger;
+import static pl.lasota.sensor.flows.nodes.builder.ParserFlows.fString;
+
 @FlowNode
 public class RequestAnalogDataNode extends Node {
 
     private final Data data;
     private final SensorMicroserviceEndpoint sensorMicroserviceEndpoint;
 
-    public RequestAnalogDataNode(String id, GlobalContext globalContext, Data data, SensorMicroserviceEndpoint sensorMicroserviceEndpoint) {
+    private RequestAnalogDataNode(String id, GlobalContext globalContext, Data data, SensorMicroserviceEndpoint sensorMicroserviceEndpoint) {
         super(id, globalContext);
         this.data = data;
         this.sensorMicroserviceEndpoint = sensorMicroserviceEndpoint;
+    }
+
+    public static Node create(String ref, GlobalContext globalContext, JsonNode node, ApplicationContext context) {
+        String deviceId = fString(node, "deviceId");
+        Integer pin = fInteger(node, "pin");
+        return new RequestAnalogDataNode(ref, globalContext, RequestAnalogDataNode.Data.create(deviceId, pin), context.getBean(SensorMicroserviceEndpoint.class));
     }
 
     @Override

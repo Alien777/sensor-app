@@ -1,4 +1,4 @@
-package pl.lasota.sensor.flows.aspect;
+package pl.lasota.sensor.api.apis;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +21,7 @@ public class LoggingControllerAspect {
 
     private final MemberService memberService;
 
-    @Before("execution(* pl.lasota.sensor.flows.apis.FlowsMicroserviceController.*(..))")
+    @Before("execution(* pl.lasota.sensor.api.apis.SensorMicroserviceController.*(..))")
     public void logRequestMapping(JoinPoint joinPoint) {
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
         Member member;
@@ -30,6 +30,6 @@ public class LoggingControllerAspect {
         } catch (SensorException e) {
             member = null;
         }
-        log.info("[FLOW APP] [{}] Execute path {} by {}", request.getMethod(), request.getServletPath(), member == null ? "none" : member.getId());
+        log.info("[API APP] [{}] Execute path {} by {}", request.getMethod(), request.getServletPath(), member == null ? "none" : member.getId());
     }
 }

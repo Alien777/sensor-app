@@ -5,12 +5,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import pl.lasota.sensor.flows.nodes.Node;
 import pl.lasota.sensor.flows.nodes.StartFlowNode;
-import pl.lasota.sensor.flows.nodes.builder.NodeCreatorFactory;
 import pl.lasota.sensor.flows.nodes.builder.ParserFlows;
+import pl.lasota.sensor.flows.nodes.nodes.FireOnceNode;
+import pl.lasota.sensor.flows.nodes.utils.GlobalContext;
 import pl.lasota.sensor.flows.nodes.utils.SensorListeningManager;
 import pl.lasota.sensor.flows.properties.FlowsProperties;
 import pl.lasota.sensor.internal.apis.api.flows.FlowSensorI;
 import pl.lasota.sensor.internal.apis.api.flows.FlowStatusI;
+import pl.lasota.sensor.member.services.MemberService;
 
 import java.util.List;
 import java.util.Map;
@@ -23,8 +25,8 @@ public class LocalManagerFlows {
 
     private final SensorListeningManager slm;
     private final ParserFlows pf;
-    private final NodeCreatorFactory ncf;
     private final FlowService fs;
+    private final MemberService ms;
     private final FlowsProperties eurekaId;
     private final Map<Long, ActiveFlow> startedFlow = new ConcurrentHashMap<>();
 
@@ -32,21 +34,22 @@ public class LocalManagerFlows {
         slm.broadcast(sensor);
     }
 
-    public FlowStatusI start(Long id, String config) {
+    public FlowStatusI start(Long id, String config, Class<Node> asRoot) {
         if (startedFlow.containsKey(id)) {
             return FlowStatusI.IS_ACTIVE_ALREADY;
         }
         fs.activateFlow(id);
         log.info("Start flow by id {} on {}", id, eurekaId.getInstanceId());
         try {
-            NodeCreatorFactory.Factory factory = ncf.create();
-            List<Node> flows = pf.flows(config, factory);
+
+            List<Node> flows = pf.flows(config, new GlobalContext(ms.loggedUser()));
             if (flows.isEmpty()) {
                 throw new IllegalArgumentException("Not found nodes");
             }
             startedFlow.put(id, new ActiveFlow(flows, config));
 
             boolean isError = flows.parallelStream()
+                    .filter(node -> (asRoot == null) != (node instanceof FireOnceNode))
                     .map(node -> ((StartFlowNode) node).start())
                     .anyMatch(aBoolean -> !aBoolean);
             if (isError) {
@@ -64,6 +67,10 @@ public class LocalManagerFlows {
         }
 
         return FlowStatusI.OK;
+    }
+
+    public FlowStatusI start(Long id, String config) {
+        return start(id, config, null);
     }
 
     public FlowStatusI stop(Long id) {

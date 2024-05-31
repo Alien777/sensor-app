@@ -18,7 +18,6 @@ import pl.lasota.sensor.api.repositories.DeviceRepository;
 import pl.lasota.sensor.api.repositories.DeviceTemporaryRepository;
 import pl.lasota.sensor.api.repositories.SensorRecordingRepository;
 import pl.lasota.sensor.core.exceptions.SensorException;
-import pl.lasota.sensor.member.services.MemberService;
 
 import java.time.OffsetDateTime;
 import java.util.*;
@@ -34,7 +33,6 @@ public class DeviceService {
     private final DeviceRepository dr;
     private final SensorRecordingRepository srr;
     private final DeviceConfigRepository dcr;
-    private final MemberService mr;
     private final DeviceUtilsService dsu;
     private final DeviceTemporaryRepository dtr;
 

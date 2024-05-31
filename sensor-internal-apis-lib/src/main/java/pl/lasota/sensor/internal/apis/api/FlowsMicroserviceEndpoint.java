@@ -26,6 +26,7 @@ public interface FlowsMicroserviceEndpoint {
     static String path = "/api-internal/flow";
     String SENSOR_VALUE_ENDPOINT_PATH = path + "/running";
     String STOP_ENDPOINT_PATH = path + "/stop/{id}";
+    String FIRE_ENDPOINT_PATH = path + "/fire-once/{id}";
     String SAVE_ENDPOINT_PATH = path + "/save";
     String DELETE_ENDPOINT_PATH = path + "/delete/{id}";
     String WHERE_EXECUTE_ENDPOINT_PATH = path + "/execute/{id}";
@@ -34,10 +35,14 @@ public interface FlowsMicroserviceEndpoint {
     FlowStatusI save(@RequestBody FlowSaveI flowSaveI) throws Exception;
 
     @RequestMapping(method = RequestMethod.POST, value = path + "/start/{id}")
-    FlowStatusI start(@PathVariable(value = "id") Long id) throws Exception;
+    FlowStatusI enabling(@PathVariable(value = "id") Long id) throws Exception;
 
     @RequestMapping(method = RequestMethod.DELETE, value = STOP_ENDPOINT_PATH)
-    FlowStatusI stop(@PathVariable(value = "id") Long id) throws Exception;
+    FlowStatusI disabling(@PathVariable(value = "id") Long id) throws Exception;
+
+    @RequestMapping(method = RequestMethod.DELETE, value = FIRE_ENDPOINT_PATH)
+    FlowStatusI fireOnce(@PathVariable(value = "id") Long id) throws Exception;
+
 
     @RequestMapping(method = RequestMethod.DELETE, value = DELETE_ENDPOINT_PATH)
     FlowStatusI delete(@PathVariable(value = "id") Long id) throws Exception;

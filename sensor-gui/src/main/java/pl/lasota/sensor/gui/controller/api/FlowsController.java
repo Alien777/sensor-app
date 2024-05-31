@@ -29,13 +29,13 @@ public class FlowsController {
     @PostMapping("/start/{id}")
     @PreAuthorize("isAuthenticated()")
     public FlowStatusI startFlows(@PathVariable("id") Long id) throws Exception {
-        return sfe.start(id);
+        return sfe.enabling(id);
     }
 
     @DeleteMapping("/stop/{id}")
     @PreAuthorize("isAuthenticated()")
     public FlowStatusI stopFlows(@PathVariable("id") Long id) throws Exception {
-        return sfe.stop(id);
+        return sfe.disabling(id);
     }
 
     @GetMapping()

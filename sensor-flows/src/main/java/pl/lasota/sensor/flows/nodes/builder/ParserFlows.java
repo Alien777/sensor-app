@@ -3,15 +3,18 @@ package pl.lasota.sensor.flows.nodes.builder;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.github.classgraph.ClassGraph;
+import io.github.classgraph.ScanResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import pl.lasota.sensor.flows.exceptions.SensorFlowException;
+import pl.lasota.sensor.flows.nodes.FlowNode;
 import pl.lasota.sensor.flows.nodes.Node;
 import pl.lasota.sensor.flows.nodes.nodes.AsyncNode;
-import pl.lasota.sensor.flows.nodes.nodes.ListeningSensorNode;
-import pl.lasota.sensor.flows.nodes.nodes.RequestAnalogDataNode;
-import pl.lasota.sensor.flows.nodes.nodes.SendPwmValueNode;
+import pl.lasota.sensor.flows.nodes.utils.GlobalContext;
+import pl.lasota.sensor.flows.properties.FlowsProperties;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -23,7 +26,10 @@ import static pl.lasota.sensor.flows.nodes.utils.NodeUtils.isRoot;
 @Slf4j
 public class ParserFlows {
 
-    public List<Node> flows(String flowsJson, NodeCreatorFactory.Factory factory) {
+    private final FlowsProperties flowsProperties;
+    private final ApplicationContext applicationContext;
+
+    public List<Node> flows(String flowsJson, GlobalContext globalContext) {
         log.info("Parse flow to node {} ", flowsJson);
         try {
             final Map<String, RawNode> nodesRaw = new HashMap<>();
@@ -34,7 +40,7 @@ public class ParserFlows {
                 String ref = ref(node);
                 String name = name(node);
                 List<String> childed = childed(node);
-                Node n = parseNode(ref, name, node, factory);
+                Node n = parseNode(ref, name, node, globalContext);
                 RawNode rawNode = new RawNode(n, childed, ref);
                 nodesRaw.put(ref, rawNode);
             }
@@ -42,6 +48,18 @@ public class ParserFlows {
         } catch (JsonProcessingException e) {
             throw new SensorFlowException("Error parsing flow", e);
         }
+    }
+
+    public static String fString(JsonNode node, String value) {
+        return node.findValue(value).asText();
+    }
+
+    public static Integer fInteger(JsonNode node, String value) {
+        return node.findValue(value).asInt();
+    }
+
+    public static Long fLong(JsonNode node, String value) {
+        return node.findValue(value).asLong();
     }
 
     private List<Node> createStructured(Map<String, RawNode> nodesRaw) {
@@ -73,42 +91,35 @@ public class ParserFlows {
         }).collect(Collectors.toList());
     }
 
-    private Node parseNode(String ref, String name, JsonNode root, NodeCreatorFactory.Factory factory) {
+
+    private Node parseNode(String ref, String name, JsonNode root, GlobalContext globalContext) {
         JsonNode node = root.get("sensor");
-        switch (name) {
-            case "SendPwmValueNode" -> {
-                String deviceId = fString(node, "deviceId");
-                Integer pin = fInteger(node, "pin");
-                String valueKey = fString(node, "valueVariable");
-                return factory.sendPwmValueNode(ref, SendPwmValueNode.Data.create(deviceId, valueKey, pin));
+        Node createdNode;
+        try (ScanResult scanResult = new ClassGraph()
+                .acceptPackages(flowsProperties.getScanNodes())
+                .enableAnnotationInfo()// Scan only the specified package
+                .scan()) {
+
+            createdNode = scanResult.getClassesWithAnnotation(FlowNode.class.getName())
+                    .filter(classInfo -> classInfo.getSimpleName().equals(name))
+                    .stream()
+                    .findFirst()
+                    .map(classInfo -> {
+                        try {
+                            Class<?> clazz = Class.forName(classInfo.getName());
+                            return (Node) clazz.getMethod("create", String.class, GlobalContext.class, JsonNode.class, ApplicationContext.class)
+                                    .invoke(null, ref, globalContext, node, applicationContext);
+                        } catch (Exception e) {
+                            log.info("Can't find node: {}", name);
+                            throw new SensorFlowException(e, "Can't find node: {}", name);
+                        }
+                    })
+                    .orElse(null);
+            if (createdNode == null) {
+                throw new SensorFlowException("Can't find node: {}", name);
             }
-            case "RequestAnalogDataNode" -> {
-                String deviceId = fString(node, "deviceId");
-                Integer pin = fInteger(node, "pin");
-                return factory.requestAnalogData(ref, RequestAnalogDataNode.Data.create(deviceId, pin));
-            }
-            case "ListeningSensorNode" -> {
-                String deviceId = fString(node, "deviceId");
-                String type = fString(node, "messageType").toUpperCase();
-                ListeningSensorNode.Data data = ListeningSensorNode.Data.create(deviceId, type);
-                return factory.listeningSensorNode(ref, data);
-            }
-            case "ExecuteCodeNode" -> {
-                String condition = fString(node, "code");
-                return factory.executeCodeNode(ref, condition);
-            }
-            case "AsyncNode" -> {
-                return factory.asyncNodeCreator(ref);
-            }
-            case "CronNode" -> {
-                String cron = fString(node, "cron");
-                return factory.cronNode(ref, cron);
-            }
-            case "SleepNode" -> {
-                Long sleepTimeSeconds = fLong(node, "sleepTimeSeconds");
-                return factory.sleepNode(ref, sleepTimeSeconds);
-            }
-            default -> throw new IllegalStateException("Unexpected value: " + name);
+            return createdNode;
+
         }
     }
 
@@ -134,19 +145,6 @@ public class ParserFlows {
     private static String name(JsonNode node) {
         return node.findValue("name").asText();
     }
-
-    private static String fString(JsonNode node, String value) {
-        return node.findValue(value).asText();
-    }
-
-    private static Integer fInteger(JsonNode node, String value) {
-        return node.findValue(value).asInt();
-    }
-
-    private static Long fLong(JsonNode node, String value) {
-        return node.findValue(value).asLong();
-    }
-
 
     private static class RawNode {
         public RawNode(Node thisNode, List<String> childrenRef, String ref) {

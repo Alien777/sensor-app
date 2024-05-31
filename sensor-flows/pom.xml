@@ -28,6 +28,7 @@
         <postgresql.version>42.7.2</postgresql.version>
         <hypersistence-utils-hibernate-63.version>3.7.4</hypersistence-utils-hibernate-63.version>
         <hibernate-core.version>6.4.4.Final</hibernate-core.version>
+        <classgraph.version>4.8.154</classgraph.version>
     </properties>
 
     <dependencies>
@@ -36,6 +37,12 @@
             <artifactId>sensor-core-lib</artifactId>
             <version>${sensor-core-lib.version}</version>
         </dependency>
+        <dependency>
+            <groupId>io.github.classgraph</groupId>
+            <artifactId>classgraph</artifactId>
+            <version>${classgraph.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>pl.lasota.sensor</groupId>
             <artifactId>sensor-member-lib</artifactId>

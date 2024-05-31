@@ -40,7 +40,7 @@ public class ReactiveJob extends QuartzJobBean {
             Optional<String> s = fme.broadcastWhoExecuteFlow(flow.getId(), dc, rt, fp.getInstanceId());
             if(s.isEmpty()) {
                 try {
-                    fme.start(flow.getId());
+                    fme.enabling(flow.getId());
                 } catch (Exception e) {
                     log.error("Occurred while broadcasting flow ", e);
                 }

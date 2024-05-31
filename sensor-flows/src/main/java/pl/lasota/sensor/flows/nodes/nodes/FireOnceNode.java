@@ -5,42 +5,35 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContext;
 import pl.lasota.sensor.flows.nodes.FlowNode;
 import pl.lasota.sensor.flows.nodes.Node;
+import pl.lasota.sensor.flows.nodes.StartFlowNode;
 import pl.lasota.sensor.flows.nodes.utils.GlobalContext;
 import pl.lasota.sensor.flows.nodes.utils.LocalContext;
 
 @Slf4j
 @FlowNode
-public class AsyncNode extends Node {
+public class FireOnceNode  extends Node implements StartFlowNode {
 
-    private AsyncNode(String id, GlobalContext globalContext) {
+    public FireOnceNode(String id, GlobalContext globalContext) {
         super(id, globalContext);
     }
 
     public static Node create(String ref, GlobalContext globalContext, JsonNode node, ApplicationContext context) {
-        return new AsyncNode(ref, globalContext);
+        return new FireOnceNode(ref, globalContext);
     }
 
     @Override
     public void execute(LocalContext localContext) {
-        Thread thread = new Thread(() -> {
-            try {
-                LocalContext newLocalContext = new LocalContext();
-                super.execute(newLocalContext);
-            } finally {
-                globalContext.getThreads().remove(id);
-            }
-        });
-        globalContext.getThreads().put(id, thread);
-        thread.start();
     }
 
     @Override
     public void clear() {
-        Thread remove = globalContext.getThreads().remove(id);
-        if (remove != null) {
-            remove.interrupt();
-        }
         super.clear();
     }
 
+    @Override
+    public boolean start() {
+        LocalContext localContext = new LocalContext();
+        super.execute(localContext);
+        return true;
+    }
 }

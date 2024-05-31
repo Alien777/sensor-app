@@ -1,6 +1,7 @@
 package pl.lasota.sensor.flows;
 
 
+import com.fasterxml.jackson.databind.JsonNode;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -8,16 +9,15 @@ import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.springframework.context.ApplicationContext;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.SimpleAsyncTaskScheduler;
 import pl.lasota.sensor.flows.nodes.Node;
 import pl.lasota.sensor.flows.nodes.StartFlowNode;
 import pl.lasota.sensor.flows.nodes.builder.FlowsBuilder;
-import pl.lasota.sensor.flows.nodes.builder.NodeCreatorFactory;
-import pl.lasota.sensor.flows.nodes.nodes.ListeningSensorNode;
+import pl.lasota.sensor.flows.nodes.nodes.*;
 import pl.lasota.sensor.flows.nodes.utils.GlobalContext;
 import pl.lasota.sensor.flows.nodes.utils.SensorListeningManager;
-import pl.lasota.sensor.internal.apis.api.SensorMicroserviceEndpoint;
 import pl.lasota.sensor.internal.apis.api.flows.FlowSensorAnalogI;
 import pl.lasota.sensor.member.User;
 import pl.lasota.sensor.member.entities.Member;
@@ -28,12 +28,12 @@ import java.time.Duration;
 import java.util.Collections;
 
 class ManagerFlowTest {
-    private TaskScheduler ts;
-
-    private SensorListeningManager slm;
 
     @Mock
-    private SensorMicroserviceEndpoint saeMock;
+    private ApplicationContext ac;
+
+    @Mock
+    private JsonNode jn;
 
     @Mock
     private MemberService msMock;
@@ -44,31 +44,37 @@ class ManagerFlowTest {
     @Mock
     private FlowSensorAnalogI sensorMock;
 
-    private NodeCreatorFactory.Factory factory;
     private GlobalContext globalContext;
 
     @BeforeEach
     public void setup() {
         MockitoAnnotations.openMocks(this);
-        ts = new SimpleAsyncTaskScheduler();
-        slm = new SensorListeningManager();
-        NodeCreatorFactory ncf = new NodeCreatorFactory(ts, slm, saeMock, msMock);
         globalContext = new GlobalContext(User.builder().id("memberId").roles(Collections.singleton(Role.ROLE_USER)).build());
-        factory = ncf.create(globalContext);
     }
 
     @Test
     void listening_sensor_execute_test() throws Exception {
 
         Mockito.when(msMock.loggedMember()).thenReturn(memberMock);
-        Mockito.when(memberMock.getId()).thenReturn("memberId");
         Mockito.when(sensorMock.getDeviceId()).thenReturn("deviceId");
         Mockito.when(sensorMock.getMessageType()).thenReturn("ANALOG");
 
-        Node root = factory.listeningSensorNode("id", ListeningSensorNode.Data.create("deviceId", "ANALOG"));
+
+        JsonNode deviceIdMock = Mockito.mock(JsonNode.class);
+        Mockito.when(jn.findValue(Mockito.same("deviceId"))).thenReturn(deviceIdMock);
+        Mockito.when(deviceIdMock.asText()).thenReturn("deviceId");
+
+        JsonNode messageTypeMock = Mockito.mock(JsonNode.class);
+        Mockito.when(jn.findValue(Mockito.same("messageType"))).thenReturn(messageTypeMock);
+        Mockito.when(messageTypeMock.asText()).thenReturn("ANALOG");
+
+        SensorListeningManager slm = new SensorListeningManager();
+        Mockito.when(ac.getBean(SensorListeningManager.class)).thenReturn(slm);
+
+        Node root = ListeningSensorNode.create("id", globalContext, jn, ac);
+
         NodeMock node = Mockito.mock(NodeMock.class);
-        FlowsBuilder.root(root)
-                .add(root, node);
+        FlowsBuilder.root(root).add(root, node);
 
         ((StartFlowNode) root).start();
         slm.broadcast(sensorMock);
@@ -84,7 +90,14 @@ class ManagerFlowTest {
         Mockito.when(sensorMock.getDeviceId()).thenReturn("deviceId");
         Mockito.when(sensorMock.getMessageType()).thenReturn("ANALOG");
 
-        Node root = factory.cronNode("id", "0/1 * * ? * *");
+        TaskScheduler taskScheduler = new SimpleAsyncTaskScheduler();
+        Mockito.when(ac.getBean(TaskScheduler.class)).thenReturn(taskScheduler);
+
+        JsonNode messageTypeMock = Mockito.mock(JsonNode.class);
+        Mockito.when(jn.findValue(Mockito.same("cron"))).thenReturn(messageTypeMock);
+        Mockito.when(messageTypeMock.asText()).thenReturn("0/1 * * ? * *");
+
+        Node root = CronNode.create("id", globalContext, jn, ac);
         NodeMock node = Mockito.mock(NodeMock.class);
         FlowsBuilder.root(root)
                 .add(root, node);
@@ -94,6 +107,7 @@ class ManagerFlowTest {
         Mockito.verify(node, Mockito.times(2)).execute(Mockito.any());
     }
 
+    //
     @Test
     void cron_node_execute_stop_test() throws Exception {
 
@@ -101,7 +115,14 @@ class ManagerFlowTest {
         Mockito.when(sensorMock.getDeviceId()).thenReturn("deviceId");
         Mockito.when(sensorMock.getMessageType()).thenReturn("ANALOG");
 
-        Node root = factory.cronNode("id", "0/1 * * ? * *");
+        TaskScheduler taskScheduler = new SimpleAsyncTaskScheduler();
+        Mockito.when(ac.getBean(TaskScheduler.class)).thenReturn(taskScheduler);
+
+        JsonNode messageTypeMock = Mockito.mock(JsonNode.class);
+        Mockito.when(jn.findValue(Mockito.same("cron"))).thenReturn(messageTypeMock);
+        Mockito.when(messageTypeMock.asText()).thenReturn("0/1 * * ? * *");
+
+        Node root = CronNode.create("id", globalContext, jn, ac);
         NodeMock node = Mockito.mock(NodeMock.class);
         FlowsBuilder.root(root)
                 .add(root, node);
@@ -112,6 +133,7 @@ class ManagerFlowTest {
         Mockito.verify(node, Mockito.times(3)).execute(Mockito.any());
     }
 
+    //
     @Test
     void cron_node_execute_new_thread_test() throws Exception {
         Mockito.when(msMock.loggedMember()).thenReturn(memberMock);
@@ -119,9 +141,26 @@ class ManagerFlowTest {
         Mockito.when(sensorMock.getDeviceId()).thenReturn("deviceId");
         Mockito.when(sensorMock.getMessageType()).thenReturn("ANALOG");
 
-        Node root = factory.listeningSensorNode("id", ListeningSensorNode.Data.create("deviceId", "ANALOG"));
-        Node async = factory.asyncNodeCreator("id1");
-        Node sleep = factory.sleepNode("id3", 1);
+        JsonNode deviceIdMock = Mockito.mock(JsonNode.class);
+        Mockito.when(jn.findValue(Mockito.same("deviceId"))).thenReturn(deviceIdMock);
+        Mockito.when(deviceIdMock.asText()).thenReturn("deviceId");
+
+        JsonNode messageTypeMock = Mockito.mock(JsonNode.class);
+        Mockito.when(jn.findValue(Mockito.same("messageType"))).thenReturn(messageTypeMock);
+        Mockito.when(messageTypeMock.asText()).thenReturn("ANALOG");
+
+        JsonNode IntervalSleepMock = Mockito.mock(JsonNode.class);
+        Mockito.when(jn.findValue(Mockito.same("sleepTimeSeconds"))).thenReturn(IntervalSleepMock);
+        Mockito.when(IntervalSleepMock.asLong()).thenReturn(1L);
+
+        SensorListeningManager slm = new SensorListeningManager();
+        Mockito.when(ac.getBean(SensorListeningManager.class)).thenReturn(slm);
+
+        Node root = ListeningSensorNode.create("id", globalContext, jn, ac);
+
+        Node async = AsyncNode.create("id1", globalContext, jn, ac);
+        Node sleep = SleepNode.create("id3", globalContext, jn, ac);
+
 
         NodeMock nodeMainThreadEnd = Mockito.mock(NodeMock.class);
         NodeMock nodeAsyncEnd = Mockito.mock(NodeMock.class);
@@ -142,17 +181,33 @@ class ManagerFlowTest {
 
     }
 
+    //
     @Test
     void js_condition_true_variable_test() throws Exception {
-
 
         Mockito.when(msMock.loggedMember()).thenReturn(memberMock);
         Mockito.when(memberMock.getId()).thenReturn("memberId");
         Mockito.when(sensorMock.getDeviceId()).thenReturn("deviceId");
         Mockito.when(sensorMock.getMessageType()).thenReturn("ANALOG");
 
-        Node root = factory.listeningSensorNode("id", ListeningSensorNode.Data.create("deviceId", "ANALOG"));
-        Node executeIfNode = factory.executeCodeNode("id1", "result=true");
+        SensorListeningManager slm = new SensorListeningManager();
+        Mockito.when(ac.getBean(SensorListeningManager.class)).thenReturn(slm);
+
+
+        JsonNode deviceIdMock = Mockito.mock(JsonNode.class);
+        Mockito.when(jn.findValue(Mockito.same("deviceId"))).thenReturn(deviceIdMock);
+        Mockito.when(deviceIdMock.asText()).thenReturn("deviceId");
+
+        JsonNode messageTypeMock = Mockito.mock(JsonNode.class);
+        Mockito.when(jn.findValue(Mockito.same("messageType"))).thenReturn(messageTypeMock);
+        Mockito.when(messageTypeMock.asText()).thenReturn("ANALOG");
+
+        JsonNode codeJsonNode = Mockito.mock(JsonNode.class);
+        Mockito.when(jn.findValue(Mockito.same("code"))).thenReturn(codeJsonNode);
+        Mockito.when(codeJsonNode.asText()).thenReturn("result=true");
+
+        Node root = ListeningSensorNode.create("id", globalContext, jn, ac);
+        Node executeIfNode = ExecuteCodeNode.create("id1", globalContext, jn, ac);
         NodeMock nodeEnd = Mockito.mock(NodeMock.class);
 
         FlowsBuilder.root(root)
@@ -164,7 +219,7 @@ class ManagerFlowTest {
 
         Mockito.verify(nodeEnd, Mockito.times(1)).execute(Mockito.any());
     }
-
+//
     @Test
     void js_condition_false_variable_test() throws Exception {
 
@@ -174,10 +229,25 @@ class ManagerFlowTest {
         Mockito.when(sensorMock.getDeviceId()).thenReturn("deviceId");
         Mockito.when(sensorMock.getMessageType()).thenReturn("ANALOG");
 
+        SensorListeningManager slm = new SensorListeningManager();
+        Mockito.when(ac.getBean(SensorListeningManager.class)).thenReturn(slm);
 
-        Node root = factory.listeningSensorNode("id", ListeningSensorNode.Data.create("deviceId", "DEVICE_CONNECTED"));
+        JsonNode deviceIdMock = Mockito.mock(JsonNode.class);
+        Mockito.when(jn.findValue(Mockito.same("deviceId"))).thenReturn(deviceIdMock);
+        Mockito.when(deviceIdMock.asText()).thenReturn("deviceId");
+
+        JsonNode messageTypeMock = Mockito.mock(JsonNode.class);
+        Mockito.when(jn.findValue(Mockito.same("messageType"))).thenReturn(messageTypeMock);
+        Mockito.when(messageTypeMock.asText()).thenReturn("DEVICE_CONNECTED");
+
+        JsonNode codeJsonNode = Mockito.mock(JsonNode.class);
+        Mockito.when(jn.findValue(Mockito.same("code"))).thenReturn(codeJsonNode);
+        Mockito.when(codeJsonNode.asText()).thenReturn("result = g_c.my_var");
+
         globalContext.getVariables().put("my_var", false);
-        Node executeIfNode = factory.executeCodeNode("id1", "result = g_c.my_var");
+
+        Node root = ListeningSensorNode.create("id", globalContext, jn, ac);
+        Node executeIfNode = ExecuteCodeNode.create("id1", globalContext, jn, ac);
         NodeMock nodeEnd = Mockito.mock(NodeMock.class);
 
         FlowsBuilder.root(root)
@@ -198,16 +268,31 @@ class ManagerFlowTest {
         Mockito.when(sensorMock.getDeviceId()).thenReturn("deviceId");
         Mockito.when(sensorMock.getMessageType()).thenReturn("ANALOG");
 
-        globalContext.getVariables().put("my_var", true);
-        Node root = factory.listeningSensorNode("id1", ListeningSensorNode.Data.create("deviceId", "ANALOG"));
+        SensorListeningManager slm = new SensorListeningManager();
+        Mockito.when(ac.getBean(SensorListeningManager.class)).thenReturn(slm);
 
-        Node executeCodeNode = factory.executeCodeNode("id2", """
+        JsonNode deviceIdMock = Mockito.mock(JsonNode.class);
+        Mockito.when(jn.findValue(Mockito.same("deviceId"))).thenReturn(deviceIdMock);
+        Mockito.when(deviceIdMock.asText()).thenReturn("deviceId");
+
+        JsonNode messageTypeMock = Mockito.mock(JsonNode.class);
+        Mockito.when(jn.findValue(Mockito.same("messageType"))).thenReturn(messageTypeMock);
+        Mockito.when(messageTypeMock.asText()).thenReturn("ANALOG");
+
+        JsonNode codeJsonNode = Mockito.mock(JsonNode.class);
+        Mockito.when(jn.findValue(Mockito.same("code"))).thenReturn(codeJsonNode);
+        Mockito.when(codeJsonNode.asText()).thenReturn("""
                 g_c.my_var=12
                 g_c.my_var_new=18
                 l_c.new_value="test"
                 let my_var_1=32
                 result=true
                  """);
+
+        globalContext.getVariables().put("my_var", true);
+
+        Node root = ListeningSensorNode.create("id", globalContext, jn, ac);
+        Node executeCodeNode = ExecuteCodeNode.create("id1", globalContext, jn, ac);
         NodeMock nodeEnd = Mockito.mock(NodeMock.class);
 
         FlowsBuilder.root(root)

@@ -17,6 +17,7 @@ import pl.lasota.sensor.internal.apis.properties.InternalApisProperties;
 public class FlowsProperties {
     private InternalApisProperties internalApisProperties;
     private EurekaClient eurekaClient;
+    private String[] scanNodes;
 
     @Autowired
     public FlowsProperties(EurekaClient eurekaClient) {

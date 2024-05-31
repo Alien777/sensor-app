@@ -44,6 +44,8 @@ spring:
             isClustered: true
             clusterCheckinInterval: 2000
 sensor:
+  flows:
+    scan-nodes: pl.lasota.sensor.flows.nodes.nodes
   internal-apis:
     jwt:
       secret: Gkl3uP7ATJcLNka0p7+v4hY0OcTu9Y08+QP1sFYE4PI=

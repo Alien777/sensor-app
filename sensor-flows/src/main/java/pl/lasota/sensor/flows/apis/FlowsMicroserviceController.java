@@ -43,17 +43,17 @@ public class FlowsMicroserviceController implements FlowsMicroserviceEndpoint {
             flowService.saveFlows(member.getId(), null, flowSaveI.name(), flowSaveI.config());
         } else {
             boolean isRunning = flowsInDb.get().isActivate();
-            this.stop(flowSaveI.id());
+            this.disabling(flowSaveI.id());
             flowService.saveFlows(member.getId(), flowSaveI.id(), flowSaveI.name(), flowSaveI.config());
             if (isRunning) {
-                this.start(flowSaveI.id());
+                this.enabling(flowSaveI.id());
             }
         }
         return FlowStatusI.OK;
     }
 
     @Override
-    public FlowStatusI start(Long id) {
+    public FlowStatusI enabling(Long id) {
         Member member = ms.loggedMember();
         Optional<Flow> flowsInDb = flowService.findFlows(member.getId(), id);
         if (flowsInDb.isEmpty()) {
@@ -78,7 +78,7 @@ public class FlowsMicroserviceController implements FlowsMicroserviceEndpoint {
 
 
     @Override
-    public FlowStatusI stop(Long id) throws Exception {
+    public FlowStatusI disabling(Long id) throws Exception {
         Member member = ms.loggedMember();
         Optional<Flow> flowsInDb = flowService.findFlows(member.getId(), id);
         if (flowsInDb.isEmpty()) {
@@ -98,6 +98,19 @@ public class FlowsMicroserviceController implements FlowsMicroserviceEndpoint {
         } else {
             return FlowStatusI.OK;
         }
+    }
+
+    @Override
+    public FlowStatusI fireOnce(Long id) throws Exception {
+        Member member = ms.loggedMember();
+        Optional<Flow> flowsInDb = flowService.findFlows(member.getId(), id);
+        if (flowsInDb.isEmpty()) {
+            log.info("Not delete flow by id: {} because not existing in db", id);
+            return FlowStatusI.NOT_FOUND;
+        }
+        Flow flow = flowsInDb.get();
+        localManagerFlows.start(id, flow.getConfig());
+        return null;
     }
 
     @Override
@@ -155,7 +168,7 @@ public class FlowsMicroserviceController implements FlowsMicroserviceEndpoint {
 
     @Override
     public void valueOfSensor(FlowSensorI sensor) {
-        ms.loggedMember();
+        Member member = ms.loggedMember();
         log.info("Receiver data form {}", sensor.getDeviceId());
         localManagerFlows.broadcast(sensor);
     }

@@ -1,14 +1,15 @@
 package pl.lasota.sensor.flows.nodes.nodes;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import org.graalvm.polyglot.Context;
-import org.graalvm.polyglot.EnvironmentAccess;
-import org.graalvm.polyglot.HostAccess;
 import org.graalvm.polyglot.Value;
+import org.springframework.context.ApplicationContext;
 import pl.lasota.sensor.flows.nodes.FlowNode;
 import pl.lasota.sensor.flows.nodes.Node;
 import pl.lasota.sensor.flows.nodes.utils.GlobalContext;
 import pl.lasota.sensor.flows.nodes.utils.LocalContext;
 
+import static pl.lasota.sensor.flows.nodes.builder.ParserFlows.fString;
 import static pl.lasota.sensor.flows.nodes.utils.NodeUtils.*;
 
 
@@ -17,9 +18,14 @@ public class ExecuteCodeNode extends Node {
 
     private final String code;
 
-    public ExecuteCodeNode(String id, GlobalContext globalContext, String code) {
+    private ExecuteCodeNode(String id, GlobalContext globalContext, String code) {
         super(id, globalContext);
         this.code = code;
+    }
+
+    public static Node create(String ref, GlobalContext globalContext, JsonNode node, ApplicationContext context) {
+        String cron = fString(node, "code");
+        return new ExecuteCodeNode(ref, globalContext, cron);
     }
 
     @Override
