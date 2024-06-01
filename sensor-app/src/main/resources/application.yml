@@ -1,0 +1,60 @@
+server:
+  port: 8080
+  servlet:
+    session:
+      cookie:
+        name: "SENSOR_APP_COOKIES"
+        max-age: 360000000
+        same-site: lax
+        http-only: false
+spring:
+  application:
+    name: sensor-gui
+  config:
+    import: file:/home/${USER}/Documents/container/sensor/oauth-config.yml
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            clientId: ${google.oauth2.clientId}
+            clientSecret: ${google.oauth2.clientSecret}
+  datasource:
+    url: jdbc:postgresql://localhost:5432/sensor
+    username: db
+    password: db
+  jpa:
+    hibernate:
+      ddl-auto: update # Dostosuj tę wartość do swoich potrzeb
+    properties:
+      hibernate:
+        format_sql: true
+    show-sql: false
+  cloud:
+    config:
+      enabled: false
+sensor:
+  flows:
+    scan-nodes: pl.lasota.sensor.flow.services.nodes.nodes
+  api:
+    firmware-folder: firmwares
+    mqtt:
+      client-id: ${random.uuid}
+      url: tcp://127.0.0.1:1883
+      topic: $share/mygroup/server
+      username: mqttUserServer
+      password: mqtt
+      max-reconnect-delay: 5000
+      connection-timeout: 30000
+      automatic-reconnect: true
+      unsecur-rest-endpoint: true
+    jwt-device:
+      secret: Gkl3uP7ATJcLNka0p7+v4hY0OcTu9H08+QP1sFYE4II=
+      expiration: 1440
+  gui:
+    gui-url: http://localhost:3000
+    redirect:
+      login-success: http://localhost:3000/oauth2
+    jwt:
+      secret: Gkl3uP7ATJcLNka0p7+v4hY0OcTu9H08+QP1sFYE4PI=
+      expiration: 1440

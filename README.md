@@ -6,17 +6,14 @@ I want to create a simple system for remote management of devices like ESP and o
 
 ## Structure of the Project
 
-- `sensor-core`:
+- `sensor-app`:
   One of the main modules. This module contains the DB layer, services, and others.
-- `sensor-api`:
   This module provides a layer of communication between MQTT and our own application.
   - esp <-> mqtt <-> sensor-api <-- sensor-core <-- database
-- `sensor-gui`:
   Contains GUI and API for the Frontend.
-- `sensor-eureka`:
   Provides discovery for sensor-api for sensor-gui, e.g., send new config.
-- `sensor-flow`:
   Component that manages flows and their launch
+   
 - `firmwares`:
   - `esp-firmwares`:
     Firmware for ESP 32. The project is written in C language for ESP IDF.
