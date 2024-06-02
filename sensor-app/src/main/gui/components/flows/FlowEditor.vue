@@ -183,32 +183,26 @@ const $q = useQuasar();
     </q-btn-group>
 
   </div>
-  <q-splitter v-model="splitterModel" style=" height: calc(100vh - 150px);" unit="px" class="dndflow" @drop="onDrop">
+  <q-splitter v-model="splitterModel" style=" height: calc(100vh - 280px);" unit="px" class="dndflow" @drop="onDrop">
     <template v-slot:before>
-      <q-card>
-        <q-card-section>
-          <div class="text-h6">Start nodes</div>
-        </q-card-section>
-        <q-card-section>
+      <div style="overflow-y: auto">
+        <div style="max-height: calc(100vh - 280px);">
           <div v-for="item in draggableItems.filter(v => v.type==='input')" :key="item.name"
                :class="`vue-flow__node-${item.type}`"
-               :draggable="true" @dragstart="onDragStart($event, {type: item.type, name: item.name} as NodeDraggable)">
+               :draggable="true"
+               @dragstart="onDragStart($event, {type: item.type, name: item.name} as NodeDraggable)">
             {{ item.readableName }}
           </div>
-        </q-card-section>
-      </q-card>
-      <q-card>
-        <q-card-section>
-          <div class="text-h6">Nodes</div>
-        </q-card-section>
-        <q-card-section>
+          <hr>
           <div v-for="item in draggableItems.filter(v => v.type==='default')" :key="item.name"
                :class="`vue-flow__node-${item.type}`"
-               :draggable="true" @dragstart="onDragStart($event, {type: item.type,name: item.name} as NodeDraggable)">
+               :draggable="true"
+               @dragstart="onDragStart($event, {type: item.type,name: item.name} as NodeDraggable)">
             {{ item.readableName }}
           </div>
-        </q-card-section>
-      </q-card>
+        </div>
+      </div>
+
     </template>
     <template v-slot:after>
       <VueFlow :nodes="nodes" :edges="edges" delete-key-code=false :default-edge-options="{

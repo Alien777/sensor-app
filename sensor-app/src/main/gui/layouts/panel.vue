@@ -8,6 +8,7 @@
           </q-avatar>
           Sensor
         </q-toolbar-title>
+        <MicRecover></MicRecover>
         <q-btn dense flat round icon="menu" @click="toggleRightDrawer"/>
       </q-toolbar>
     </q-header>
@@ -32,7 +33,6 @@
       </aside>
     </q-drawer>
     <q-page-container style="margin: 20px">
-      <MicRecover></MicRecover>
       <NuxtPage></NuxtPage>
     </q-page-container>
   </q-layout>
