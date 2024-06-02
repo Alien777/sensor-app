@@ -33,8 +33,6 @@ services:
     depends_on:
       sensor-postgres:
         condition: service_started
-      sensor-eureka:
-        condition: service_started
   sensor-gui-frontend:
     container_name: sensor-frontend-docker-compose
     build:
@@ -45,7 +43,7 @@ services:
     networks:
       - internal-network
     depends_on:
-      sensor-gui-backend:
+      sensor-app:
         condition: service_started
 volumes:
   postgres-data: { }

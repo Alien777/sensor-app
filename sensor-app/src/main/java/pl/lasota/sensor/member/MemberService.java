@@ -34,8 +34,8 @@ public class MemberService {
         save(user);
     }
 
-    public void auth(String memberId)   {
-        Member member =  getMember(memberId);
+    public void auth(String memberId) {
+        Member member = getMember(memberId);
         Authentication authentication = new UsernamePasswordAuthenticationToken(member,
                 null,
                 member.getAuthorities());

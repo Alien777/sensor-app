@@ -27,8 +27,7 @@ public class JwtOncePerRequestFilter extends OncePerRequestFilter {
 
         if (SecureConfig.LOGIN_PATH.equals(request.getServletPath()) && request.getMethod().equalsIgnoreCase("POST")) {
             authService.login(request, response);
-        }
-        if (new AntPathMatcher().match(SOCKET_PATH, request.getServletPath())) {
+        } else if (new AntPathMatcher().match(SOCKET_PATH, request.getServletPath())) {
             authService.checkAuthSession(request);
             filterChain.doFilter(request, response);
         } else {

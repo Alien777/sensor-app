@@ -18,7 +18,7 @@ spring:
             clientId: clientId
             clientSecret: clientSecret
   datasource:
-    url: jdbc:postgresql://localhost:5432/postgres
+    url: jdbc:postgresql://sensor-postgres:5432/postgres
     username: postgres
     password: postgres
   jpa:
@@ -33,14 +33,14 @@ spring:
       enabled: false
 sensor:
   ai:
-    voice-model: voice-model
+    voice-model: sensor/voice-model
   flows:
     scan-nodes: pl.lasota.sensor.flow.services.nodes.nodes
   api:
-    firmware-folder: firmwares
+    firmware-folder: sensor/firmwares
     mqtt:
       client-id: ${random.uuid}
-      url: tcp://127.0.0.1:1883
+      url: tcp://sensor-eclipse-mqtt:1883
       topic: $share/mygroup/server
       username: mqttUserServer
       password: mqtt

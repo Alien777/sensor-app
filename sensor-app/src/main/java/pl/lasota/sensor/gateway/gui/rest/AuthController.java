@@ -20,7 +20,6 @@ public class AuthController {
     private final AuthService authService;
 
     @GetMapping("/token")
-    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<String> token(HttpServletRequest request, HttpServletResponse response) {
         return ResponseEntity.ok(authService.getToken());
     }

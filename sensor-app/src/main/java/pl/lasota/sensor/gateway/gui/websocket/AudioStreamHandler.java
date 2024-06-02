@@ -45,6 +45,7 @@ public class AudioStreamHandler extends TextWebSocketHandler {
             Member member = authService.checkAuthToken(payload);
             currentActiveSession.put(session, audioWaveInputStreamBus.takeBroadcaster(member));
         } catch (Exception e) {
+            log.error("Problem with login {}", message.getPayload(), e);
             session.close(CloseStatus.POLICY_VIOLATION);
         }
     }
@@ -70,6 +71,10 @@ public class AudioStreamHandler extends TextWebSocketHandler {
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
         InputStreamBus<Member, String>.Broadcast<PipedOutputStream, AudioInputStream> broadcast = currentActiveSession.get(session);
+        if (broadcast == null) {
+            super.afterConnectionClosed(session, status);
+            return;
+        }
         broadcast.close();
         currentActiveSession.remove(session);
         super.afterConnectionClosed(session, status);
