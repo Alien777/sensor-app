@@ -1,4 +1,4 @@
-package pl.lasota.sensor.gateway.device.mqtt;
+package pl.lasota.sensor.gateway.device;
 
 import org.eclipse.paho.mqttv5.common.MqttException;
 

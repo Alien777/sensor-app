@@ -16,10 +16,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @RequiredArgsConstructor
 public class GlobalContext {
     private final AtomicBoolean stopped = new AtomicBoolean(false);
+    public final AtomicBoolean isRunningRightNow = new AtomicBoolean(false);
     private final Map<String, ScheduledFuture<?>> schedules = new ConcurrentHashMap<>();
     private final Map<String, Thread> threads = new ConcurrentHashMap<>();
     private final Map<String, Object> variables = new ConcurrentHashMap<>();
-    private final Member user;
+    private final Member member;
 
 
     public final Object getVariable(String key) {
@@ -41,12 +42,14 @@ public class GlobalContext {
         return stopped.get();
     }
 
-    public void recreateSecurityHolder()
-    {
-        Authentication authentication = new UsernamePasswordAuthenticationToken(user,
+    public void recreateSecurityHolder() {
+        Authentication authentication = new UsernamePasswordAuthenticationToken(member,
                 null,
-                user.getAuthorities());
+                member.getAuthorities());
         SecurityContextHolder.clearContext();
         SecurityContextHolder.getContext().setAuthentication(authentication);
     }
+
+
+
 }

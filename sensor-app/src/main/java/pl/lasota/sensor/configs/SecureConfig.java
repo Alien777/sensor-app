@@ -29,8 +29,9 @@ public class SecureConfig {
 
     private final GuiProperties properties;
 
-    public final static String[] OPENED_PATHS = {"/api/auth/token", "/sererver/"};
+    public final static String[] OPENED_PATHS = {"/api/auth/token"};
     public final static String LOGIN_PATH = "/api/auth/login";
+    public final static String SOCKET_PATH = "/api/socket/**";
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {

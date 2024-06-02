@@ -4,6 +4,7 @@ export default defineNuxtConfig({
     devtools: {enabled: true},
     runtimeConfig: {
         public: {
+            wsApi: 'ws://localhost:8080/api',
             apiHost: 'http://localhost:8080',
             apiUrl: 'http://localhost:8080/api',
         }

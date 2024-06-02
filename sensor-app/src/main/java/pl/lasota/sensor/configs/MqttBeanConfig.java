@@ -7,7 +7,7 @@ import org.eclipse.paho.mqttv5.client.MqttClient;
 import org.eclipse.paho.mqttv5.common.MqttException;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
-import pl.lasota.sensor.gateway.device.mqtt.SimpleCallback;
+import pl.lasota.sensor.gateway.device.SimpleCallback;
 import pl.lasota.sensor.configs.properties.ApiProperties;
 
 @Component

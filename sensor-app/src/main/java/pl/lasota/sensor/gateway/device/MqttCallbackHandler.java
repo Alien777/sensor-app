@@ -1,4 +1,4 @@
-package pl.lasota.sensor.gateway.device.mqtt;
+package pl.lasota.sensor.gateway.device;
 
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.paho.mqttv5.client.IMqttToken;

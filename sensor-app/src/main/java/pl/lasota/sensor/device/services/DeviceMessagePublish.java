@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 import pl.lasota.sensor.entities.Device;
 import pl.lasota.sensor.entities.DeviceConfig;
 import pl.lasota.sensor.exceptions.SensorApiException;
-import pl.lasota.sensor.gateway.device.mqtt.MqttMessagePublish;
+import pl.lasota.sensor.gateway.device.MqttMessagePublish;
 import pl.lasota.sensor.payload.MessageFrame;
 import pl.lasota.sensor.payload.to.ForceReadingOfAnalogDataPayload;
 import pl.lasota.sensor.payload.to.PwmPayload;

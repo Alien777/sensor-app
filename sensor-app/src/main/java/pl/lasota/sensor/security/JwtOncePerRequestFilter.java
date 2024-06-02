@@ -14,6 +14,8 @@ import pl.lasota.sensor.configs.SecureConfig;
 import java.io.IOException;
 import java.util.Arrays;
 
+import static pl.lasota.sensor.configs.SecureConfig.SOCKET_PATH;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -25,8 +27,12 @@ public class JwtOncePerRequestFilter extends OncePerRequestFilter {
 
         if (SecureConfig.LOGIN_PATH.equals(request.getServletPath()) && request.getMethod().equalsIgnoreCase("POST")) {
             authService.login(request, response);
+        }
+        if (new AntPathMatcher().match(SOCKET_PATH, request.getServletPath())) {
+            authService.checkAuthSession(request);
+            filterChain.doFilter(request, response);
         } else {
-            authService.checkAuth(request);
+            authService.checkAuthComplete(request);
             filterChain.doFilter(request, response);
         }
     }

@@ -6,12 +6,11 @@ import org.springframework.stereotype.Service;
 import pl.lasota.sensor.entities.Flow;
 import pl.lasota.sensor.entities.Member;
 import pl.lasota.sensor.exceptions.SensorFlowException;
-import pl.lasota.sensor.flow.services.FlowDataService;
-import pl.lasota.sensor.flow.services.ManagerFlowService;
 import pl.lasota.sensor.flow.model.FlowI;
 import pl.lasota.sensor.flow.model.FlowSaveI;
-import pl.lasota.sensor.flow.model.FlowSensorI;
 import pl.lasota.sensor.flow.model.FlowStatusI;
+import pl.lasota.sensor.flow.services.FlowDataService;
+import pl.lasota.sensor.flow.services.ManagerFlowService;
 import pl.lasota.sensor.member.MemberService;
 
 import java.util.List;
@@ -124,14 +123,4 @@ public class FlowApi implements FlowApiInterface {
         return flowDataService.getAll(member.getId()).stream().map(flow -> new FlowI(flow.getId(), flow.getName(), flow.isActivate(), flow.getConfig()))
                 .collect(Collectors.toList());
     }
-
-
-
-    @Override
-    public void valueOfSensor(FlowSensorI sensor) {
-        Member member = ms.loggedMember();
-        log.info("Receiver data form {}", sensor.getDeviceId());
-        managerFlowService.broadcast(sensor);
-    }
-
 }

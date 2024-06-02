@@ -5,14 +5,12 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import pl.lasota.sensor.flow.model.FlowSensorI;
 import pl.lasota.sensor.flow.model.FlowStatusI;
 import pl.lasota.sensor.flow.services.nodes.Node;
 import pl.lasota.sensor.flow.services.nodes.StartFlowNode;
 import pl.lasota.sensor.flow.services.nodes.builder.ParserFlows;
 import pl.lasota.sensor.flow.services.nodes.nodes.FireOnceNode;
 import pl.lasota.sensor.flow.services.nodes.utils.GlobalContext;
-import pl.lasota.sensor.flow.services.nodes.utils.SensorListeningManager;
 import pl.lasota.sensor.member.MemberService;
 
 import java.util.List;
@@ -24,16 +22,11 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 public class ManagerFlowService {
 
-    private final SensorListeningManager slm;
     private final ParserFlows pf;
     private final FlowDataService fs;
     private final MemberService ms;
 
     private final Map<Long, ActiveFlow> startedFlow = new ConcurrentHashMap<>();
-
-    public void broadcast(FlowSensorI sensor) {
-        slm.broadcast(sensor);
-    }
 
     public FlowStatusI start(Long id, String config, Class<Node> asRoot) {
         if (startedFlow.containsKey(id)) {

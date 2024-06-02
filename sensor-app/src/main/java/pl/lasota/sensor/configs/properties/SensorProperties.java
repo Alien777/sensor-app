@@ -16,4 +16,5 @@ public class SensorProperties {
     private FlowsProperties flowsProperties;
     private ApiProperties apiProperties;
     private GuiProperties guiProperties;
+    private AIProperties aiProperties;
 }

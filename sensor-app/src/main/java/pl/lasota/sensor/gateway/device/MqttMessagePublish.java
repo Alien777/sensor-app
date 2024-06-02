@@ -1,4 +1,4 @@
-package pl.lasota.sensor.gateway.device.mqtt;
+package pl.lasota.sensor.gateway.device;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;

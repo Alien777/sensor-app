@@ -3,12 +3,12 @@ package pl.lasota.sensor.device.mqtt;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import pl.lasota.sensor.bus.FlowSensorIInputStreamBus;
 import pl.lasota.sensor.device.services.DeviceDataService;
+import pl.lasota.sensor.device.services.DeviceMessagePublish;
 import pl.lasota.sensor.device.services.filters.BeforeValidMessageFilter;
 import pl.lasota.sensor.device.services.filters.FilterChain;
 import pl.lasota.sensor.device.services.filters.SaveSensorValueFilter;
-import pl.lasota.sensor.flow.FlowApiInterface;
-import pl.lasota.sensor.device.services.DeviceMessagePublish;
 import pl.lasota.sensor.member.MemberService;
 import pl.lasota.sensor.payload.MessageFrame;
 import pl.lasota.sensor.payload.MessageType;
@@ -23,8 +23,6 @@ class MessageReceiverTest {
         MemberService msMock = Mockito.mock(MemberService.class);
         DeviceDataService dsMock = Mockito.mock(DeviceDataService.class);
         DeviceMessagePublish uMock = Mockito.mock(DeviceMessagePublish.class);
-        FlowApiInterface crtMock = Mockito.mock(FlowApiInterface.class);
-
 
 
         Mockito.when(mfMock.getMemberId()).thenReturn("memberId_1234567");
@@ -39,7 +37,7 @@ class MessageReceiverTest {
 
         FilterChain filterChain = new FilterChain();
         BeforeValidMessageFilter beforeValidMessageFilter = new BeforeValidMessageFilter(dsMock);
-        SaveSensorValueFilter saveSensorValueFilter = new SaveSensorValueFilter(dsMock, uMock, crtMock);
+        SaveSensorValueFilter saveSensorValueFilter = new SaveSensorValueFilter(dsMock, uMock, new FlowSensorIInputStreamBus());
         filterChain
                 .addFilter(beforeValidMessageFilter)
                 .addFilter(saveSensorValueFilter);

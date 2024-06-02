@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
 import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
+import pl.lasota.sensor.bus.AudioWaveInputStreamBus;
 import pl.lasota.sensor.gateway.gui.websocket.AudioStreamHandler;
 import pl.lasota.sensor.security.AuthService;
 
@@ -14,10 +15,16 @@ import pl.lasota.sensor.security.AuthService;
 public class WebSocketConfig implements WebSocketConfigurer {
 
     private final AuthService authService;
+    private final AudioWaveInputStreamBus audioWaveInputStreamBus;
+
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-        registry
-                .addHandler(new AudioStreamHandler(authService), "/api/socket/audio-commend")
-                .setAllowedOriginPatterns("*");
+        try {
+            registry
+                    .addHandler(new AudioStreamHandler(audioWaveInputStreamBus, authService), "/api/socket/audio-commend")
+                    .setAllowedOriginPatterns("*");
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }

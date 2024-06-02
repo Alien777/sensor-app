@@ -34,6 +34,8 @@ spring:
     config:
       enabled: false
 sensor:
+  ai:
+    voice-model: /home/adam/Downloads/vosk-model-small-pl-0.22
   flows:
     scan-nodes: pl.lasota.sensor.flow.services.nodes.nodes
   api:
@@ -48,9 +50,6 @@ sensor:
       connection-timeout: 30000
       automatic-reconnect: true
       unsecur-rest-endpoint: true
-    jwt-device:
-      secret: Gkl3uP7ATJcLNka0p7+v4hY0OcTu9H08+QP1sFYE4II=
-      expiration: 1440
   gui:
     gui-url: http://localhost:3000
     redirect:

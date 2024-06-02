@@ -1,7 +1,8 @@
 <template>
   <div>
-    <button @click="startRecording">Start Recording</button>
-    <button @click="stopRecording">Stop Recording</button>
+    <q-btn color="green" v-if="!socket" @click="startRecording">Start voice commend</q-btn>
+    <q-btn color="red" v-if="socket" @click="stopRecording">Stop voice commend</q-btn>
+
   </div>
 </template>
 
@@ -9,12 +10,12 @@
 import {ref, onBeforeUnmount} from 'vue'
 
 const runtimeConfig = useRuntimeConfig();
+
 import {storageUtils} from "~/composables/StorageUtils";
 
 const {getToken} = storageUtils(runtimeConfig);
 // Twój URL do Spring Boot i token JWT
-const SOCKET_URL = 'ws://localhost:8080/api/socket/audio-commend'
-const JWT_TOKEN = 'YOUR_JWT_TOKEN'
+const SOCKET_URL = runtimeConfig.public.wsApi + '/socket/audio-commend'
 
 // Ref dla WebSocket
 const socket = ref(null)
@@ -60,6 +61,7 @@ const stopRecording = () => {
   }
   if (socket.value) {
     socket.value.close()
+    socket.value = null;
   }
 }
 

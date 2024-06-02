@@ -15,7 +15,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Service;
-import org.springframework.web.socket.WebSocketSession;
 import pl.lasota.sensor.entities.Member;
 import pl.lasota.sensor.entities.Provider;
 import pl.lasota.sensor.exceptions.AuthException;
@@ -29,7 +28,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 @RequiredArgsConstructor
@@ -38,8 +36,6 @@ public class AuthService {
     private final SessionStorage sessionStorage;
     private final JwtResolve jwtResolve;
     private final MemberService memberService;
-
-    private final static ConcurrentHashMap<String, Member> IS_LOGGED = new ConcurrentHashMap<>();
 
     public UserInfo getUserDetails() {
 
@@ -95,21 +91,33 @@ public class AuthService {
         }
     }
 
-    public void checkAuth(Map<String, String> request, String id) {
+    public Member checkAuthToken(Map<String, String> request) throws AuthException {
+        String token = extractBearerToken(request.get("Authorization"));
 
-        String token = extractBearerToken(request);
         if (token == null) {
-            log.info("Token or session storage is empty");
+            log.info("Token or session storage is empty ");
             throw new AuthException("Token or session storage is empty ");
         }
         Jws<Claims> claimsJws = jwtResolve.parseToken(token);
-        memberService.auth((String) claimsJws.getPayload().get("id"));
-        IS_LOGGED.put(id, memberService.loggedUser());
+        return memberService.getMember(claimsJws.getPayload().get("id", String.class));
     }
 
+    public void checkAuthSession(HttpServletRequest request) throws AuthException {
+        if (sessionStorage.isEmpty()) {
+            log.info("Session storage is empty {}", request.getServletPath());
+            throw new AuthException("Token or session storage is empty " + request.getServletPath());
+        }
 
-    public void checkAuth(HttpServletRequest request) throws AuthException {
-        String token = extractBearerToken(request);
+        Member user = sessionStorage.getMember();
+        Authentication authentication = new UsernamePasswordAuthenticationToken(user,
+                sessionStorage.getToken(),
+                user.getAuthorities());
+        SecurityContextHolder.getContext()
+                .setAuthentication(authentication);
+    }
+
+    public void checkAuthComplete(HttpServletRequest request) throws AuthException {
+        String token = extractBearerToken(request.getHeader("Authorization"));
 
         if (token == null || sessionStorage.isEmpty()) {
             log.info("Token or session storage is empty {}", request.getServletPath());
@@ -133,38 +141,11 @@ public class AuthService {
         sessionStorage.setMember(member);
     }
 
-
-    private String extractBearerToken(HttpServletRequest request) {
-        String authorizationHeader = request.getHeader("Authorization");
-
+    private String extractBearerToken(String authorizationHeader) {
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
             return authorizationHeader.substring(7);
         }
 
         return null;
-    }
-
-    private String extractBearerToken(Map<String, String> request) {
-        String authorizationHeader = request.get("Authorization");
-
-        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-            return authorizationHeader.substring(7);
-        }
-
-        return null;
-    }
-
-
-    public void logout(WebSocketSession session) {
-        IS_LOGGED.remove(session.getId());
-        try {
-            session.close();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public Member getSessionUser(WebSocketSession session) {
-        return IS_LOGGED.get(session.getId());
     }
 }
