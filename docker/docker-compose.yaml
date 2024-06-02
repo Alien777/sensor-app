@@ -21,44 +21,11 @@ services:
       - postgres-data:/var/lib/postgresql/data
     networks:
       - internal-network
-  sensor-eureka:
-    container_name: sensor-eureka-docker-compose
+  sensor-app:
+    container_name: sensor-app-docker-compose
     build:
       context: ../
-      dockerfile: docker/sensor-eureka.Dockerfile
-    networks:
-      - internal-network
-  sensor-flows:
-    container_name: sensor-flows-docker-compose
-    build:
-      context: ../
-      dockerfile: docker/sensor-flows.Dockerfile
-    networks:
-      - internal-network
-    depends_on:
-      sensor-postgres:
-        condition: service_started
-      sensor-eureka:
-        condition: service_started
-  sensor-api:
-    container_name: sensor-api-docker-compose
-    build:
-      context: ../
-      dockerfile: docker/sensor-api.Dockerfile
-    networks:
-      - internal-network
-    depends_on:
-      sensor-postgres:
-        condition: service_started
-      sensor-eureka:
-        condition: service_started
-      sensor-eclipse-mqtt:
-        condition: service_started
-  sensor-gui-backend:
-    container_name: sensor-backend-docker-compose
-    build:
-      context: ../
-      dockerfile: docker/sensor-gui-backend.Dockerfile
+      dockerfile: docker/sensor-app.Dockerfile
     ports:
       - "8080:8080"
     networks:
