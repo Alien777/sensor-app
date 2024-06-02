@@ -59,7 +59,7 @@ public class SaveSensorValueFilter implements Filter<MessageFrame, MessageFrame>
             if (fT != null) {
                 flowApi.takeBroadcaster(null).write(objectOutputStream -> {
                     try {
-                        objectOutputStream.writeObject(fT);
+                        objectOutputStream.writeUnshared(fT);
                     } catch (IOException e) {
                         throw new SensorApiException(e);
                     }

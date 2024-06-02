@@ -3,7 +3,7 @@ package pl.lasota.sensor.flow.services.nodes.nodes;
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContext;
-import pl.lasota.sensor.AI;
+import pl.lasota.sensor.ai.AI;
 import pl.lasota.sensor.bus.AudioWaveInputStreamBus;
 import pl.lasota.sensor.entities.Member;
 import pl.lasota.sensor.flow.services.nodes.FlowNode;

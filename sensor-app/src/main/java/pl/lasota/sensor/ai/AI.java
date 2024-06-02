@@ -1,4 +1,4 @@
-package pl.lasota.sensor;
+package pl.lasota.sensor.ai;
 
 import lombok.AllArgsConstructor;
 
@@ -11,7 +11,6 @@ import java.util.regex.Pattern;
 public class AI {
 
     public boolean matchText(String source, List<List<String>> tokenizerTarget) {
-        System.out.println(source);
         List<String> tokenizer = tokenizer(source);
         return match(tokenizer, tokenizerTarget);
     }

@@ -8,7 +8,8 @@ public class ByteToObjectConverter<RESULT> implements Converter<RESULT, ObjectOu
 
     @Override
     public void onConverter(ObjectInputStream in, Consumer<RESULT> consumer) throws Exception {
-        Object o = in.readObject();
+
+        Object o = in.readUnshared();
         if (o != null) {
             consumer.accept((RESULT) o);
         }
