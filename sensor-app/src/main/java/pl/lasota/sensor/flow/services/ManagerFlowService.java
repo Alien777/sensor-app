@@ -5,11 +5,12 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import pl.lasota.sensor.flow.model.FlowStatusI;
+import pl.lasota.sensor.exceptions.SensorFlowException;
 import pl.lasota.sensor.flow.services.nodes.Node;
 import pl.lasota.sensor.flow.services.nodes.StartFlowNode;
 import pl.lasota.sensor.flow.services.nodes.builder.ParserFlows;
 import pl.lasota.sensor.flow.services.nodes.nodes.FireOnceNode;
+import pl.lasota.sensor.flow.services.nodes.utils.FlowContext;
 import pl.lasota.sensor.flow.services.nodes.utils.GlobalContext;
 import pl.lasota.sensor.member.MemberService;
 
@@ -28,58 +29,47 @@ public class ManagerFlowService {
 
     private final Map<Long, ActiveFlow> startedFlow = new ConcurrentHashMap<>();
 
-    public FlowStatusI start(Long id, String config, Class<Node> asRoot) {
+    public void start(Long id, String config, Class<Node> asRoot) {
         if (startedFlow.containsKey(id)) {
-            return FlowStatusI.IS_ACTIVE_ALREADY;
+            return;
         }
         fs.activateFlow(id);
-        log.info("Start flow by id {} ", id);
+        log.info("Start flow id {} config {}", id, config);
         try {
-
-            List<Node> flows = pf.flows(config, new GlobalContext(ms.loggedUser()));
-            if (flows.isEmpty()) {
-                throw new IllegalArgumentException("Not found nodes");
-            }
+            List<Node> flows = pf.flows(config, new GlobalContext());
             startedFlow.put(id, new ActiveFlow(flows, config));
-
-            boolean isError = flows.parallelStream()
-                    .filter(node -> (asRoot == null) != (node instanceof FireOnceNode))
-                    .map(node -> ((StartFlowNode) node).start())
-                    .anyMatch(aBoolean -> !aBoolean);
-            if (isError) {
-                flows.forEach(Node::clear);
-                startedFlow.remove(id);
-                fs.deactivateFlow(id);
-                return FlowStatusI.ERROR;
+            for (Node node : flows) {
+                if (node == null) {
+                    continue;
+                }
+                if (!(node instanceof FireOnceNode)) {
+                    ((StartFlowNode) node).start(new FlowContext(ms.loggedUser()));
+                }
             }
 
         } catch (Exception e) {
-            log.error("Problem with start flow ", e);
             startedFlow.remove(id);
             fs.deactivateFlow(id);
-            return FlowStatusI.ERROR;
+            throw new SensorFlowException(e, "Problem with start flows {} ", id);
         }
-
-        return FlowStatusI.OK;
     }
 
-    public FlowStatusI start(Long id, String config) {
-        return start(id, config, null);
+    public void start(Long id, String config) {
+        start(id, config, null);
     }
 
-    public FlowStatusI stop(Long id) {
+    public void stop(Long id) {
         if (!startedFlow.containsKey(id)) {
-            return FlowStatusI.NOT_FOUND;
+            return;
         }
         ActiveFlow activeFlow = startedFlow.get(id);
         try {
             activeFlow.getRoots().forEach(Node::clear);
             startedFlow.remove(id);
         } catch (Exception e) {
-            return FlowStatusI.ERROR;
+            throw new SensorFlowException(e, "Problem with stop flow {}", id);
         }
         fs.deactivateFlow(id);
-        return FlowStatusI.OK;
     }
 
     public boolean contains(Long id) {

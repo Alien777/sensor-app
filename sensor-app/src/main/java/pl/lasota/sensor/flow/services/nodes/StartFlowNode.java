@@ -1,7 +1,9 @@
 package pl.lasota.sensor.flow.services.nodes;
 
+import pl.lasota.sensor.flow.services.nodes.utils.FlowContext;
+
 public interface StartFlowNode {
 
-    boolean start();
+    void start(FlowContext flowContext) throws Exception;
 
 }

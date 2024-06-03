@@ -16,17 +16,20 @@ import java.util.Optional;
 public final class NodeUtils {
 
     public static String GLOBAL_CONTEXT_NAME = "g_c";
+    public static String FLOW_CONTEXT_NAME = "f_c";
     public static String LOCAL_CONTEXT_NAME = "l_c";
     public static String RESULT_NAME = "result";
 
 
-    public static void updateLangContext(LanguageId languageId, LocalContext localContext, GlobalContext globalContext, Context context) {
+    public static void updateLangContext(LanguageId languageId, LocalContext localContext, FlowContext flowContext, GlobalContext globalContext, Context context) {
         context.getBindings(languageId.getLang()).putMember(LOCAL_CONTEXT_NAME, localContext.getVariables());
+        context.getBindings(languageId.getLang()).putMember(FLOW_CONTEXT_NAME, flowContext.getVariables());
         context.getBindings(languageId.getLang()).putMember(GLOBAL_CONTEXT_NAME, globalContext.getVariables());
     }
 
-    public static void updateFlowContext(LanguageId languageId, Context context, LocalContext localContext, GlobalContext globalContext) {
+    public static void updateFlowContext(LanguageId languageId, Context context, LocalContext localContext, FlowContext flowContext, GlobalContext globalContext) {
         getDataContext(languageId, context, localContext.getVariables(), LOCAL_CONTEXT_NAME);
+        getDataContext(languageId, context, flowContext.getVariables(), FLOW_CONTEXT_NAME);
         getDataContext(languageId, context, globalContext.getVariables(), GLOBAL_CONTEXT_NAME);
 
     }
@@ -56,7 +59,7 @@ public final class NodeUtils {
                 .build();
     }
 
-    public static <T> Optional<T> getValue(String pathValue, LocalContext localContext, GlobalContext globalContext, Class<?> longClass) {
+    public static <T> Optional<T> getValue(String pathValue, LocalContext localContext, FlowContext flowContext, GlobalContext globalContext, Class<?> longClass) {
         ObjectMapper mapper = new ObjectMapper();
         if (pathValue == null || pathValue.isBlank()) {
             return Optional.empty();
@@ -65,6 +68,8 @@ public final class NodeUtils {
             JsonNode rootNode;
             if (pathValue.startsWith(GLOBAL_CONTEXT_NAME)) {
                 rootNode = mapper.valueToTree(globalContext.getVariables());
+            } else if (pathValue.startsWith(FLOW_CONTEXT_NAME)) {
+                rootNode = mapper.valueToTree(flowContext.getVariables());
             } else if (pathValue.startsWith(LOCAL_CONTEXT_NAME)) {
                 rootNode = mapper.valueToTree(localContext.getVariables());
             } else {

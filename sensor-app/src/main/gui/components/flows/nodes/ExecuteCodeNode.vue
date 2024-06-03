@@ -18,8 +18,7 @@ onMounted(() => {
   if (!props.sensor) {
     return;
   }
-
-  code.value = props.sensor.code
+  code.value = props.sensor.code ? props.sensor.code : code.value
 })
 const {updateNode} = useVueFlow()
 

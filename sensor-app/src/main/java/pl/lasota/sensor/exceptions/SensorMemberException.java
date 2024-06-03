@@ -6,7 +6,7 @@ public class SensorMemberException extends SensorException {
     }
 
     public SensorMemberException(String message) {
-        super(null, message);
+        super(message);
     }
 
     public SensorMemberException(Throwable e) {

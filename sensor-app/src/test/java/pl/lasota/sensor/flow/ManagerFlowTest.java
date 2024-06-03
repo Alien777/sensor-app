@@ -20,6 +20,7 @@ import pl.lasota.sensor.flow.services.nodes.Node;
 import pl.lasota.sensor.flow.services.nodes.StartFlowNode;
 import pl.lasota.sensor.flow.services.nodes.builder.FlowsBuilder;
 import pl.lasota.sensor.flow.services.nodes.nodes.*;
+import pl.lasota.sensor.flow.services.nodes.utils.FlowContext;
 import pl.lasota.sensor.flow.services.nodes.utils.GlobalContext;
 import pl.lasota.sensor.member.MemberService;
 
@@ -47,10 +48,13 @@ class ManagerFlowTest {
 
     private GlobalContext globalContext;
 
+    private FlowContext flowContext;
+
     @BeforeEach
     public void setup() {
         MockitoAnnotations.openMocks(this);
-        globalContext = new GlobalContext(Member.builder().id("memberId").role(Role.ROLE_USER).build());
+        globalContext = new GlobalContext();
+        flowContext = new FlowContext(Member.builder().id("memberId").role(Role.ROLE_USER).build());
         flowSensorAnalogI = new FlowSensorAnalogI();
         flowSensorAnalogI.setDeviceId("deviceId");
         flowSensorAnalogI.setMemberId("memberId");
@@ -86,7 +90,7 @@ class ManagerFlowTest {
             return null;
         }).when(node).execute(Mockito.any());
 
-        ((StartFlowNode) root).start();
+        ((StartFlowNode) root).start(flowContext);
         slm.takeBroadcaster(null).streamOut.writeUnshared(flowSensorAnalogI);
         Thread.sleep(10);
         slm.takeBroadcaster(null).streamOut.writeUnshared(flowSensorAnalogI);
@@ -111,7 +115,7 @@ class ManagerFlowTest {
         NodeMock node = Mockito.mock(NodeMock.class);
         FlowsBuilder.root(root)
                 .add(root, node);
-        ((StartFlowNode) root).start();
+        ((StartFlowNode) root).start(flowContext);
         Thread.sleep(2000);
 
         Mockito.verify(node, Mockito.times(2)).execute(Mockito.any());
@@ -135,7 +139,7 @@ class ManagerFlowTest {
         NodeMock node = Mockito.mock(NodeMock.class);
         FlowsBuilder.root(root)
                 .add(root, node);
-        ((StartFlowNode) root).start();
+        ((StartFlowNode) root).start(flowContext);
         Thread.sleep(3000);
         root.clear();
         Thread.sleep(3000);
@@ -179,7 +183,7 @@ class ManagerFlowTest {
                 .add(async, sleep)
                 .add(sleep, nodeAsyncEnd);
 
-        ((StartFlowNode) root).start();
+        ((StartFlowNode) root).start(flowContext);
         slm.takeBroadcaster(null).streamOut.writeUnshared(flowSensorAnalogI);
         Thread.sleep(Duration.ofSeconds(3));
 
@@ -226,7 +230,7 @@ class ManagerFlowTest {
                 .add(root, executeIfNode)
                 .add(executeIfNode, nodeEnd);
 
-        ((StartFlowNode) root).start();
+        ((StartFlowNode) root).start(flowContext);
 
         slm.takeBroadcaster(null).streamOut.writeUnshared(flowSensorAnalogI);
         assertTrue(latch.await(2, TimeUnit.SECONDS), "Test did not complete in time");
@@ -266,7 +270,7 @@ class ManagerFlowTest {
                 .add(root, executeIfNode)
                 .add(executeIfNode, nodeEnd);
 
-        ((StartFlowNode) root).start();
+        ((StartFlowNode) root).start(flowContext);
 
         slm.takeBroadcaster(null).streamOut.writeUnshared(flowSensorAnalogI);
         Thread.sleep(500);
@@ -319,7 +323,7 @@ class ManagerFlowTest {
                 .add(executeCodeNode, nodeEnd);
 
         Assertions.assertEquals(true, globalContext.getVariable("my_var"));
-        ((StartFlowNode) root).start();
+        ((StartFlowNode) root).start(flowContext);
         slm.takeBroadcaster(null).streamOut.writeUnshared(flowSensorAnalogI);
 
         assertTrue(latch.await(2, TimeUnit.SECONDS), "Test did not complete in time");

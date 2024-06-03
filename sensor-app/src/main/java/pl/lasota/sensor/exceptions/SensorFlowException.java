@@ -9,7 +9,7 @@ public class SensorFlowException extends SensorException {
     }
 
     public SensorFlowException(String message) {
-        super(null, message);
+        super( message);
     }
 
     public SensorFlowException(Throwable e) {

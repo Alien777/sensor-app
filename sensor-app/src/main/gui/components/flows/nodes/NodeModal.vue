@@ -52,7 +52,8 @@ onClickOutside(target, event => {
 </script>
 <template>
   <div>
-    <strong> {{ props.nodeDefault.readableName }} &nbsp;&nbsp;</strong>
+    <p style="margin: 0 0 4px;"><strong> {{ props.nodeDefault.readableName }}</strong></p>
+    <p style="margin: 0 0 4px;">{{ props.id }}</p>
     <hr>
     <q-btn size="xs" icon="edit" color="primary" @click="open"/>
     <q-btn v-if="props.nodeDefault.description" size="xs" icon="info" color="info">
@@ -82,8 +83,11 @@ onClickOutside(target, event => {
         <q-card style="width: 100%; height: 100%">
           <q-card-actions>
             <q-btn size="xs" style="z-index: 20000" icon="close" color="primary" @click="close"/>
-            <q-linear-progress :value="0.6" color="pink"/>
           </q-card-actions>
+          <q-card-section>
+            <p style="margin: 0 0 4px;"><strong> {{ props.nodeDefault.readableName }}</strong></p>
+            <p style="margin: 0 0 4px;">{{ props.id }}</p>
+          </q-card-section>
           <q-card-section>
             <slot ref="test" name="default"></slot>
           </q-card-section>

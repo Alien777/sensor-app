@@ -24,22 +24,26 @@ public class AsyncNode extends Node {
     public void execute(LocalContext localContext) {
         Thread thread = new Thread(() -> {
             try {
-                super.execute(localContext);
+                try {
+                    super.execute(new LocalContext());
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
             } finally {
-                globalContext.getThreads().remove(id);
+                flowContext.getThreads().remove(id);
             }
         });
-        globalContext.getThreads().put(id, thread);
+        flowContext.getThreads().put(id, thread);
         thread.start();
     }
 
     @Override
     public void clear() {
-        Thread remove = globalContext.getThreads().remove(id);
+        super.clear();
+        Thread remove = flowContext.getThreads().remove(id);
         if (remove != null) {
             remove.interrupt();
         }
-        super.clear();
     }
 
 }

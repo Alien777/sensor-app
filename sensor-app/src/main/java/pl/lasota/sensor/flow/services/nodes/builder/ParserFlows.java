@@ -29,7 +29,6 @@ public class ParserFlows {
     private final ApplicationContext applicationContext;
 
     public List<Node> flows(String flowsJson, GlobalContext globalContext) {
-        log.info("Parse flow to node {} ", flowsJson);
         try {
             final Map<String, RawNode> nodesRaw = new HashMap<>();
             ObjectMapper om = new ObjectMapper();
@@ -45,7 +44,7 @@ public class ParserFlows {
             }
             return createStructured(nodesRaw);
         } catch (JsonProcessingException e) {
-            throw new SensorFlowException("Error parsing flow", e);
+            throw new SensorFlowException(e, "Occurred problem with parsing flow");
         }
     }
 
@@ -109,13 +108,12 @@ public class ParserFlows {
                             return (Node) clazz.getMethod("create", String.class, GlobalContext.class, JsonNode.class, ApplicationContext.class)
                                     .invoke(null, ref, globalContext, node, applicationContext);
                         } catch (Exception e) {
-                            log.info("Can't find node: {}", name);
-                            throw new SensorFlowException(e, "Can't find node: {}", name);
+                            throw new SensorFlowException(e, "Problem with create node {}", name);
                         }
                     })
                     .orElse(null);
             if (createdNode == null) {
-                throw new SensorFlowException("Can't find node: {}", name);
+                throw new SensorFlowException("Not found node by {}", name);
             }
             return createdNode;
 

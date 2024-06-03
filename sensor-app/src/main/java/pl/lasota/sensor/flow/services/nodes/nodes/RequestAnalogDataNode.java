@@ -6,7 +6,6 @@ import lombok.Getter;
 import org.springframework.context.ApplicationContext;
 import pl.lasota.sensor.device.DeviceApiInterface;
 import pl.lasota.sensor.device.model.SendForAnalogDataI;
-import pl.lasota.sensor.exceptions.SensorFlowException;
 import pl.lasota.sensor.flow.services.nodes.FlowNode;
 import pl.lasota.sensor.flow.services.nodes.Node;
 import pl.lasota.sensor.flow.services.nodes.utils.GlobalContext;
@@ -21,7 +20,7 @@ public class RequestAnalogDataNode extends Node {
     private final Data data;
     private final DeviceApiInterface deviceApiInterface;
 
-    private RequestAnalogDataNode(String id, GlobalContext globalContext, Data data,  DeviceApiInterface deviceApiInterface) {
+    private RequestAnalogDataNode(String id, GlobalContext globalContext, Data data, DeviceApiInterface deviceApiInterface) {
         super(id, globalContext);
         this.data = data;
         this.deviceApiInterface = deviceApiInterface;
@@ -34,13 +33,9 @@ public class RequestAnalogDataNode extends Node {
     }
 
     @Override
-    public void execute(LocalContext localContext) {
-        try {
-            deviceApiInterface.sendRequestForDataAnalog(new SendForAnalogDataI(data.deviceId, data.pin));
-            super.execute(localContext);
-        } catch (Exception e) {
-            throw new SensorFlowException("Occurred problem with send request to analog data", e);
-        }
+    public void execute(LocalContext localContext) throws Exception {
+        deviceApiInterface.sendRequestForDataAnalog(new SendForAnalogDataI(data.deviceId, data.pin));
+        super.execute(localContext);
     }
 
     @AllArgsConstructor(staticName = "create")

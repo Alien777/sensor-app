@@ -7,7 +7,7 @@ public class SensorApiException extends SensorException {
     }
 
     public SensorApiException(String message) {
-        super(null, message);
+        super(message);
     }
 
     public SensorApiException(Throwable e) {

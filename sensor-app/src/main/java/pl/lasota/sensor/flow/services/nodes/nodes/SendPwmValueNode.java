@@ -25,7 +25,7 @@ public class SendPwmValueNode extends Node {
     private final Data data;
     private final DeviceApiInterface deviceApiInterface;
 
-    private SendPwmValueNode(String id, GlobalContext globalContext, Data data,  DeviceApiInterface deviceApiInterface) {
+    private SendPwmValueNode(String id, GlobalContext globalContext, Data data, DeviceApiInterface deviceApiInterface) {
         super(id, globalContext);
         this.data = data;
         this.deviceApiInterface = deviceApiInterface;
@@ -39,21 +39,17 @@ public class SendPwmValueNode extends Node {
         DeviceApiInterface sae = context.getBean(DeviceApiInterface.class);
         List<Integer> configPwmPins = sae.getConfigPwmPins(data.getDeviceId());
         if (!configPwmPins.contains(data.getPin())) {
-            throw new SensorFlowException("Pwm pin not found");
+            throw new SensorFlowException("Pwm pin {} not found for device {}", pin, deviceId);
         }
         return new SendPwmValueNode(ref, globalContext, data, sae);
     }
 
     @Override
-    public void execute(LocalContext localContext) {
-        Optional<Long> value = NodeUtils.getValue(data.valueVariable, localContext, globalContext, Long.class);
+    public void execute(LocalContext localContext) throws Exception {
+        Optional<Long> value = NodeUtils.getValue(data.valueVariable, localContext, flowContext, globalContext, Long.class);
         if (value.isPresent()) {
-            try {
-                deviceApiInterface.sendPwmValueToDevice(new SendPwmI(data.deviceId, data.pin, value.get()));
-                super.execute(localContext);
-            } catch (Exception e) {
-                throw new SensorFlowException("Occurred problem with send pwm value to device", e);
-            }
+            deviceApiInterface.sendPwmValueToDevice(new SendPwmI(data.deviceId, data.pin, value.get()));
+            super.execute(localContext);
         }
     }
 

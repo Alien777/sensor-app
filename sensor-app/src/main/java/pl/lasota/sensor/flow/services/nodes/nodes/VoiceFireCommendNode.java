@@ -6,28 +6,27 @@ import org.springframework.context.ApplicationContext;
 import pl.lasota.sensor.ai.AI;
 import pl.lasota.sensor.bus.AudioWaveInputStreamBus;
 import pl.lasota.sensor.entities.Member;
+import pl.lasota.sensor.flow.services.nodes.AsyncNodeConsumer;
 import pl.lasota.sensor.flow.services.nodes.FlowNode;
 import pl.lasota.sensor.flow.services.nodes.Node;
 import pl.lasota.sensor.flow.services.nodes.StartFlowNode;
+import pl.lasota.sensor.flow.services.nodes.utils.FlowContext;
 import pl.lasota.sensor.flow.services.nodes.utils.GlobalContext;
 import pl.lasota.sensor.flow.services.nodes.utils.LocalContext;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.function.BiConsumer;
 
 import static pl.lasota.sensor.flow.services.nodes.builder.ParserFlows.fString;
 
 @Slf4j
 @FlowNode
-public class VoiceFireCommendNode extends Node implements StartFlowNode {
-
+public class VoiceFireCommendNode extends Node implements StartFlowNode, AsyncNodeConsumer<Member, String> {
 
     private final List<List<String>> commends;
     private final AudioWaveInputStreamBus audioWaveInputStreamBus;
     private final AI ai = AI.create();
-    ;
 
     public VoiceFireCommendNode(String id, GlobalContext globalContext, List<List<String>> commends, AudioWaveInputStreamBus audioWaveInputStreamBus) {
         super(id, globalContext);
@@ -36,42 +35,40 @@ public class VoiceFireCommendNode extends Node implements StartFlowNode {
     }
 
     public static Node create(String ref, GlobalContext globalContext, JsonNode node, ApplicationContext context) {
-        String commends1 = fString(node, "commends");
-        List<String> commends = new ArrayList<>(Arrays.asList(commends1.split(";")));
+        List<String> commends = new ArrayList<>(Arrays.asList(fString(node, "commends").split(";")));
         AudioWaveInputStreamBus bean = context.getBean(AudioWaveInputStreamBus.class);
         List<List<String>> commendsToken = commends.stream().map(AI::tokenizer).toList();
         return new VoiceFireCommendNode(ref, globalContext, commendsToken, bean);
     }
 
-    private final BiConsumer<Member, String> b = new BiConsumer<>() {
-        @Override
-        public void accept(Member member, String s) {
-            if (globalContext.isRunningRightNow.get()) {
-                return;
-            }
-            globalContext.isRunningRightNow.set(true);
-            if (!globalContext.getMember().getId().equals(member.getId())) {
-                return;
-            }
-            boolean b2 = ai.matchText(s, commends);
-            if (b2) {
-                LocalContext localContext = new LocalContext();
-                VoiceFireCommendNode.super.execute(localContext);
-            }
-            globalContext.isRunningRightNow.set(false);
-        }
-    };
 
+    @Override
+    public boolean preConsume(Member member, String s) {
+        return flowContext.getMember().getId().equals(member.getId());
+    }
 
     @Override
     public void clear() {
-        audioWaveInputStreamBus.removeConsumer(b);
+        audioWaveInputStreamBus.removeConsumer(this);
         super.clear();
     }
 
     @Override
-    public boolean start() {
-        audioWaveInputStreamBus.addConsumer(b);
-        return true;
+    public void start(FlowContext flowContext) throws Exception {
+        super.propagateFlowContext(flowContext);
+        audioWaveInputStreamBus.addConsumer(this);
+    }
+
+    @Override
+    public void error(Exception e) {
+        log.error(e.getMessage(), e);
+    }
+
+    @Override
+    public void consume(Member member, String s) throws Exception {
+        if (ai.matchText(s, commends)) {
+            LocalContext localContext = new LocalContext();
+            VoiceFireCommendNode.super.execute(localContext);
+        }
     }
 }

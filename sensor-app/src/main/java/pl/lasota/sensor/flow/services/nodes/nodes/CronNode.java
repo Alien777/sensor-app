@@ -8,9 +8,10 @@ import org.springframework.scheduling.support.CronTrigger;
 import pl.lasota.sensor.flow.services.nodes.FlowNode;
 import pl.lasota.sensor.flow.services.nodes.Node;
 import pl.lasota.sensor.flow.services.nodes.StartFlowNode;
+import pl.lasota.sensor.flow.services.nodes.builder.ParserFlows;
+import pl.lasota.sensor.flow.services.nodes.utils.FlowContext;
 import pl.lasota.sensor.flow.services.nodes.utils.GlobalContext;
 import pl.lasota.sensor.flow.services.nodes.utils.LocalContext;
-import pl.lasota.sensor.flow.services.nodes.builder.ParserFlows;
 
 import java.util.Map;
 import java.util.concurrent.ScheduledFuture;
@@ -18,7 +19,7 @@ import java.util.concurrent.ScheduledFuture;
 
 @Slf4j
 @FlowNode
-public class CronNode extends Node implements StartFlowNode {
+public class CronNode extends Node implements StartFlowNode, Runnable {
 
     private final TaskScheduler taskScheduler;
     private final String cron;
@@ -36,26 +37,11 @@ public class CronNode extends Node implements StartFlowNode {
     }
 
 
-    public boolean start() {
-        try {
-            ScheduledFuture<?> newSchedule = taskScheduler.schedule(() -> {
-                try {
-                    if (globalContext.isStopped()) {
-                        return;
-                    }
-                    LocalContext localContext = new LocalContext();
-                    super.execute(localContext);
-                } catch (Exception e) {
-                    log.error("Occurred flow exception ", e);
-                }
-            }, CronTrigger.forFixedExecution(cron));
-            Map<String, ScheduledFuture<?>> schedules = globalContext.getSchedules();
-            schedules.put(id, newSchedule);
-        } catch (Exception e) {
-            log.error("Problem with start node ", e);
-            return false;
-        }
-        return true;
+    public void start(FlowContext flowContext) throws Exception {
+        super.propagateFlowContext(flowContext);
+        ScheduledFuture<?> newSchedule = taskScheduler.schedule(this, CronTrigger.forFixedExecution(cron));
+        Map<String, ScheduledFuture<?>> schedules = super.flowContext.getSchedules();
+        schedules.put(id, newSchedule);
     }
 
     @Override
@@ -65,12 +51,21 @@ public class CronNode extends Node implements StartFlowNode {
 
     @Override
     public void clear() {
-        globalContext.stopFlow();
-        ScheduledFuture<?> scheduledFuture = globalContext.getSchedules().get(id);
+        super.clear();
+        ScheduledFuture<?> scheduledFuture = flowContext.getSchedules().get(id);
         if (scheduledFuture != null) {
-            globalContext.getSchedules().remove(id);
+            flowContext.getSchedules().remove(id);
             scheduledFuture.cancel(true);
         }
-        super.clear();
+    }
+
+    @Override
+    public void run() {
+        LocalContext localContext = new LocalContext();
+        try {
+            super.execute(localContext);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import pl.lasota.sensor.exceptions.SensorFlowException;
+import pl.lasota.sensor.flow.services.nodes.utils.FlowContext;
 import pl.lasota.sensor.flow.services.nodes.utils.GlobalContext;
 import pl.lasota.sensor.flow.services.nodes.utils.LocalContext;
 
@@ -22,23 +23,25 @@ public abstract class Node {
 
     protected final GlobalContext globalContext;
 
-    public void execute(LocalContext localContext) {
+    protected FlowContext flowContext;
+
+    public void execute(LocalContext localContext) throws Exception {
         for (Node node : nodes) {
             if (globalContext.isStopped()) {
                 break;
             }
             try {
-                log.info("Executing node {} from {} to {}", id, this.getClass().getName(), node.getClass().getName());
-                globalContext.recreateSecurityHolder();
+                log.info("Executing node {}", id);
+                flowContext.recreateSecurityHolder();
                 node.execute(localContext);
             } catch (Exception e) {
-                log.error("Occurred error during executing node {} from {} to {}", id, this.getClass().getName(), node.getClass().getName());
-                throw new SensorFlowException(e, "Occurred error during executing node {} from {} ", id, this.getClass().getName());
+                throw new SensorFlowException(e, "Occurred error during executing node FROM {} TO {}", id, node.id);
             }
         }
     }
 
     public void clear() {
+        globalContext.stopFlow();
         for (Node node : nodes) {
             try {
                 node.clear();
@@ -56,4 +59,10 @@ public abstract class Node {
         nodes.addFirst(node);
     }
 
+    protected void propagateFlowContext(FlowContext flowContext) {
+        this.flowContext = flowContext;
+        for (Node node : nodes) {
+            node.propagateFlowContext(flowContext);
+        }
+    }
 }

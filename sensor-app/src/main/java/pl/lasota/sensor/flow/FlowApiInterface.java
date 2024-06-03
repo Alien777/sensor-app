@@ -2,27 +2,27 @@ package pl.lasota.sensor.flow;
 
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+import pl.lasota.sensor.exceptions.SensorFlowException;
 import pl.lasota.sensor.flow.model.FlowI;
 import pl.lasota.sensor.flow.model.FlowSaveI;
-import pl.lasota.sensor.flow.model.FlowStatusI;
 
 import java.util.List;
 
 
 public interface FlowApiInterface {
 
-    FlowStatusI save(@RequestBody FlowSaveI flowSaveI) throws Exception;
+    void save(@RequestBody FlowSaveI flowSaveI) throws SensorFlowException;
 
-    FlowStatusI enabling(@PathVariable(value = "id") Long id) throws Exception;
+    void enabling(@PathVariable(value = "id") Long id) throws SensorFlowException;
 
-    FlowStatusI disabling(@PathVariable(value = "id") Long id) throws Exception;
+    void disabling(@PathVariable(value = "id") Long id) throws SensorFlowException;
 
-    FlowStatusI fireOnce(@PathVariable(value = "id") Long id) throws Exception;
+    void fireOnce(@PathVariable(value = "id") Long id) throws SensorFlowException;
 
-    FlowStatusI delete(@PathVariable(value = "id") Long id) throws Exception;
+    void delete(@PathVariable(value = "id") Long id) throws SensorFlowException;
 
-    FlowI get(@PathVariable(value = "id") Long id) throws Exception;
+    FlowI get(@PathVariable(value = "id") Long id) throws SensorFlowException;
 
-    List<FlowI> get() throws Exception;
+    List<FlowI> get() throws SensorFlowException;
 
 }

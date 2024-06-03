@@ -29,13 +29,13 @@ public class ExecuteCodeNode extends Node {
     }
 
     @Override
-    public void execute(LocalContext localContext) {
+    public void execute(LocalContext localContext) throws Exception {
         try (Context context = NodeUtils.buildContext(NodeUtils.LanguageId.JS)) {
-            NodeUtils.updateLangContext(NodeUtils.LanguageId.JS, localContext, globalContext, context);
+            NodeUtils.updateLangContext(NodeUtils.LanguageId.JS, localContext, flowContext, globalContext, context);
             String codeToExecute = String.format("%s", code);
             Context c = context.eval(NodeUtils.LanguageId.JS.getLang(), codeToExecute).getContext();
             Value result = c.getBindings(NodeUtils.LanguageId.JS.getLang()).getMember(NodeUtils.RESULT_NAME);
-            NodeUtils.updateFlowContext(NodeUtils.LanguageId.JS, c, localContext, globalContext);
+            NodeUtils.updateFlowContext(NodeUtils.LanguageId.JS, c, localContext, flowContext, globalContext);
             if (result != null && result.isBoolean() && result.asBoolean()) {
                 super.execute(localContext);
             }

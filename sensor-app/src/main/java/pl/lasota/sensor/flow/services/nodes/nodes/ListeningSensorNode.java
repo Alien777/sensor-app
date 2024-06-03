@@ -8,55 +8,27 @@ import org.springframework.context.ApplicationContext;
 import pl.lasota.sensor.bus.FlowSensorIInputStreamBus;
 import pl.lasota.sensor.flow.model.FlowSensorAnalogI;
 import pl.lasota.sensor.flow.model.FlowSensorI;
+import pl.lasota.sensor.flow.services.nodes.AsyncNodeConsumer;
 import pl.lasota.sensor.flow.services.nodes.FlowNode;
 import pl.lasota.sensor.flow.services.nodes.Node;
 import pl.lasota.sensor.flow.services.nodes.StartFlowNode;
-import pl.lasota.sensor.flow.services.nodes.utils.*;
-
-import java.util.function.BiConsumer;
+import pl.lasota.sensor.flow.services.nodes.utils.FlowContext;
+import pl.lasota.sensor.flow.services.nodes.utils.GlobalContext;
+import pl.lasota.sensor.flow.services.nodes.utils.LocalContext;
 
 import static pl.lasota.sensor.flow.services.nodes.builder.ParserFlows.fString;
 
 @FlowNode
 @Slf4j
-public class ListeningSensorNode extends Node implements StartFlowNode {
+public class ListeningSensorNode extends Node implements StartFlowNode, AsyncNodeConsumer<String, FlowSensorI> {
 
     private final Data data;
     private final FlowSensorIInputStreamBus slm;
-    private final BiConsumer<String, FlowSensorI> consumer;
 
     private ListeningSensorNode(String id, GlobalContext globalContext, Data data, FlowSensorIInputStreamBus slm) {
         super(id, globalContext);
         this.data = data;
         this.slm = slm;
-        consumer = (s, sensor) -> {
-            try {
-                if (globalContext.isRunningRightNow.get()) {
-                    return;
-                }
-                globalContext.isRunningRightNow.set(true);
-
-                if (globalContext.isStopped()) {
-                    return;
-                }
-                if (!globalContext.getMember().getId().equals(sensor.getMemberId())) {
-                    return;
-                }
-                if (!data.getDeviceId().equals(sensor.getDeviceId())) {
-                    return;
-                }
-                LocalContext localContext = new LocalContext();
-                if (!analyze(sensor, localContext)) {
-                    return;
-                }
-
-                ListeningSensorNode.super.execute(localContext);
-                globalContext.isRunningRightNow.set(false);
-
-            } catch (Exception e) {
-                log.error("Occurred flow exception ", e);
-            }
-        };
     }
 
     public static Node create(String ref, GlobalContext globalContext, JsonNode node, ApplicationContext context) {
@@ -66,17 +38,52 @@ public class ListeningSensorNode extends Node implements StartFlowNode {
         return new ListeningSensorNode(ref, globalContext, data, context.getBean(FlowSensorIInputStreamBus.class));
     }
 
+    @Override
+    public void execute(LocalContext localContext) {
+        throw new UnsupportedOperationException("Please execute start instead execute");
+    }
+
 
     @Override
-    public boolean start() {
-        try {
-            slm.addConsumer(consumer);
-        } catch (Exception e) {
-            log.error("Problem with start node ", e);
+    public void start(FlowContext flowContext) throws Exception {
+        super.propagateFlowContext(flowContext);
+        slm.addConsumer(this);
+    }
+
+    @Override
+    public void clear() {
+        slm.removeConsumer(this);
+        super.clear();
+    }
+
+
+    @Override
+    public boolean preConsume(String s, FlowSensorI sensor) {
+        if (!flowContext.getMember().getId().equals(sensor.getMemberId())) {
+            return false;
+        }
+        if (!data.getDeviceId().equals(sensor.getDeviceId())) {
             return false;
         }
         return true;
     }
+
+    @Override
+    public void consume(String s, FlowSensorI flowSensorI) throws Exception {
+        LocalContext localContext = new LocalContext();
+        if (!analyze(flowSensorI, localContext)) {
+            return;
+        }
+        ListeningSensorNode.super.execute(localContext);
+    }
+
+    @AllArgsConstructor(staticName = "create")
+    @Getter
+    public static class Data {
+        private final String deviceId;
+        private final String forMessageType;
+    }
+
 
     private boolean analyze(FlowSensorI sensor, LocalContext localContext) {
         if (!sensor.getMessageType().equals(data.forMessageType)) {
@@ -94,26 +101,5 @@ public class ListeningSensorNode extends Node implements StartFlowNode {
             }
             default -> false;
         };
-    }
-
-
-    @Override
-    public void execute(LocalContext localContext) {
-        throw new UnsupportedOperationException("Please execute start instead execute");
-    }
-
-    @Override
-    public void clear() {
-        globalContext.stopFlow();
-        slm.removeConsumer(consumer);
-        super.clear();
-    }
-
-
-    @AllArgsConstructor(staticName = "create")
-    @Getter
-    public static class Data {
-        private final String deviceId;
-        private final String forMessageType;
     }
 }

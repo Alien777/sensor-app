@@ -15,6 +15,7 @@ import pl.lasota.sensor.exceptions.SensorException;
 import pl.lasota.sensor.gateway.gui.model.ErrorResponseT;
 
 import java.io.IOException;
+import java.util.UUID;
 
 @ControllerAdvice
 @Slf4j
@@ -23,14 +24,14 @@ public class GlobalExceptionHandler implements AuthenticationEntryPoint {
 
     @ExceptionHandler(value = SensorException.class)
     public ResponseEntity<ErrorResponseT> blogNotFoundException(SensorException se) {
-        ErrorResponseT errorResponseT = new ErrorResponseT(se.getMessage(), se.getDetails());
-        log.error("Sensor exception error {}, {}", se.getMessage(), se.getDetails(), se);
+        String messagesOnlyStackTrace = se.getMessagesOnlyStackTrace(UUID.randomUUID());
+        ErrorResponseT errorResponseT = new ErrorResponseT(se.getMessage(), messagesOnlyStackTrace);
+        log.error("Sensor exception error {}, {}", se.getMessage(), messagesOnlyStackTrace, se);
         return new ResponseEntity<>(errorResponseT, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler(value = Exception.class)
     public ResponseEntity<ErrorResponseT> databaseConnectionFailsException(Exception e) {
-        log.error("Internal error ", e);
         ErrorResponseT errorResponseT = new ErrorResponseT(e.getMessage(), "Contact with admin");
         log.error("Sensor exception error {}", e.getMessage(), e);
         return new ResponseEntity<>(errorResponseT, HttpStatus.INTERNAL_SERVER_ERROR);
