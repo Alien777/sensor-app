@@ -2,28 +2,30 @@
 
 ## Why?
 
-I want to create a simple system for remote management of devices like ESP and others. The project will also contain a user-friendly API to create a flow process.
+I want to create a simple system for remote management of devices like ESP and others. The project will also contain a
+user-friendly API to create a flow process.
 
 ## Structure of the Project
 
-- `sensor-core`:
+- `sensor-app`:
   One of the main modules. This module contains the DB layer, services, and others.
-- `sensor-api`:
   This module provides a layer of communication between MQTT and our own application.
-  - esp <-> mqtt <-> sensor-api <-- sensor-core <-- database
-- `sensor-gui`:
-  Contains GUI and API for the Frontend.
-- `sensor-eureka`:
-  Provides discovery for sensor-api for sensor-gui, e.g., send new config.
-- `sensor-flow`:
-  Component that manages flows and their launch
-- `firmwares`:
-  - `esp-firmwares`:
-    Firmware for ESP 32. The project is written in C language for ESP IDF.
-  - `defaultConfig.json` contains the default config for firmwares.
-  - `schema.json` contains the specification based on the API payload documentation for firmwares.
-  - [payload](documentation/README.md) contains API payload between device and sensor-api.
+    - esp <-> mqtt <-> sensor-app <-- database
+      Contains GUI and API for the Frontend.
+      Component that manages flows and their launch
 
+- `firmwares`:
+    - `esp-firmwares`:
+      Firmware for ESP 32. The project is written in C language for ESP IDF.
+    - `defaultConfig.json` contains the default config for firmwares.
+    - `schema.json` contains the specification based on the API payload documentation for firmwares.
+    - [payload](documentation/README.md) contains API payload between device and sensor-api.
+
+### Voice to Text
+
+- If you want change voice model, you need to change the contents of the folder
+- [Voice Model Folder](docker/data/config/voice-model)
+- https://github.com/alphacep/vosk-api
 
 ### Esp Panel GUI
 
@@ -38,7 +40,9 @@ I want to create a simple system for remote management of devices like ESP and o
 ![img.png](documentation/files/device-config.png)
 
 ### My Plan
+
 #### ESP32:
+
 * ~~Support ANALOG~~
 * ~~Support PWM~~
 * Support UART
@@ -53,3 +57,4 @@ I want to create a simple system for remote management of devices like ESP and o
 ### Technologies
 
 JAVA, C, MQTT, POSTGRES, NUXT
+
