@@ -87,8 +87,9 @@ class ManagerFlowTest {
         }).when(node).execute(Mockito.any());
 
         ((StartFlowNode) root).start();
-        slm.takeBroadcaster(null).streamOut.writeObject(flowSensorAnalogI);
-        slm.takeBroadcaster(null).streamOut.writeObject(flowSensorAnalogI);
+        slm.takeBroadcaster(null).streamOut.writeUnshared(flowSensorAnalogI);
+        Thread.sleep(10);
+        slm.takeBroadcaster(null).streamOut.writeUnshared(flowSensorAnalogI);
 
         assertTrue(latch.await(2, TimeUnit.SECONDS), "Test did not complete in time");
         Mockito.verify(node, Mockito.times(2)).execute(Mockito.any());
@@ -179,7 +180,7 @@ class ManagerFlowTest {
                 .add(sleep, nodeAsyncEnd);
 
         ((StartFlowNode) root).start();
-        slm.takeBroadcaster(null).streamOut.writeObject(flowSensorAnalogI);
+        slm.takeBroadcaster(null).streamOut.writeUnshared(flowSensorAnalogI);
         Thread.sleep(Duration.ofSeconds(3));
 
         InOrder inOrder = Mockito.inOrder(nodeMainThreadEnd, nodeAsyncEnd);
@@ -227,7 +228,7 @@ class ManagerFlowTest {
 
         ((StartFlowNode) root).start();
 
-        slm.takeBroadcaster(null).streamOut.writeObject(flowSensorAnalogI);
+        slm.takeBroadcaster(null).streamOut.writeUnshared(flowSensorAnalogI);
         assertTrue(latch.await(2, TimeUnit.SECONDS), "Test did not complete in time");
 
         Mockito.verify(nodeEnd, Mockito.times(1)).execute(Mockito.any());
@@ -267,7 +268,7 @@ class ManagerFlowTest {
 
         ((StartFlowNode) root).start();
 
-        slm.takeBroadcaster(null).streamOut.writeObject(flowSensorAnalogI);
+        slm.takeBroadcaster(null).streamOut.writeUnshared(flowSensorAnalogI);
         Thread.sleep(500);
 
         Mockito.verify(nodeEnd, Mockito.times(0)).execute(Mockito.any());
@@ -319,7 +320,7 @@ class ManagerFlowTest {
 
         Assertions.assertEquals(true, globalContext.getVariable("my_var"));
         ((StartFlowNode) root).start();
-        slm.takeBroadcaster(null).streamOut.writeObject(flowSensorAnalogI);
+        slm.takeBroadcaster(null).streamOut.writeUnshared(flowSensorAnalogI);
 
         assertTrue(latch.await(2, TimeUnit.SECONDS), "Test did not complete in time");
 

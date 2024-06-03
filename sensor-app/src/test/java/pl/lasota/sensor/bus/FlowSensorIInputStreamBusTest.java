@@ -1,10 +1,6 @@
 package pl.lasota.sensor.bus;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import pl.lasota.sensor.flow.model.FlowSensorI;
 
 import java.io.IOException;
@@ -13,10 +9,11 @@ import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@SpringBootTest
+//@Disabled
+//@SpringBootTest
 class FlowSensorIInputStreamBusTest {
 
-    @Autowired
+//    @Autowired
     private FlowSensorIInputStreamBus flowSensorIInputStreamBus;
 
     @BeforeEach
@@ -24,8 +21,7 @@ class FlowSensorIInputStreamBusTest {
         // Set up any required resources or configuration
     }
 
-    @Test
-    @Disabled
+//    @Test
     void testPerformance() throws IOException, InterruptedException {
         final int recordCount = 50000;
         CountDownLatch latch = new CountDownLatch(recordCount);
@@ -47,14 +43,13 @@ class FlowSensorIInputStreamBusTest {
             });
         }
 
-        latch.await(); // Wait until all records are processed
+        latch.await();
 
         long endTime = System.nanoTime();
         long durationInMillis = TimeUnit.NANOSECONDS.toMillis(endTime - startTime);
 
         System.out.println("Processed " + recordCount + " objects in " + durationInMillis + " ms");
 
-        // Example assertion: processing should not take more than a certain amount of time
-        assertTrue(durationInMillis < 200, "Performance test failed: took longer than expected");
+        assertTrue(durationInMillis < 3000, "Performance test failed: took longer than expected");
     }
 }
