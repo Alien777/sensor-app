@@ -74,6 +74,7 @@ public class ListeningSensorNode extends Node implements StartFlowNode, AsyncNod
         if (!analyze(flowSensorI, localContext)) {
             return;
         }
+
         ListeningSensorNode.super.execute(localContext);
     }
 

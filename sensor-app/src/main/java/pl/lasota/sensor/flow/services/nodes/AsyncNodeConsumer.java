@@ -24,7 +24,9 @@ public interface AsyncNodeConsumer<STREAM_INFORMATION, RESULT> extends BiConsume
     }
 
     default void accept(STREAM_INFORMATION streamInformation, RESULT result) {
-        preConsume(streamInformation, result);
+        if (!preConsume(streamInformation, result)) {
+            return;
+        }
         getExecutorService().submit(() -> {
             try {
                 consume(streamInformation, result);

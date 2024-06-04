@@ -9,13 +9,10 @@ import pl.lasota.sensor.device.services.DeviceDataService;
 import pl.lasota.sensor.device.services.DeviceMessagePublish;
 import pl.lasota.sensor.entities.AnalogSensor;
 import pl.lasota.sensor.entities.Sensor;
-import pl.lasota.sensor.exceptions.SensorApiException;
 import pl.lasota.sensor.flow.model.FlowSensorAnalogI;
 import pl.lasota.sensor.flow.model.FlowSensorI;
 import pl.lasota.sensor.payload.MessageFrame;
 import pl.lasota.sensor.payload.MessageType;
-
-import java.io.IOException;
 
 
 @Component
@@ -57,13 +54,7 @@ public class SaveSensorValueFilter implements Filter<MessageFrame, MessageFrame>
                 }
             };
             if (fT != null) {
-                flowApi.takeBroadcaster(null).write(objectOutputStream -> {
-                    try {
-                        objectOutputStream.writeUnshared(fT);
-                    } catch (IOException e) {
-                        throw new SensorApiException(e);
-                    }
-                });
+                flowApi.takeBroadcaster(null).write(fT);
             }
         }
     }

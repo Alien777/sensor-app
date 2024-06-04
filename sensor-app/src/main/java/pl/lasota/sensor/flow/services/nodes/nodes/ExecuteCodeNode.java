@@ -39,6 +39,8 @@ public class ExecuteCodeNode extends Node {
             if (result != null && result.isBoolean() && result.asBoolean()) {
                 super.execute(localContext);
             }
+
         }
+
     }
 }

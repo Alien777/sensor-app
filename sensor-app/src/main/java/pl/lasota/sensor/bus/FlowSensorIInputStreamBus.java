@@ -2,25 +2,22 @@ package pl.lasota.sensor.bus;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import pl.lasota.sensor.bus.conventer.ByteToObjectConverter;
+import pl.lasota.sensor.bus.broadcast.CustomerBroadcast;
+import pl.lasota.sensor.bus.broadcast.impl.FlowSensorIBroadcasterStream;
 import pl.lasota.sensor.flow.model.FlowSensorI;
-
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 
 @Service
 @RequiredArgsConstructor
-public class FlowSensorIInputStreamBus extends InputStreamBus<String, FlowSensorI> {
+public class FlowSensorIInputStreamBus extends CustomerBroadcast<String, FlowSensorI> {
 
-    private final InputStreamBus<String, FlowSensorI>.Broadcast<ObjectOutputStream, ObjectInputStream> broadcast;
+    private final FlowSensorIBroadcasterStream broadcast;
 
-    public FlowSensorIInputStreamBus() throws IOException {
-        broadcast = new Broadcast<ObjectOutputStream, ObjectInputStream>(ByteToObjectConverter::new, null);
+    public FlowSensorIInputStreamBus() throws Exception {
+        broadcast = new FlowSensorIBroadcasterStream(super.getCustomers());
     }
 
     @Override
-    public InputStreamBus<String, FlowSensorI>.Broadcast<ObjectOutputStream, ObjectInputStream> takeBroadcaster(String streamInformation) {
+    public FlowSensorIBroadcasterStream takeBroadcaster(String s) {
         return broadcast;
     }
 }

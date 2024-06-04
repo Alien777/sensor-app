@@ -8,13 +8,11 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 import pl.lasota.sensor.bus.AudioWaveInputStreamBus;
-import pl.lasota.sensor.bus.InputStreamBus;
+import pl.lasota.sensor.bus.broadcast.impl.AudioBroadcasterStream;
 import pl.lasota.sensor.entities.Member;
 import pl.lasota.sensor.security.AuthService;
 
-import javax.sound.sampled.AudioInputStream;
 import java.io.IOException;
-import java.io.PipedOutputStream;
 import java.nio.ByteBuffer;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -22,7 +20,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 public class AudioStreamHandler extends TextWebSocketHandler {
 
-    private final ConcurrentHashMap<WebSocketSession, InputStreamBus<Member, String>.Broadcast<PipedOutputStream, AudioInputStream>>
+    private final ConcurrentHashMap<WebSocketSession, AudioBroadcasterStream>
             currentActiveSession = new ConcurrentHashMap<>();
 
     private final AudioWaveInputStreamBus audioWaveInputStreamBus;
@@ -52,30 +50,31 @@ public class AudioStreamHandler extends TextWebSocketHandler {
 
     @Override
     protected void handleBinaryMessage(WebSocketSession session, BinaryMessage message) {
-        InputStreamBus<Member, String>.Broadcast<PipedOutputStream, AudioInputStream> broadcast = currentActiveSession.get(session);
-        if (broadcast == null) {
+        AudioBroadcasterStream audioBroadcasterStream = currentActiveSession.get(session);
+        if (audioBroadcasterStream == null) {
             return;
         }
 
         ByteBuffer payload = message.getPayload();
         byte[] audioData = new byte[payload.remaining()];
         payload.get(audioData);
-        try {
-            broadcast.streamOut.write(audioData);
-        } catch (IOException e) {
 
+        try {
+            audioBroadcasterStream.write(audioData);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
 
     }
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
-        InputStreamBus<Member, String>.Broadcast<PipedOutputStream, AudioInputStream> broadcast = currentActiveSession.get(session);
-        if (broadcast == null) {
+        AudioBroadcasterStream audioBroadcasterStream = currentActiveSession.get(session);
+        if (audioBroadcasterStream == null) {
             super.afterConnectionClosed(session, status);
             return;
         }
-        broadcast.close();
+        audioBroadcasterStream.close();
         currentActiveSession.remove(session);
         super.afterConnectionClosed(session, status);
     }
