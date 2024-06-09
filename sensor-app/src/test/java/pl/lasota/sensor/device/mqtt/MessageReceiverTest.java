@@ -31,7 +31,8 @@ class MessageReceiverTest {
         Mockito.when(mfMock.getVersionFirmware()).thenReturn("1.0");
         Mockito.when(mfMock.getMessageType()).thenReturn(MessageType.DEVICE_CONNECTED);
         Mockito.when(msMock.isMemberExistByMemberId(Mockito.same("memberId_1234567"))).thenReturn(true);
-        Mockito.when(dsMock.isTokenValid("memberId_1234567", "deviceId_123", "token")).thenReturn(true);
+        Mockito.when(dsMock.moveToDeviceFromTemporary("memberId_1234567", "deviceId_123", "token")).thenReturn(true);
+        Mockito.when(dsMock.isCurrentTokenValid("memberId_1234567", "deviceId_123", "token")).thenReturn(true);
         Mockito.when(dsMock.isDeviceExist("memberId_1234567", "deviceId_123")).thenReturn(true);
 
 

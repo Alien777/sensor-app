@@ -12,8 +12,8 @@ import java.util.Optional;
 
 @Repository
 public interface DeviceTemporaryRepository extends JpaRepository<DeviceTemporary, String> {
-    @Query("SELECT s FROM DeviceTemporary s WHERE s.member = :memberId AND s.id = :deviceId AND s.currentDeviceToken.token = :token")
-    Optional<DeviceTemporary> isTokenValid(@Param("memberId") String memberId, @Param("token") String token);
+    @Query("SELECT s FROM DeviceTemporary s WHERE s.member = :memberId AND s.currentDeviceToken.token = :token")
+    Optional<DeviceTemporary> getDeviceTemplate(@Param("memberId") String memberId, @Param("token") String token);
 
     @Query("SELECT s FROM DeviceTemporary s WHERE s.member = :memberId")
     List<DeviceTemporary> findAllDevicesBy(@Param("memberId") String memberId);

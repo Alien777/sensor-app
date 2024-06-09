@@ -5,6 +5,7 @@ import {
     type DeviceT,
     timeToDate
 } from "~/composables/api/StructureApp";
+import {Notify} from "quasar";
 
 export const deviceApi = (runtimeConfig: any) => {
     let {fetchApiRequest} = fetchUtils(runtimeConfig);
@@ -18,6 +19,40 @@ export const deviceApi = (runtimeConfig: any) => {
                 }
             });
         return value.data.value;
+    }
+
+    const initDevice = async (version: string, name: string, wifiSsid: string, wifiPassword: string): Promise<boolean> => {
+        try {
+            let value = await fetchApiRequest<any>(`/device/build`, {
+                method: 'post',
+                body: {
+                    version: version,
+                    name: name,
+                    wifiSsid: wifiSsid,
+                    wifiPassword: wifiPassword,
+                },
+                responseType: 'blob',
+            });
+
+            const blob = await value.data.value;
+            if (blob) {
+                const url = window.URL.createObjectURL(blob as Blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.setAttribute('download', `${name}-${version}.zip`); // Nazwa pliku do pobrania
+                document.body.appendChild(link);
+                link.click();
+                if (link.parentNode)
+                    link.parentNode.removeChild(link);
+                window.URL.revokeObjectURL(url);
+                return true;
+            } else {
+                return false;
+            }
+        } catch (error) {
+            console.error('Error during device initialization:', error);
+            return false;
+        }
     }
 
     const getAllDevice = async (withNotActive = false): Promise<DeviceT[]> => {
@@ -45,13 +80,25 @@ export const deviceApi = (runtimeConfig: any) => {
         return value.data.value.map(value1 => timeToDate(value1));
     }
 
+    const getVersions = async (): Promise<string[]> => {
+        let value = await fetchApiRequest<string[]>(`/device/versions`,
+            {method: 'get'});
+        return value.data.value;
+    }
     const activateConfig = async (id: string, id_config: number): Promise<any> => {
         return await fetchApiRequest<DeviceConfigT[]>(`/device/${id}/config/${id_config}/activate`,
             {method: 'put'});
     }
 
     return {
-        getAllDevice, getDeviceConfig, saveDeviceConfig, getAllConfigs, activateConfig, saveDevice
+        getAllDevice,
+        getDeviceConfig,
+        saveDeviceConfig,
+        getAllConfigs,
+        activateConfig,
+        saveDevice,
+        initDevice,
+        getVersions
     }
 
 

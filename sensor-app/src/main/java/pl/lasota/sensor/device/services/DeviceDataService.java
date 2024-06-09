@@ -6,22 +6,27 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import pl.lasota.sensor.configs.properties.DeviceProperties;
+import pl.lasota.sensor.device.services.repositories.*;
+import pl.lasota.sensor.entities.*;
 import pl.lasota.sensor.exceptions.SensorApiException;
+import pl.lasota.sensor.exceptions.SensorException;
 import pl.lasota.sensor.payload.MessageFrame;
 import pl.lasota.sensor.payload.MessageType;
 import pl.lasota.sensor.payload.to.AnalogConfig;
 import pl.lasota.sensor.payload.to.ConfigPayload;
 import pl.lasota.sensor.payload.to.PwmConfig;
-import pl.lasota.sensor.device.services.repositories.DeviceConfigRepository;
-import pl.lasota.sensor.device.services.repositories.DeviceRepository;
-import pl.lasota.sensor.device.services.repositories.DeviceTemporaryRepository;
-import pl.lasota.sensor.device.services.repositories.SensorRecordingRepository;
-import pl.lasota.sensor.exceptions.SensorException;
-import pl.lasota.sensor.entities.*;
 
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import static pl.lasota.sensor.payload.MessageType.DEVICE_CONNECTED;
 
@@ -35,6 +40,7 @@ public class DeviceDataService {
     private final DeviceConfigRepository dcr;
     private final DeviceConfigService dsu;
     private final DeviceTemporaryRepository dtr;
+    private final DeviceTokenRepository dtor;
 
     @Transactional(rollbackFor = SensorException.class)
     public Sensor insertSensorReading(MessageFrame messageFrame) {
@@ -71,7 +77,7 @@ public class DeviceDataService {
     }
 
     @Transactional
-    public String saveTemporary(String memberId, String deviceId, String name) {
+    public String saveTemporary(String memberId, String name) {
         String token = UUID.randomUUID().toString();
         DeviceToken deviceToken = DeviceToken.builder()
                 .member(memberId)
@@ -80,30 +86,42 @@ public class DeviceDataService {
         dtr.save(DeviceTemporary.builder()
                 .time(OffsetDateTime.now())
                 .name(name)
-                .device(deviceId)
                 .member(memberId)
                 .currentDeviceToken(deviceToken).build());
         return token;
-
     }
 
 
     @Transactional
     public boolean moveToDeviceFromTemporary(String memberId, String deviceId, String token) {
-        Optional<DeviceTemporary> tokenValid = dtr.isTokenValid(memberId, token);
-        if (tokenValid.isEmpty()) {
+
+        Optional<DeviceTemporary> deviceTemplateOptional = dtr.getDeviceTemplate(memberId, token);
+        Optional<Device> deviceOptional = dr.findDeviceBy(memberId, deviceId);
+
+        if (deviceTemplateOptional.isPresent() && deviceOptional.isPresent()) {
+            DeviceTemporary deviceTemporary = deviceTemplateOptional.get();
+            Device device = deviceOptional.get();
+            device.setCurrentDeviceToken(deviceTemporary.getCurrentDeviceToken());
+            device.setName(deviceTemporary.getName());
+            dr.save(device);
+            dtr.delete(deviceTemporary);
+            return true;
+        } else if (deviceTemplateOptional.isPresent()) {
+            DeviceTemporary deviceTemporary = deviceTemplateOptional.get();
+            Device device = Device.builder()
+                    .member(memberId)
+                    .name(deviceTemporary.getName())
+                    .currentDeviceToken(deviceTemporary.getCurrentDeviceToken())
+                    .id(deviceId.toUpperCase())
+                    .build();
+            dr.save(device);
+            dtr.delete(deviceTemporary);
+            return true;
+        } else if (deviceOptional.isPresent()) {
+            return true;
+        } else {
             return false;
         }
-        DeviceTemporary deviceTemporary = tokenValid.get();
-        Device device = Device.builder()
-                .member(memberId)
-                .name(deviceTemporary.getName())
-                .currentDeviceToken(deviceTemporary.getCurrentDeviceToken())
-                .id(deviceId.toUpperCase())
-                .build();
-        dr.save(device);
-        dtr.delete(deviceTemporary);
-        return true;
     }
 
     @Transactional(rollbackFor = SensorException.class)
@@ -189,8 +207,8 @@ public class DeviceDataService {
         return dr.existsDevice(memberId, deviceId);
     }
 
-    public boolean isTokenValid(String memberId, String deviceId, String token) {
-        return dr.isTokenValid(memberId, deviceId, token);
+    public boolean isCurrentTokenValid(String memberId, String deviceId, String token) {
+        return dr.isCurrentTokenValid(memberId, deviceId, token);
     }
 
     public List<Device> getAllDeviceBy(String memberId) {
@@ -256,6 +274,78 @@ public class DeviceDataService {
             return MessageType.getListMessageTypeFromDevice();
         }
 
-        return Collections.singletonList(MessageType.DEVICE_CONNECTED);
+        return Collections.singletonList(DEVICE_CONNECTED);
     }
+
+    @Transactional
+    public byte[] generateBuildPackage(String version, String deviceName, String wifiSsid, String wifiPassword, String memberId, DeviceProperties ap) throws IOException {
+        String token = saveTemporary(memberId, deviceName);
+        String[] command = {
+                Paths.get(ap.getFirmwareFolder(), version, ap.getGenerateBuildPackage()).toString(),
+                wifiSsid,
+                wifiPassword,
+                memberId,
+                ap.getMqttIpExternal(),
+                token,
+                Paths.get(ap.getFirmwareFolder(), version).toAbsolutePath().toString()
+        };
+        String last = "";
+        try {
+            ProcessBuilder processBuilder = new ProcessBuilder(command);
+            Process process = processBuilder.start();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            String line;
+            while ((line = reader.readLine()) != null) {
+                last = line;
+                log.info("SCRIPT {}", line);
+            }
+            process.waitFor();
+            byte[] bytes = zipFolder(last);
+
+            try (Stream<Path> walk = Files.walk(Path.of(last));) {
+                walk.sorted(Comparator.reverseOrder())
+                        .map(Path::toFile)
+                        .forEach(File::delete);
+            }
+            log.info("Generated build package {}", last);
+            return bytes;
+        } catch (Exception e) {
+            log.error("Problem ", e);
+            throw new SensorApiException(e, "Error building device config");
+        }
+    }
+
+    public byte[] zipFolder(String sourceDirPath) throws IOException {
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        try (ZipOutputStream zipOutputStream = new ZipOutputStream(byteArrayOutputStream)) {
+
+            Path sourceDir = Paths.get(sourceDirPath);
+            try (Stream<Path> walk = Files.walk(sourceDir)) {
+                walk.filter(path -> !Files.isDirectory(path)).forEach(path -> {
+                    ZipEntry zipEntry = new ZipEntry(sourceDir.relativize(path).toString());
+                    try {
+                        zipOutputStream.putNextEntry(zipEntry);
+                        Files.copy(path, zipOutputStream);
+                        zipOutputStream.closeEntry();
+                    } catch (IOException e) {
+                        throw new RuntimeException("Problem with generate zip", e);
+                    }
+                });
+            }
+        }
+        return byteArrayOutputStream.toByteArray();
+    }
+
+
+    public List<String> getVersions(DeviceProperties ap) {
+        return Arrays.stream(Objects.requireNonNull(new File(ap.getFirmwareFolder()).listFiles()))
+                .filter(File::isDirectory)
+                .map(File::getName).toList();
+
+    }
+
+    public boolean isTokenExist(String memberId, String token) {
+        return dtor.isExist(memberId, token);
+    }
+
 }

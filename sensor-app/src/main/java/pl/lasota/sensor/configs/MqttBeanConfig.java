@@ -8,13 +8,13 @@ import org.eclipse.paho.mqttv5.common.MqttException;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 import pl.lasota.sensor.gateway.device.SimpleCallback;
-import pl.lasota.sensor.configs.properties.ApiProperties;
+import pl.lasota.sensor.configs.properties.DeviceProperties;
 
 @Component
 @Slf4j
 @RequiredArgsConstructor
 public class MqttBeanConfig {
-    private final ApiProperties properties;
+    private final DeviceProperties properties;
 
     @Bean
     public IMqttClient mqttClient() throws MqttException {

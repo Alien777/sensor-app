@@ -115,10 +115,10 @@ export default function useDragAndDrop() {
                 return () => {
                     return h('div', {style: {height: '100%', width: '100%'}}, [
                         h(NodeModal, {
-                                id: id,
+                                id: id as any,
                                 node: insert,
                                 deleteNodeFunction: (id: string) => removeNodes({id: id} as any),
-                                nodeDefault: draggableItems.value.filter(value => value.name === insert.name)[0]
+                                nodeDefault: draggableItems.value.filter(value => value.name === insert.name)[0] as any
                             },
                             h(component, {
                                 id: id,

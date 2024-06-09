@@ -22,5 +22,4 @@ public class DeviceToken {
 
     @Column(name = "token", unique = true)
     private String token;
-
 }

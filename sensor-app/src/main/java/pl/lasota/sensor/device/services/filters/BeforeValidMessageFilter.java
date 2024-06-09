@@ -40,16 +40,12 @@ public class BeforeValidMessageFilter implements Filter<MessageFrame, MessageFra
             return;
         }
 
-        if (!ds.isDeviceExist(request.getMemberId(), request.getDeviceId())) {
-
-            if(!ds.moveToDeviceFromTemporary(request.getMemberId(), request.getDeviceId(), request.getToken()))
-            {
-                log.info("Device not existing {} ", request.getDeviceId());
-                return;
-            }
+        if (!ds.moveToDeviceFromTemporary(request.getMemberId(), request.getDeviceId(), request.getToken())) {
+            log.info("Problem with moved from temporary to device {} ", request.getDeviceId());
+            return;
         }
 
-        if (!ds.isTokenValid(request.getMemberId(), request.getDeviceId(), request.getToken())) {
+        if (!ds.isCurrentTokenValid(request.getMemberId(), request.getDeviceId(), request.getToken())) {
             log.info("Wrong token {} ", request.getDeviceId());
             return;
         }

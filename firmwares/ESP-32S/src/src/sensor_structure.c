@@ -334,7 +334,7 @@ const char *topicSubscribe()
     const char *deviceKey = get_mac_address();
     memset(topic, 0, sizeof(topic));
     strncat(topic, "/", sizeof(topic) - 1);
-    strncat(topic, config.member_key, sizeof(topic) - strlen(topic) - 1);
+    strncat(topic, config.member_id, sizeof(topic) - strlen(topic) - 1);
     strncat(topic, "/", sizeof(topic) - strlen(topic) - 1);
     strncat(topic, deviceKey, sizeof(topic) - strlen(topic) - 1);
 

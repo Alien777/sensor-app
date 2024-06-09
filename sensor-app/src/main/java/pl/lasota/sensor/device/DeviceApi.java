@@ -3,17 +3,18 @@ package pl.lasota.sensor.device;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.RestController;
-import pl.lasota.sensor.device.services.DeviceDataService;
-import pl.lasota.sensor.device.services.DeviceConfigService;
+import pl.lasota.sensor.configs.properties.DeviceProperties;
 import pl.lasota.sensor.device.model.*;
+import pl.lasota.sensor.device.services.DeviceConfigService;
+import pl.lasota.sensor.device.services.DeviceDataService;
 import pl.lasota.sensor.device.services.DeviceMessagePublish;
 import pl.lasota.sensor.entities.Device;
 import pl.lasota.sensor.entities.DeviceConfig;
 import pl.lasota.sensor.entities.Member;
 import pl.lasota.sensor.exceptions.SensorApiException;
 import pl.lasota.sensor.member.MemberService;
-import pl.lasota.sensor.configs.properties.ApiProperties;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,7 +27,7 @@ public class DeviceApi implements DeviceApiInterface {
     private final DeviceMessagePublish deviceMessagePublish;
     private final MemberService ms;
     private final DeviceDataService ds;
-    private final ApiProperties ap;
+    private final DeviceProperties ap;
     private final DeviceConfigService dsu;
 
     @Override
@@ -50,7 +51,7 @@ public class DeviceApi implements DeviceApiInterface {
     @Override
     public String save(DeviceCreateI deviceCreateI) {
         Member member = ms.loggedMember();
-        return ds.saveTemporary(member.getId(), deviceCreateI.id(), deviceCreateI.name());
+        return ds.saveTemporary(member.getId(), deviceCreateI.name());
     }
 
     @Override
@@ -132,7 +133,7 @@ public class DeviceApi implements DeviceApiInterface {
 
     @Override
     public String getMqttIp() {
-        return ap.getMqtt().getUrl();
+        return ap.getMqttIpExternal();
     }
 
     @Override
@@ -145,4 +146,15 @@ public class DeviceApi implements DeviceApiInterface {
         return ds.getDevice(memberId, deviceId);
     }
 
+    @Override
+    public byte[] build(String version, String name, String ssid, String password) throws IOException {
+        Member member = ms.loggedMember();
+        return ds.generateBuildPackage(version, name, ssid, password, member.getId(), ap);
+    }
+
+    @Override
+    public List<String> getVersions() {
+        ms.loggedMember();
+        return ds.getVersions(ap);
+    }
 }

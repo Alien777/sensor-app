@@ -78,7 +78,7 @@ void publish(const int config_id, const char *message, message_type type)
 
     int requiredSize = snprintf(NULL, 0,
                                 "{\"%s\":\"%s\",\"%s\":%d,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"payload\":%s,\"message_type\":\"%s\"}", "token", config.token, "config_identifier", config_id, "version_firmware", VERSION_FIRMWARE,
-                                DEVICE_KEY, device_key, MEMBER_KEY, config.member_key, message, message_type) +
+                                DEVICE_KEY, device_key, MEMBER_KEY, config.member_id, message, message_type) +
                        1;
 
     char *json = (char *)malloc(requiredSize);
@@ -87,7 +87,7 @@ void publish(const int config_id, const char *message, message_type type)
     {
         snprintf(json, requiredSize,
                  "{\"%s\":\"%s\",\"%s\":%d,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"payload\":%s,\"message_type\":\"%s\"}", "token", config.token, "config_identifier", config_id, "version_firmware", VERSION_FIRMWARE,
-                 DEVICE_KEY, device_key, MEMBER_KEY, config.member_key, message, message_type);
+                 DEVICE_KEY, device_key, MEMBER_KEY, config.member_id, message, message_type);
         esp_mqtt_client_publish(client, PUBLISH_TOPIC, json, 0, 2, 0);
         free(json);
     }

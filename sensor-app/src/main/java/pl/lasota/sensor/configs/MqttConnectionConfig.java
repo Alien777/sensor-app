@@ -7,13 +7,13 @@ import org.eclipse.paho.mqttv5.client.MqttConnectionOptions;
 import org.eclipse.paho.mqttv5.common.MqttException;
 import org.springframework.stereotype.Component;
 import pl.lasota.sensor.gateway.device.MqttCallbackHandler;
-import pl.lasota.sensor.configs.properties.ApiProperties;
+import pl.lasota.sensor.configs.properties.DeviceProperties;
 
 @Component
 @RequiredArgsConstructor
 public class MqttConnectionConfig {
     private final IMqttClient mqttClient;
-    private final ApiProperties properties;
+    private final DeviceProperties properties;
     private final MqttCallbackHandler callbackHandler;
 
     @PostConstruct

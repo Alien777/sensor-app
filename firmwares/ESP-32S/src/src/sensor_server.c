@@ -182,7 +182,7 @@ static esp_err_t saveHandle(httpd_req_t *req)
 
     if (strlen(member) > 0)
     {
-        save_member_key(member);
+        save_member_id(member);
     }
 
     if (strlen(server_ip) > 0)

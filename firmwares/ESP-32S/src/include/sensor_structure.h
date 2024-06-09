@@ -119,10 +119,9 @@ struct ConfigEps
 {
     char wifi_ssid[32];
     char wifi_password[64];
-    char member_key[17];
+    char member_id[17];
     char server_ip[17];
     char token[37];
-    bool inited;
 };
 
 

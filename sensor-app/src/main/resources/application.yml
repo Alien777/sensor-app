@@ -35,14 +35,16 @@ spring:
       enabled: false
 sensor:
   ai:
-    voice-model: /home/adam/Downloads/vosk-model-small-pl-0.22
+    voice-model: docker/data/config/voice-model
   flows:
     scan-nodes: pl.lasota.sensor.flow.services.nodes.nodes
-  api:
+  device:
     firmware-folder: firmwares
+    generate-build-package: generate_nvs.sh
+    mqtt-ip-external: 192.168.1.235
     mqtt:
       client-id: ${random.uuid}
-      url: tcp://192.168.1.235:1883
+      url: tcp://localhost:1883
       topic: $share/mygroup/server
       username: mqttUserServer
       password: mqtt
@@ -50,9 +52,9 @@ sensor:
       connection-timeout: 30000
       automatic-reconnect: true
   gui:
-    gui-url: http://192.168.1.235:3000
+    gui-url: http://localhost:3000
     redirect:
-      login-success: http://192.168.1.235:3000/oauth2
+      login-success: http://localhost:3000/oauth2
     jwt:
       secret: Gkl3uP7ATJcLNka0p7+v4hY0OcTu9H08+QP1sFYE4PI=
       expiration: 1440

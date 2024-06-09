@@ -6,13 +6,14 @@ import pl.lasota.sensor.device.model.*;
 import pl.lasota.sensor.entities.Device;
 import pl.lasota.sensor.entities.DeviceConfig;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
 
 public interface DeviceApiInterface {
 
-    void sendConfigToDevice( SendConfigI configS) throws Exception;
+    void sendConfigToDevice(SendConfigI configS) throws Exception;
 
     void sendPwmValueToDevice(@RequestBody SendPwmI configS) throws Exception;
 
@@ -49,4 +50,9 @@ public interface DeviceApiInterface {
     DeviceConfig currentDeviceConfig(String memberId, String deviceId);
 
     Optional<Device> getDevice(String memberId, String deviceId);
+
+    byte[] build(String version, String name, String ssid, String password) throws IOException;
+
+    List<String> getVersions();
+
 }

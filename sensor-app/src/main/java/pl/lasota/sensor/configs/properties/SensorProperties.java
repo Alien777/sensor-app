@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 public class SensorProperties {
 
     private FlowsProperties flowsProperties;
-    private ApiProperties apiProperties;
+    private DeviceProperties deviceProperties;
     private GuiProperties guiProperties;
     private AIProperties aiProperties;
 }

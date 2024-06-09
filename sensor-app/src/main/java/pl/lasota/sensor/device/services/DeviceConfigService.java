@@ -13,7 +13,7 @@ import pl.lasota.sensor.entities.Device;
 import pl.lasota.sensor.entities.DeviceConfig;
 import pl.lasota.sensor.exceptions.SensorApiException;
 import pl.lasota.sensor.payload.to.ConfigPayload;
-import pl.lasota.sensor.configs.properties.ApiProperties;
+import pl.lasota.sensor.configs.properties.DeviceProperties;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -29,7 +29,7 @@ public class DeviceConfigService {
     private final static String NAME_DEFAULT_CONFIG = "defaultConfig.json";
     private final static String NAME_SCHEMA_CONFIG = "schema.json";
 
-    private final ApiProperties properties;
+    private final DeviceProperties properties;
 
 
     public String schemaForVersion(String schemaVersion) {

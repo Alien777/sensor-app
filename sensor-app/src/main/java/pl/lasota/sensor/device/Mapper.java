@@ -10,7 +10,7 @@ import pl.lasota.sensor.entities.DeviceTemporary;
 
 public final class Mapper {
     public static DeviceI map(Device device) {
-        return new DeviceI(device.getId(), device.getVersion(), device.getName(), device.getCurrentDeviceConfig() != null, device.getCurrentDeviceToken().getToken());
+        return new DeviceI(device.getId(), device.getVersion(), device.getName(), device.getCurrentDeviceConfig() != null,null);
     }
 
     public static DeviceI map(DeviceTemporary device) {

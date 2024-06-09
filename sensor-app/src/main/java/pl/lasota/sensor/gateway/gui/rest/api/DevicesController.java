@@ -2,18 +2,20 @@ package pl.lasota.sensor.gateway.gui.rest.api;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import pl.lasota.sensor.device.DeviceApiInterface;
-import pl.lasota.sensor.device.model.ConfigCreateI;
-import pl.lasota.sensor.device.model.ConfigI;
-import pl.lasota.sensor.device.model.DeviceCreateI;
-import pl.lasota.sensor.device.model.DeviceI;
+import pl.lasota.sensor.device.model.*;
 import pl.lasota.sensor.gateway.gui.model.ConfigSaveT;
 import pl.lasota.sensor.gateway.gui.model.ConfigT;
 import pl.lasota.sensor.gateway.gui.model.DeviceSaveT;
 import pl.lasota.sensor.gateway.gui.model.DeviceT;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,6 +34,15 @@ public class DevicesController {
         return sme.save(new DeviceCreateI(device.getId(), device.getName()));
     }
 
+    @PostMapping("/build")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ByteArrayResource> build(@RequestBody DeviceBuildI device) throws IOException {
+        byte[] build = sme.build(device.version(), device.name(), device.wifiSsid(), device.wifiPassword());
+        ByteArrayResource resource = new ByteArrayResource(build);
+        return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=folder.zip").contentType(MediaType.APPLICATION_OCTET_STREAM).contentLength(build.length).body(resource);
+    }
+
+
     @GetMapping
     @PreAuthorize("isAuthenticated()")
     public List<DeviceT> devices(@RequestParam("withNotActive") boolean withNotActive) {
@@ -49,6 +60,12 @@ public class DevicesController {
     @PreAuthorize("isAuthenticated()")
     public void activateConfig(@PathVariable("id") String deviceId, @PathVariable("id_config") Long configId) {
         sme.activateConfig(deviceId, configId);
+    }
+
+    @GetMapping("/versions")
+    @PreAuthorize("isAuthenticated()")
+    public List<String> getAvailableVersion() {
+        return sme.getVersions();
     }
 
 

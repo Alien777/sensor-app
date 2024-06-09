@@ -13,6 +13,7 @@
                :icon="device.version?'sensors':'autorenew'">
           <div v-if="device.version">
             <p>{{ device.name.substring(0, 20) }}</p>
+            <p class="bg-blue-1">{{ device.id}}</p>
           </div>
           <div v-else>
             <p>{{ device.name.substring(0, 20) }}</p>

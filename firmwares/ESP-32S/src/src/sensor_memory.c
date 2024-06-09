@@ -5,7 +5,8 @@ static void handle_error(esp_err_t err);
 static int open_storage(nvs_handle_t *handle, nvs_open_mode mode);
 static void close_storage(nvs_handle_t handle);
 static esp_err_t save_config(const ConfigEps *config);
-static void save_initial();
+static esp_err_t load_str_and_clear(char *value, const char *key);
+
 static void handle_error(esp_err_t err)
 {
     ESP_LOGE("MEMORY", "Occured problem");
@@ -55,22 +56,62 @@ void memory_initial()
 
     ESP_ERROR_CHECK(ret);
 
-    ConfigEps config;
-    esp_err_t err = load_config(&config);
-    if (err == ESP_FAIL || config.inited == false)
-    {
-        ESP_LOGI("MEMORY", "Initialing memory");
+    char wifi_ssid[32];
+    char wifi_password[64];
+    char member_id[17];
+    char server_ip[17];
+    char token[37];
 
-        // initiation memory if run first time.
-        save_wifi_credentials("none", "none");
-        save_member_key("none");
-        save_server_ip("none");
-        save_initial();
-    }
-    else
+    if (load_str_and_clear(wifi_ssid, "wifi_ssid") == ESP_OK &&
+        load_str_and_clear(wifi_password, "wifi_password") == ESP_OK)
     {
-        ESP_LOGI("MEMORY", "Was initialized");
+        ESP_LOGI("MEMORY", "Init default wifi: %s, %s", wifi_ssid, wifi_password);
+        save_wifi_credentials(wifi_ssid, wifi_password);
     }
+
+    if (load_str_and_clear(member_id, "member_id") == ESP_OK)
+    {
+        ESP_LOGI("MEMORY", "Init default member id: %s", member_id);
+        save_member_id(member_id);
+    }
+
+    if (load_str_and_clear(server_ip, "server_ip") == ESP_OK)
+    {
+        ESP_LOGI("MEMORY", "Init default server ip: %s", server_ip);
+        save_server_ip(server_ip);
+    }
+
+    if (load_str_and_clear(token, "token") == ESP_OK)
+    {
+        ESP_LOGI("MEMORY", "Init default token: %s", token);
+        save_token(token);
+    }
+}
+
+static esp_err_t load_str_and_clear(char *value, const char *key)
+{
+    nvs_handle_t my_handle;
+    esp_err_t err;
+
+    err = open_storage(&my_handle, NVS_READWRITE);
+    if (err != ESP_OK)
+    {
+        return err;
+    }
+
+    size_t required_size;
+    err = nvs_get_str(my_handle, key, NULL, &required_size);
+    if (err == ESP_OK)
+    {
+        err = nvs_get_str(my_handle, key, value, &required_size);
+        if (err == ESP_OK)
+        {
+            nvs_erase_key(my_handle, key);
+        }
+    }
+
+    close_storage(my_handle);
+    return err;
 }
 
 esp_err_t load_config(ConfigEps *config)
@@ -113,7 +154,7 @@ void save_wifi_credentials(const char *ssid, const char *password)
     ESP_LOGI("MEMORY", "Save credential");
 }
 
-void save_member_key(const char *member_key)
+void save_member_id(const char *member_id)
 {
     ConfigEps config;
 
@@ -122,7 +163,7 @@ void save_member_key(const char *member_key)
         memset(&config, 0, sizeof(ConfigEps));
     }
 
-    strncpy(config.member_key, member_key, sizeof(config.member_key));
+    strncpy(config.member_id, member_id, sizeof(config.member_id));
 
     esp_err_t err = save_config(&config);
     if (err != ESP_OK)
@@ -155,7 +196,6 @@ void save_server_ip(const char *server_ip)
     ESP_LOGI("MEMORY", "Save server ip");
 }
 
-
 void save_token(const char *token)
 {
     ConfigEps config;
@@ -175,24 +215,4 @@ void save_token(const char *token)
     }
 
     ESP_LOGI("MEMORY", "Save token");
-}
-
-static void save_initial()
-{
-    ConfigEps config;
-
-    if (load_config(&config) != ESP_OK)
-    {
-        memset(&config, 0, sizeof(ConfigEps));
-    }
-
-    config.inited = true;
-    esp_err_t err = save_config(&config);
-    if (err != ESP_OK)
-    {
-        handle_error(err);
-        return;
-    }
-
-    ESP_LOGI("MEMORY", "Save sinitied");
 }

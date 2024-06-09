@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import {computed, defineProps, ref, watch} from 'vue'
+import {computed, defineProps, ref} from 'vue'
 import {deviceApi} from "~/composables/api/DeviceApi";
-import {resourceApi} from "~/composables/api/ResourcesApi";
-import {Notify} from "quasar";
+import {Notify, QSpinnerGears} from "quasar";
+import SelectLazy from "~/components/common/SelectLazy.vue";
 
 const props = defineProps({
   onChange: {
@@ -12,162 +12,106 @@ const props = defineProps({
 });
 
 enum Enum {
-  LOCAL,
-  OFFLINE
+  UPLOAD_NEW_FIRMWARE
 }
 
 
-const offlineStep = ['choice_step', "name_step", "online_device_id_step", "online_summary_step"]
-const localStep = ['choice_step', "name_step", "wifi_config", "local_wait", "local_summary_step"]
-
+const offlineStep = ["name_step", "wifi_config_step", "online_summary_step"]
 const runtimeConfig = useRuntimeConfig();
-const {memberId} = authUtils(runtimeConfig);
-const {saveDevice} = deviceApi(runtimeConfig);
-const {mqttServer} = resourceApi(runtimeConfig);
-
-const step = ref('choice_step');
-const typeOfStep = ref(Enum.LOCAL);
+const {initDevice, getVersions} = deviceApi(runtimeConfig);
+const loading = ref(false)
+const step = ref('name_step');
+const typeOfStep = ref(Enum.UPLOAD_NEW_FIRMWARE);
 const stepPath = ref(offlineStep);
-const name = ref<string>('');
-const id = ref<string>('');
-const token = ref<string>('');
-const ssid = ref<string>('');
-const password = ref<string>('');
-const server = ref<string>('');
+const device_name = ref<string>();
+const version = ref<string>('');
+const wifi_ssid = ref<string>('');
+const wifi_password = ref<string>('');
 
-// Computed properties for validation
-const isNameValid = computed(() => name.value != null && name.value.length >= 1);
-const isIdValid = computed(() => id.value != null && id.value.length === 12);
+const isNameValid = computed(() => device_name.value != null && device_name.value.length >= 1);
+const versionValid = computed(() => version.value != null && version.value.length >= 1);
+const ssidValid = computed(() => wifi_ssid.value != null && wifi_ssid.value.length >= 1);
 
-// Check if it's okay to proceed to the next step or to finish
 const canProceed = computed(() => {
-  if (step.value === "name_step") return isNameValid.value;
-  if (step.value === "online_device_id_step" && typeOfStep.value === Enum.OFFLINE) return isIdValid.value;
-  return true; // For any step beyond, adjust as necessary
+  if (step.value === "name_step") return isNameValid.value && versionValid.value;
+  if (step.value === "wifi_config_step") return ssidValid.value;
+  return true;
 });
 
 const execute = (step: string) => {
-  if (step == "local_wait") {
-    saveDevice('', name.value).then(value => {
-      token.value = value
-    }).then(() => {
-      props.onChange();
-    })
-  }
 }
-// Method to handle the finish action
+
 const onFinish = (ref: any) => {
-  mqttServer().then(value => server.value = value)
-  if (typeOfStep.value === Enum.OFFLINE) {
-    saveDevice(id.value, name.value).then(value => token.value = value).then(() => {
-      ref.stepper.next();
-      props.onChange();
+  loading.value = true;
+  if (!wifi_password.value || !wifi_ssid.value || !device_name.value || !version.value) {
+    Notify.create({
+      type: 'error',
+      message: 'Problem with send message. Data not valid'
     })
+    loading.value = false;
+    return;
   }
-  if (typeOfStep.value === Enum.LOCAL) {
+  initDevice(version.value, device_name.value, wifi_ssid.value, wifi_password.value)
+      .then(success => {
+        if (success) {
+          ref.stepper.next();
+        } else {
+          Notify.create({
+            type: 'error',
+            message: `Problem with generate ${device_name.value}-${version.value}.zip`
+          })
+        }
+      }).finally(() => {
+    props.onChange();
+    loading.value = false;
+  });
 
-    if (!ssid.value || !password.value || !token.value || !memberId() || !server) {
-      Notify.create({
-        type: 'error',
-        message: 'Problem with send message. Data not valid'
-      })
-      return;
-    }
-
-    try {
-      // Using Nuxt 3's useFetch to post data
-      const {data, error} = useFetch('http://192.168.4.1/save', {
-        method: 'POST',
-        body: JSON.stringify({
-          ssid: ssid.value,
-          password: password.value,
-          token: token.value,
-          member_key: memberId(),
-          server_ip: server.value,
-        }),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (error.value) {
-        console.error('Error:', error.value);
-        Notify.create({
-          type: 'error',
-          message: 'Problem with send message. Server not valid'
-        })
-      }
-    } catch (error) {
-      Notify.create({
-        type: 'error',
-        message: 'Problem with send message. Server not valid'
-      })
-    }
-  }
-
-  // Implement finishing actions here
 };
-
-watch(id, (newValue) => {
-  const correctedValue = newValue.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
-  if (newValue !== correctedValue) {
-    id.value = correctedValue;
-  }
-});
-
+const provideVersions = (value: any) => {
+  getVersions().then((v) => {
+    value(v);
+  });
+};
 </script>
 
 <template>
   <div class="q-pa-md">
+
     <q-stepper v-model="step" ref="stepper" color="primary" animated>
-      <q-step name="choice_step" title="Choice step" icon="settings" :done="step =='choice_step'">
-        <q-btn @click="()=>{
-          stepPath=localStep;
-          typeOfStep=Enum.LOCAL
-          $refs.stepper.next();
-        }">Configure in local
-        </q-btn>
-        <q-btn @click="()=>{
-          stepPath=offlineStep;
-          typeOfStep=Enum.OFFLINE
-          $refs.stepper.next();
-        }">Configure offline
-        </q-btn>
-      </q-step>
-      <q-step name="name_step" title="Enter the device name" icon="settings" :done="step =='name_step'">
-        <q-input label="Name of Device" v-model="name" maxlength="32" hint="example: Kitchen Sensor" clearable
+      <q-step name="name_step" title="Enter the device name" icon="settings" :done="step =='wifi_config_step'">
+
+        <q-input label="Name of Device" v-model="device_name" maxlength="32" hint="example: Kitchen Sensor" clearable
                  :rules="[value => (value && value.length >= 1) || 'Minimal length is 1.']"
         ></q-input>
+
+        <SelectLazy v-model="version" :provide-data="provideVersions" label="Version of device"/>
       </q-step>
-      <q-step v-if="typeOfStep===Enum.OFFLINE" name="online_device_id_step" title="Enter the device ID" icon="settings"
-              :done="step =='online_device_id_step'">
-        <q-input label="Identyfity device" v-model="id" maxlength="12" hint="example: 7C9EBDF513CC" clearable
-                 :rules="[value => (value && value.length === 12) || 'Minimal length is 12.']"
-        ></q-input>
+      <q-step v-if="typeOfStep===Enum.UPLOAD_NEW_FIRMWARE" name="wifi_config_step" title="Enter the WiFi credential"
+              icon="settings"
+              :done="step =='online_summary_step'">
+        <div v-if="!loading">
+          <p>Credential WiFi</p>
+          <q-input label="SSID" v-model="wifi_ssid" maxlength="32" hint="example: dom" clearable
+          ></q-input>
+          <q-input label="Password" v-model="wifi_password" maxlength="64" clearable
+          ></q-input>
+        </div>
+        <div v-else class="flex flex-center">
+          <q-spinner-gears size="50px" color="primary"/>
+          <br>
+          <p>Generate file. Please wait.</p>
+        </div>
       </q-step>
-      <q-step v-if="typeOfStep===Enum.LOCAL" name="wifi_config" title="Wifi config" icon="add_comment">
-        <p>Wifi of device</p>
-        <q-input label="SSID" v-model="ssid" maxlength="32" hint="example: dom" clearable
-        ></q-input>
-        <q-input label="Password" v-model="password" maxlength="64" clearable
-        ></q-input>
+      <q-step v-if="typeOfStep===Enum.UPLOAD_NEW_FIRMWARE" name="online_summary_step" title="Summary"
+              icon="add_comment">
+        <p>{{ `File was downloaded: ${device_name}-${version}.zip` }}</p>
+        <p>{{ `Connect the device to the usb port` }}</p>
+        <p>{{ 'Unzip it and run the upload.sh or upload.bat script' }}</p>
       </q-step>
-      <q-step v-if="typeOfStep===Enum.OFFLINE" name="online_summary_step" title="Summary" icon="add_comment">
-        <p>This configuration please entry into device panel configuration.</p>
-        <p><em>Member ID: </em>{{ memberId() }}</p>
-        <p><em>Token: </em>{{ token }}</p>
-        <p><em>Server IP: </em>{{ server }}</p>
-      </q-step>
-      <q-step v-if="typeOfStep===Enum.LOCAL" name="local_wait" title="Information" icon="add_comment">
-        <p>Please connect by wifi to Access Point of device</p>
-      </q-step>
-      <q-step v-if="typeOfStep===Enum.LOCAL" name="local_summary_step" title="Summary" icon="add_comment">
-        <p>Esp will be configured. Please wait for connect device to fill ID</p>
-      </q-step>
-      <template v-if="step !== stepPath[stepPath.length-1]" v-slot:navigation>
+      <template v-slot:navigation>
         <q-stepper-navigation>
           <q-btn
-              v-if="step !== stepPath[stepPath.length-2] && step !== stepPath[stepPath.length-1] && step !== stepPath[0]"
+              v-if="step !== stepPath[stepPath.length-2] && step !== stepPath[stepPath.length-1]"
               @click="()=>{
             $refs.stepper.next();
             execute(step);
@@ -175,9 +119,12 @@ watch(id, (newValue) => {
               :disabled="!canProceed"
               color="primary"
               label="Next"/>
-          <q-btn v-if="step === stepPath[stepPath.length-2]" @click="()=>onFinish($refs)" :disabled="!canProceed"
+          <q-btn v-if="!loading && step === stepPath[stepPath.length-2]" @click="()=>onFinish($refs) && loading"
+                 :disabled="!canProceed"
                  color="primary" label="Finish"/>
-          <q-btn v-if="step !== stepPath[0]" flat color="primary" @click="$refs.stepper.previous()" label="Back"
+          <q-btn v-if=" !loading && step !== stepPath[0] && step !== stepPath[stepPath.length-1]  && loading" flat
+                 color="primary"
+                 @click="$refs.stepper.previous()" label="Back"
                  class="q-ml-sm"/>
         </q-stepper-navigation>
       </template>
