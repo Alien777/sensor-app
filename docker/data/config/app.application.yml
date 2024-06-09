@@ -38,6 +38,8 @@ sensor:
     scan-nodes: pl.lasota.sensor.flow.services.nodes.nodes
   api:
     firmware-folder: sensor/firmwares
+    generate-build-package: generate_nvs.sh
+    mqtt-ip-external: 192.168.1.235
     mqtt:
       client-id: ${random.uuid}
       url: tcp://sensor-eclipse-mqtt:1883

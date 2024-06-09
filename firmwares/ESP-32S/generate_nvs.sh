@@ -83,13 +83,12 @@ main() {
     generate_config_csv "$SSID" "$PASSWORD" "$MEMBER_ID" "$SERVER_IP" "$TOKEN" "$TMP_PATH"
     run_python_script "$TMP_PATH"
 
-    cp "$SRC_PATH/src/.pio/build/nodemcu-32s/firmware.bin" "$TMP_PATH"
-    cp "$SRC_PATH/src/.pio/build/nodemcu-32s/bootloader.bin" "$TMP_PATH"
-    cp "$SRC_PATH/src/.pio/build/nodemcu-32s/partitions.bin" "$TMP_PATH"
-    cp "$SRC_PATH/src/.pio/build/nodemcu-32s/spiffs.bin" "$TMP_PATH"
-    cp "$SRC_PATH/upload.sh" "$TMP_PATH"
+    cp $SRC_PATH/bin/*.bin $TMP_PATH
+    cp "$SRC_PATH/upload_firmware_by_usb.sh" "$TMP_PATH"
+    cp "$SRC_PATH/upload_firmware_by_usb.bat" "$TMP_PATH"
 
     echo "The script has finished running"
+    rm -rf "$TMP_PATH/esp-idf-master"
     echo "$TMP_PATH"
 }
 

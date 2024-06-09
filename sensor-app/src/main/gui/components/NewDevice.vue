@@ -91,6 +91,7 @@ const provideVersions = (value: any) => {
               :done="step =='online_summary_step'">
         <div v-if="!loading">
           <p>Credential WiFi</p>
+          <em>This should be wifi to which the device will connect.</em>
           <q-input label="SSID" v-model="wifi_ssid" maxlength="32" hint="example: dom" clearable
           ></q-input>
           <q-input label="Password" v-model="wifi_password" maxlength="64" clearable
