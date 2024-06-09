@@ -46,7 +46,8 @@ services:
       sensor-app:
         condition: service_started
 volumes:
-  postgres-data: { }
+  postgres-data:
+    name: "sensor-postgres-docker-volume"
 networks:
   internal-network:
     driver: bridge

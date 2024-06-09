@@ -4,8 +4,8 @@
 download_file() {
     local url=$1
     local output=$2
-    echo "Downloading file from $url to $output"
-    curl -L -o "$output" "$url"
+    echo "curl -L -v -o" $output $url
+    curl -L -o $output $url
 }
 
 # Function to unzip a ZIP file
@@ -13,7 +13,7 @@ unzip_file() {
     local ZIP_FILE=$1
     local dest_dir=$2
     echo "Unzipping file $ZIP_FILE to directory $dest_dir"
-    unzip "$ZIP_FILE" -d "$dest_dir"
+    unzip "$ZIP_FILE" -d "$dest_dir" > /dev/null 2>&1
 }
 
 # Function to generate the config.csv file

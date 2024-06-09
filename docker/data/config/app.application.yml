@@ -36,7 +36,7 @@ sensor:
     voice-model: sensor/voice-model
   flows:
     scan-nodes: pl.lasota.sensor.flow.services.nodes.nodes
-  api:
+  device:
     firmware-folder: sensor/firmwares
     generate-build-package: generate_nvs.sh
     mqtt-ip-external: 192.168.1.235
