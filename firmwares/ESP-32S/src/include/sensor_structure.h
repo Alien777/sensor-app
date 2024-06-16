@@ -28,8 +28,10 @@ typedef struct PwmTask PwmTask;
 typedef struct Message Message;
 typedef struct AnalogConfig AnalogConfig;
 typedef struct PwmConfig PwmConfig;
+typedef struct DigitalConfig DigitalConfig;
 typedef struct ConfigEps ConfigEps;
 typedef struct PwmSetup PwmSetup;
+typedef struct DigitalSetup DigitalSetup;
 typedef struct AnalogReadData AnalogReadData;
 
 typedef enum
@@ -39,6 +41,7 @@ typedef enum
     ANALOG_EXTORT,
     PWM,
     CONFIG,
+    DIGITAL_WRITE,
     UNKNOWN,
 } message_type;
 
@@ -48,6 +51,13 @@ struct PwmConfig
     int freq;
     int channel;
     int pin;
+};
+
+
+struct DigitalConfig
+{
+    int pin;
+
 };
 
 struct AnalogConfig
@@ -82,6 +92,11 @@ struct PwmSetup
     int duty;
 };
 
+struct DigitalSetup
+{
+    int pin;
+    int value;
+};
 
 struct AnalogReadData
 {
@@ -100,11 +115,14 @@ struct Message
 
     PwmConfig pwm_configs[MAX_S];
     AnalogConfig analog_configs[MAX_S];
+    DigitalConfig digital_configs[MAX_S];
     PwmSetup pwn_setup;
+    DigitalSetup digital_setup;
     AnalogReadData analog_read_data;
 
     int analog_configs_size;
     int pwm_configs_size;
+    int digital_configs_size;
 };
 
 struct WifiNetwork

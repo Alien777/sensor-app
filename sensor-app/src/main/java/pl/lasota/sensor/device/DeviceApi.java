@@ -37,6 +37,13 @@ public class DeviceApi implements DeviceApiInterface {
     }
 
     @Override
+    public void sendDigitalValueToDevice(SendDigitalI configS) throws Exception {
+        Member member = ms.loggedMember();
+        deviceMessagePublish.sendDigital(member.getId(), configS.deviceId(), configS.pin(), configS.value());
+    }
+
+
+    @Override
     public void sendPwmValueToDevice(SendPwmI configS) throws Exception {
         Member member = ms.loggedMember();
         deviceMessagePublish.sendPwm(member.getId(), configS.deviceId(), configS.pin(), configS.value());
@@ -130,6 +137,12 @@ public class DeviceApi implements DeviceApiInterface {
         Member member = ms.loggedMember();
         return ds.getMessageType(member.getId(), deviceId).stream().map(Enum::name).toList();
     }
+    @Override
+    public List<Integer> getConfigDigitalPins(String deviceId) {
+        Member member = ms.loggedMember();
+        return ds.getDigitalPins(member.getId(), deviceId);
+    }
+
 
     @Override
     public String getMqttIp() {

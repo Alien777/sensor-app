@@ -25,6 +25,12 @@ public class ConfigUtilsController {
         return sme.getConfigPwmPins(deviceId);
     }
 
+    @GetMapping("/{device}/digital/pins")
+    @PreAuthorize("isAuthenticated()")
+    public List<Integer> getDigitalPins(@PathVariable("device") String deviceId) {
+        return sme.getConfigDigitalPins(deviceId);
+    }
+
     @GetMapping("/{device}/analog/pins")
     @PreAuthorize("isAuthenticated()")
     public List<Integer> getAnalogsPins(@PathVariable("device") String deviceId) {

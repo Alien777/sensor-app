@@ -27,7 +27,12 @@ public enum MessageType {
     /**
      * During Host send pwm value to Device
      **/
-    PWM;
+    PWM,
+
+    /**
+     * During Host send digital value
+     **/
+    DIGITAL_WRITE;
 
 
     public static List<MessageType> getListMessageTypeFromDevice() {

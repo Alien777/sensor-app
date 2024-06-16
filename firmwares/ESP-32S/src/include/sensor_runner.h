@@ -12,5 +12,7 @@ void config_json(Message* message);
 
 void set_pwm(Message *message);
 
+void set_digital(Message *message);
+
 void analog_extort(Message *message);
 #endif

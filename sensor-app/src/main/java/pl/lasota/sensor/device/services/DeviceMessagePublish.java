@@ -9,6 +9,7 @@ import pl.lasota.sensor.entities.DeviceConfig;
 import pl.lasota.sensor.exceptions.SensorApiException;
 import pl.lasota.sensor.gateway.device.MqttMessagePublish;
 import pl.lasota.sensor.payload.MessageFrame;
+import pl.lasota.sensor.payload.to.DigitalPayload;
 import pl.lasota.sensor.payload.to.ForceReadingOfAnalogDataPayload;
 import pl.lasota.sensor.payload.to.PwmPayload;
 
@@ -34,6 +35,17 @@ public class DeviceMessagePublish {
                 throw new SensorApiException(e);
             }
 
+        }
+
+    }
+
+    public void sendDigital(String memberId, String deviceId, int pin, int value) throws Exception {
+        DeviceConfig lastDeviceConfig = deviceDataService.currentDeviceConfig(memberId, deviceId);
+        Optional<Device> deviceOptional = deviceDataService.getDevice(memberId, deviceId);
+        if (deviceOptional.isPresent()) {
+            Device device = deviceOptional.get();
+            MessageFrame mf = MessageFrame.factoryDigitalPayload(lastDeviceConfig.getId(), lastDeviceConfig.getForVersion(), deviceId, memberId, device.getCurrentDeviceToken().getToken(), new DigitalPayload(pin, value));
+            mqttMessagePublish.publish(mf);
         }
 
     }

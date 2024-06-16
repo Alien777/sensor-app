@@ -19,6 +19,8 @@ public interface DeviceApiInterface {
 
     void sendRequestForDataAnalog(@RequestBody SendForAnalogDataI configS) throws Exception;
 
+    void sendDigitalValueToDevice(SendDigitalI configS) throws Exception;
+
     String save(@RequestBody DeviceCreateI deviceCreateI);
 
     List<DeviceI> get();
@@ -45,6 +47,8 @@ public interface DeviceApiInterface {
 
     List<String> getConfigMessageType(@RequestParam(value = "deviceId") String deviceId);
 
+    List<Integer> getConfigDigitalPins(String deviceId);
+
     String getMqttIp();
 
     DeviceConfig currentDeviceConfig(String memberId, String deviceId);
@@ -54,5 +58,6 @@ public interface DeviceApiInterface {
     byte[] build(String version, String name, String ssid, String password) throws IOException;
 
     List<String> getVersions();
+
 
 }

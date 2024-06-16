@@ -6,11 +6,12 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Data;
+import pl.lasota.sensor.entities.Sensor;
 import pl.lasota.sensor.payload.from.AnalogValuePayload;
+import pl.lasota.sensor.payload.from.ConnectDevicePayload;
+import pl.lasota.sensor.payload.to.DigitalPayload;
 import pl.lasota.sensor.payload.to.ForceReadingOfAnalogDataPayload;
 import pl.lasota.sensor.payload.to.PwmPayload;
-import pl.lasota.sensor.entities.Sensor;
-import pl.lasota.sensor.payload.from.ConnectDevicePayload;
 
 @Data
 public class MessageFrame {
@@ -48,6 +49,7 @@ public class MessageFrame {
     @JsonProperty("payload")
     private JsonNode payload;
 
+
     public String getDeviceId() {
         return deviceId.toUpperCase();
     }
@@ -72,7 +74,8 @@ public class MessageFrame {
     public String makePayloadForDevice() throws JsonProcessingException {
         return switch (messageType) {
             case DEVICE_CONNECTED, ANALOG -> throw new UnsupportedOperationException();
-            case CONFIG, PWM, ANALOG_EXTORT -> om.writeValueAsString(this);
+            case CONFIG, PWM, ANALOG_EXTORT, DIGITAL_WRITE -> om.writeValueAsString(this);
+
         };
     }
 
@@ -83,7 +86,7 @@ public class MessageFrame {
     public Sensor.SensorBuilder getPayloadFromDriver() {
         return switch (messageType) {
             case DEVICE_CONNECTED -> new ConnectDevicePayload().parse(this);
-            case CONFIG, PWM, ANALOG_EXTORT -> throw new UnsupportedOperationException();
+            case CONFIG, PWM, ANALOG_EXTORT,DIGITAL_WRITE -> throw new UnsupportedOperationException();
             case ANALOG -> new AnalogValuePayload().parse(this);
         };
     }
@@ -103,6 +106,14 @@ public class MessageFrame {
     public static MessageFrame factoryPwmPayload(Long configId, String version, String deviceId, String memberId, String token, PwmPayload pwmPayload) throws JsonProcessingException {
         String json = om.writeValueAsString(pwmPayload);
         return new MessageFrame(configId, version, deviceId, memberId, MessageType.PWM, token, om.readTree(json));
+    }
+
+    /**
+     * @hidden
+     */
+    public static MessageFrame factoryDigitalPayload(Long configId, String version, String deviceId, String memberId, String token, DigitalPayload pwmPayload) throws JsonProcessingException {
+        String json = om.writeValueAsString(pwmPayload);
+        return new MessageFrame(configId, version, deviceId, memberId, MessageType.DIGITAL_WRITE, token, om.readTree(json));
     }
 
     /**

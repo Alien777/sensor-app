@@ -15,6 +15,7 @@ import pl.lasota.sensor.payload.MessageFrame;
 import pl.lasota.sensor.payload.MessageType;
 import pl.lasota.sensor.payload.to.AnalogConfig;
 import pl.lasota.sensor.payload.to.ConfigPayload;
+import pl.lasota.sensor.payload.to.DigitalConfig;
 import pl.lasota.sensor.payload.to.PwmConfig;
 
 import java.io.*;
@@ -248,6 +249,19 @@ public class DeviceDataService {
     }
 
     @Transactional
+    public List<Integer> getDigitalPins(String memberId, String deviceId) {
+
+        DeviceConfig deviceConfig = currentDeviceConfig(memberId, deviceId);
+        ConfigPayload configPayload;
+        try {
+            configPayload = dsu.mapConfigToObject(deviceConfig.getConfig());
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+        return configPayload.getDigitalConfig().stream().map(DigitalConfig::getPin).collect(Collectors.toList());
+    }
+
+    @Transactional
     public List<Integer> getAnalogPins(String memberId, String deviceId) {
 
         DeviceConfig deviceConfig = currentDeviceConfig(memberId, deviceId);
@@ -347,5 +361,6 @@ public class DeviceDataService {
     public boolean isTokenExist(String memberId, String token) {
         return dtor.isExist(memberId, token);
     }
+
 
 }

@@ -9,7 +9,7 @@ static void freeOutputTask(AnalogTask *task);
 static void closeAllTasks();
 static void addTask(TaskHandle_t task, AnalogTask *outputTask);
 static int pwm_pin_to_channel[100];
-
+static int digital_pin[100];
 TaskHandle_t tasks[MAX_TASKS];
 AnalogTask *analogDataTask[MAX_TASKS];
 int pwmTasks = 0;
@@ -91,6 +91,22 @@ void config_json(Message *message)
 
         pwm_pin_to_channel[message->pwm_configs[i].pin] = i;
     }
+
+    for (int i = 0; i < message->digital_configs_size; i++)
+    {
+
+        ESP_LOGE("TASK", "Config digital from pin %d %d", message->digital_configs[i].pin, i);
+
+        gpio_config_t io_conf;
+        io_conf.intr_type = GPIO_INTR_DISABLE;
+        io_conf.mode = GPIO_MODE_OUTPUT;
+        io_conf.pin_bit_mask = (1ULL << message->digital_configs[i].pin);
+        io_conf.pull_down_en = GPIO_PULLDOWN_DISABLE;
+        io_conf.pull_up_en = GPIO_PULLUP_DISABLE;
+        gpio_config(&io_conf);
+        digital_pin[i] = message->pwm_configs[i].pin;
+    }
+
     for (int i = 0; i < message->analog_configs_size; i++)
     {
 
@@ -101,9 +117,9 @@ void config_json(Message *message)
         {
             if (outputTask->analog_config.sampling <= 0)
             {
-                   adc1_config_channel_atten(outputTask->analog_config.pin, outputTask->analog_config.atten);
-                   adc1_config_width(outputTask->analog_config.width);
-                   continue;
+                adc1_config_channel_atten(outputTask->analog_config.pin, outputTask->analog_config.atten);
+                adc1_config_width(outputTask->analog_config.width);
+                continue;
             }
 
             TaskHandle_t taskHandle;
@@ -128,6 +144,21 @@ static void closeAllTasks()
 
     for (int i = 0; i < 100; i++)
     {
+        if (digital_pin[i] != -1)
+        {
+            gpio_config_t io_conf_disable;
+            io_conf_disable.intr_type = GPIO_INTR_DISABLE;
+            io_conf_disable.mode = GPIO_MODE_DISABLE;
+            io_conf_disable.pin_bit_mask = (1ULL << digital_pin[i]);
+            io_conf_disable.pull_down_en = GPIO_PULLDOWN_DISABLE;
+            io_conf_disable.pull_up_en = GPIO_PULLUP_DISABLE;
+            gpio_config(&io_conf_disable);
+        }
+        digital_pin[i] = -1;
+    }
+
+    for (int i = 0; i < 100; i++)
+    {
         pwm_pin_to_channel[i] = -1;
     }
 
@@ -139,6 +170,7 @@ static void closeAllTasks()
             .duty_resolution = LEDC_TIMER_1_BIT,
             .freq_hz = 0,
             .speed_mode = LEDC_HIGH_SPEED_MODE,
+            .clk_cfg = LEDC_AUTO_CLK,
             .timer_num = i};
         ledc_timer_config(&ledc_timer_reset);
 
@@ -193,6 +225,17 @@ static void freeOutputTask(AnalogTask *task)
     {
         free(task);
     }
+}
+
+void set_digital(Message *message)
+{
+    if (message->message_type != DIGITAL_WRITE)
+    {
+        ESP_LOGD("TASK", "This not digital message");
+        return;
+    }
+    ESP_LOGI("DIGITAL", "Setup value: %d for pin: %d", message->digital_setup.value, message->digital_setup.pin);
+    gpio_set_level(message->digital_setup.pin, message->digital_setup.value);
 }
 
 void set_pwm(Message *message)
