@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import pl.lasota.sensor.device.DeviceApiInterface;
+import pl.lasota.sensor.device.DeviceConfigInterface;
 
 import java.util.List;
 
@@ -17,7 +17,7 @@ import java.util.List;
 @Slf4j
 public class ConfigUtilsController {
 
-    private final DeviceApiInterface sme;
+    private final DeviceConfigInterface sme;
 
     @GetMapping("/{device}/pwm/pins")
     @PreAuthorize("isAuthenticated()")

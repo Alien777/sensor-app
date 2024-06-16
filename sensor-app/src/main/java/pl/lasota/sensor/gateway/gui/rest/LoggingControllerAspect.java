@@ -9,9 +9,9 @@ import org.aspectj.lang.annotation.Before;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
-import pl.lasota.sensor.exceptions.SensorException;
 import pl.lasota.sensor.entities.Member;
-import pl.lasota.sensor.member.MemberService;
+import pl.lasota.sensor.exceptions.SensorException;
+import pl.lasota.sensor.member.MemberLoginDetailsServiceInterface;
 
 @Aspect
 @Component
@@ -19,7 +19,7 @@ import pl.lasota.sensor.member.MemberService;
 @RequiredArgsConstructor
 public class LoggingControllerAspect {
 
-    private final MemberService memberService;
+    private final MemberLoginDetailsServiceInterface memberService;
 
     @Before("execution(* pl.lasota.sensor.gateway.rest.api..*(..))")
     public void logRequestMapping(JoinPoint joinPoint) {

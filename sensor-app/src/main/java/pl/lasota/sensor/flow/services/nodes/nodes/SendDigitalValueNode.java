@@ -4,7 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.context.ApplicationContext;
-import pl.lasota.sensor.device.DeviceApiInterface;
+import pl.lasota.sensor.device.DeviceConfigInterface;
+import pl.lasota.sensor.device.DeviceSendMessageInterface;
 import pl.lasota.sensor.device.model.SendDigitalI;
 import pl.lasota.sensor.exceptions.SensorFlowException;
 import pl.lasota.sensor.flow.services.nodes.FlowNode;
@@ -23,9 +24,9 @@ import static pl.lasota.sensor.flow.services.nodes.builder.ParserFlows.fString;
 public class SendDigitalValueNode extends Node {
 
     private final Data data;
-    private final DeviceApiInterface deviceApiInterface;
+    private final DeviceSendMessageInterface deviceApiInterface;
 
-    private SendDigitalValueNode(String id, GlobalContext globalContext, Data data, DeviceApiInterface deviceApiInterface) {
+    private SendDigitalValueNode(String id, GlobalContext globalContext, Data data, DeviceSendMessageInterface deviceApiInterface) {
         super(id, globalContext);
         this.data = data;
         this.deviceApiInterface = deviceApiInterface;
@@ -36,12 +37,13 @@ public class SendDigitalValueNode extends Node {
         Integer pin = fInteger(node, "pin");
         String valueKey = fString(node, "valueVariable");
         Data data = Data.create(deviceId, valueKey, pin);
-        DeviceApiInterface sae = context.getBean(DeviceApiInterface.class);
-        List<Integer> configDigitalPins = sae.getConfigDigitalPins(data.getDeviceId());
+        DeviceSendMessageInterface dsmi = context.getBean(DeviceSendMessageInterface.class);
+        DeviceConfigInterface dci = context.getBean(DeviceConfigInterface.class);
+        List<Integer> configDigitalPins = dci.getConfigDigitalPins(data.getDeviceId());
         if (!configDigitalPins.contains(data.getPin())) {
             throw new SensorFlowException("Digital pin {} not found for device {}", pin, deviceId);
         }
-        return new SendDigitalValueNode(ref, globalContext, data, sae);
+        return new SendDigitalValueNode(ref, globalContext, data, dsmi);
     }
 
     @Override

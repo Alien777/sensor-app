@@ -8,7 +8,7 @@ import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import pl.lasota.sensor.entities.Flow;
-import pl.lasota.sensor.member.MemberService;
+import pl.lasota.sensor.security.AuthServiceInterface;
 
 import java.util.List;
 
@@ -19,7 +19,7 @@ public class ReactivateNodeJob {
 
     private final FlowDataService flowDataService;
     private final ManagerFlowService mf;
-    private final MemberService ms;
+    private final AuthServiceInterface ms;
 
     @EventListener(ApplicationReadyEvent.class)
     @Scheduled(cron = "0 0 0 * * ?")
@@ -29,7 +29,7 @@ public class ReactivateNodeJob {
             if (mf.contains(flow.getId())) {
                 return;
             }
-            ms.auth(flow.getMember());
+            ms.initialAuthenticationByMemberId(flow.getMember());
             try {
                 mf.start(flow.getId(), flow.getConfig());
             } catch (Exception e) {

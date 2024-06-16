@@ -11,6 +11,7 @@ import pl.lasota.sensor.gateway.device.MqttMessagePublish;
 import pl.lasota.sensor.payload.MessageFrame;
 import pl.lasota.sensor.payload.to.DigitalPayload;
 import pl.lasota.sensor.payload.to.ForceReadingOfAnalogDataPayload;
+import pl.lasota.sensor.payload.to.PingDataPayload;
 import pl.lasota.sensor.payload.to.PwmPayload;
 
 import java.util.Optional;
@@ -68,6 +69,17 @@ public class DeviceMessagePublish {
             Device device = deviceOptional.get();
             MessageFrame mf = MessageFrame.factorySendForAnalogData(lastDeviceConfig.getId(),
                     lastDeviceConfig.getForVersion(), deviceId, memberId, device.getCurrentDeviceToken().getToken(), new ForceReadingOfAnalogDataPayload(pin));
+            mqttMessagePublish.publish(mf);
+        }
+    }
+
+    public void sendForPingData(String memberId, String deviceId) throws Exception {
+        DeviceConfig lastDeviceConfig = deviceDataService.currentDeviceConfig(memberId, deviceId);
+        Optional<Device> deviceOptional = deviceDataService.getDevice(memberId, deviceId);
+        if (deviceOptional.isPresent()) {
+            Device device = deviceOptional.get();
+            MessageFrame mf = MessageFrame.factorySendPingData(lastDeviceConfig.getId(),
+                    lastDeviceConfig.getForVersion(), deviceId, memberId, device.getCurrentDeviceToken().getToken(),new PingDataPayload());
             mqttMessagePublish.publish(mf);
         }
     }

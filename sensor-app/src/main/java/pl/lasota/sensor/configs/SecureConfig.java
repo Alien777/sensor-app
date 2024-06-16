@@ -11,8 +11,8 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import pl.lasota.sensor.gateway.gui.rest.GlobalExceptionHandler;
-import pl.lasota.sensor.security.JwtOncePerRequestFilter;
-import pl.lasota.sensor.security.SensorAuthenticationSuccessOAuthHandler;
+import pl.lasota.sensor.security.services.JwtOncePerRequestFilter;
+import pl.lasota.sensor.security.services.SensorAuthenticationSuccessOAuthHandler;
 import pl.lasota.sensor.configs.properties.GuiProperties;
 
 import static org.springframework.security.config.Customizer.withDefaults;

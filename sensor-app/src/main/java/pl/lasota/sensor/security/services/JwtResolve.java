@@ -1,4 +1,4 @@
-package pl.lasota.sensor.security;
+package pl.lasota.sensor.security.services;
 
 
 import io.jsonwebtoken.Claims;

@@ -3,7 +3,7 @@ package pl.lasota.sensor.flow.services.nodes.nodes;
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContext;
-import pl.lasota.sensor.ai.AI;
+import pl.lasota.sensor.utils.Tokenizer;
 import pl.lasota.sensor.bus.AudioWaveInputStreamBus;
 import pl.lasota.sensor.entities.Member;
 import pl.lasota.sensor.flow.services.nodes.AsyncNodeConsumer;
@@ -26,7 +26,7 @@ public class VoiceFireCommendNode extends Node implements StartFlowNode, AsyncNo
 
     private final List<List<String>> commends;
     private final AudioWaveInputStreamBus audioWaveInputStreamBus;
-    private final AI ai = AI.create();
+    private final Tokenizer tokenizer = Tokenizer.create();
 
     public VoiceFireCommendNode(String id, GlobalContext globalContext, List<List<String>> commends, AudioWaveInputStreamBus audioWaveInputStreamBus) {
         super(id, globalContext);
@@ -37,7 +37,7 @@ public class VoiceFireCommendNode extends Node implements StartFlowNode, AsyncNo
     public static Node create(String ref, GlobalContext globalContext, JsonNode node, ApplicationContext context) {
         List<String> commends = new ArrayList<>(Arrays.asList(fString(node, "commends").split(";")));
         AudioWaveInputStreamBus bean = context.getBean(AudioWaveInputStreamBus.class);
-        List<List<String>> commendsToken = commends.stream().map(AI::tokenizer).toList();
+        List<List<String>> commendsToken = commends.stream().map(Tokenizer::tokenizer).toList();
         return new VoiceFireCommendNode(ref, globalContext, commendsToken, bean);
     }
 
@@ -66,7 +66,7 @@ public class VoiceFireCommendNode extends Node implements StartFlowNode, AsyncNo
 
     @Override
     public void consume(Member member, String s) throws Exception {
-        if (ai.matchText(s, commends)) {
+        if (tokenizer.matchText(s, commends)) {
             LocalContext localContext = new LocalContext();
             VoiceFireCommendNode.super.execute(localContext);
         }

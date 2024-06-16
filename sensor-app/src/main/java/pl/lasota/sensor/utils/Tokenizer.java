@@ -1,4 +1,4 @@
-package pl.lasota.sensor.ai;
+package pl.lasota.sensor.utils;
 
 import lombok.AllArgsConstructor;
 
@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 @AllArgsConstructor(staticName = "create")
-public class AI {
+public class Tokenizer {
 
     public boolean matchText(String source, List<List<String>> tokenizerTarget) {
         List<String> tokenizer = tokenizer(source);

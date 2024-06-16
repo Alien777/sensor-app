@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.context.ApplicationContext;
-import pl.lasota.sensor.device.DeviceApiInterface;
+import pl.lasota.sensor.device.DeviceSendMessageInterface;
 import pl.lasota.sensor.device.model.SendForAnalogDataI;
 import pl.lasota.sensor.flow.services.nodes.FlowNode;
 import pl.lasota.sensor.flow.services.nodes.Node;
@@ -18,23 +18,23 @@ import static pl.lasota.sensor.flow.services.nodes.builder.ParserFlows.fString;
 public class RequestAnalogDataNode extends Node {
 
     private final Data data;
-    private final DeviceApiInterface deviceApiInterface;
+    private final DeviceSendMessageInterface deviceSendMessageInterface;
 
-    private RequestAnalogDataNode(String id, GlobalContext globalContext, Data data, DeviceApiInterface deviceApiInterface) {
+    private RequestAnalogDataNode(String id, GlobalContext globalContext, Data data, DeviceSendMessageInterface deviceSendMessageInterface) {
         super(id, globalContext);
         this.data = data;
-        this.deviceApiInterface = deviceApiInterface;
+        this.deviceSendMessageInterface = deviceSendMessageInterface;
     }
 
     public static Node create(String ref, GlobalContext globalContext, JsonNode node, ApplicationContext context) {
         String deviceId = fString(node, "deviceId");
         Integer pin = fInteger(node, "pin");
-        return new RequestAnalogDataNode(ref, globalContext, RequestAnalogDataNode.Data.create(deviceId, pin), context.getBean(DeviceApiInterface.class));
+        return new RequestAnalogDataNode(ref, globalContext, RequestAnalogDataNode.Data.create(deviceId, pin), context.getBean(DeviceSendMessageInterface.class));
     }
 
     @Override
     public void execute(LocalContext localContext) throws Exception {
-        deviceApiInterface.sendRequestForDataAnalog(new SendForAnalogDataI(data.deviceId, data.pin));
+        deviceSendMessageInterface.sendRequestForDataAnalog(new SendForAnalogDataI(data.deviceId, data.pin));
         super.execute(localContext);
     }
 

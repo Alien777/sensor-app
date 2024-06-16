@@ -1,4 +1,4 @@
-package pl.lasota.sensor.security;
+package pl.lasota.sensor.security.services;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -28,10 +28,10 @@ public class JwtOncePerRequestFilter extends OncePerRequestFilter {
         if (SecureConfig.LOGIN_PATH.equals(request.getServletPath()) && request.getMethod().equalsIgnoreCase("POST")) {
             authService.login(request, response);
         } else if (new AntPathMatcher().match(SOCKET_PATH, request.getServletPath())) {
-            authService.checkAuthSession(request);
+            authService.initialAuthenticationContextByOnlySession(request);
             filterChain.doFilter(request, response);
         } else {
-            authService.checkAuthComplete(request);
+            authService.initiateAuthenticationContext(request);
             filterChain.doFilter(request, response);
         }
     }

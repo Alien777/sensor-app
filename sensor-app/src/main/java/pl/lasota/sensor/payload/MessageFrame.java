@@ -11,6 +11,7 @@ import pl.lasota.sensor.payload.from.AnalogValuePayload;
 import pl.lasota.sensor.payload.from.ConnectDevicePayload;
 import pl.lasota.sensor.payload.to.DigitalPayload;
 import pl.lasota.sensor.payload.to.ForceReadingOfAnalogDataPayload;
+import pl.lasota.sensor.payload.to.PingDataPayload;
 import pl.lasota.sensor.payload.to.PwmPayload;
 
 @Data
@@ -73,8 +74,8 @@ public class MessageFrame {
     @JsonIgnore
     public String makePayloadForDevice() throws JsonProcessingException {
         return switch (messageType) {
-            case DEVICE_CONNECTED, ANALOG -> throw new UnsupportedOperationException();
-            case CONFIG, PWM, ANALOG_EXTORT, DIGITAL_WRITE -> om.writeValueAsString(this);
+            case DEVICE_CONNECTED, ANALOG, PING_ACK -> throw new UnsupportedOperationException();
+            case CONFIG, PWM, ANALOG_EXTORT, DIGITAL_WRITE, PING -> om.writeValueAsString(this);
 
         };
     }
@@ -85,8 +86,8 @@ public class MessageFrame {
     @JsonIgnore
     public Sensor.SensorBuilder getPayloadFromDriver() {
         return switch (messageType) {
-            case DEVICE_CONNECTED -> new ConnectDevicePayload().parse(this);
-            case CONFIG, PWM, ANALOG_EXTORT,DIGITAL_WRITE -> throw new UnsupportedOperationException();
+            case DEVICE_CONNECTED, PING_ACK -> new ConnectDevicePayload().parse(this);
+            case CONFIG, PWM, ANALOG_EXTORT, DIGITAL_WRITE, PING -> throw new UnsupportedOperationException();
             case ANALOG -> new AnalogValuePayload().parse(this);
         };
     }
@@ -123,6 +124,15 @@ public class MessageFrame {
     public static MessageFrame factorySendForAnalogData(Long configId, String version, String deviceId, String memberId, String token, ForceReadingOfAnalogDataPayload analogData) throws JsonProcessingException {
         String json = om.writeValueAsString(analogData);
         return new MessageFrame(configId, version, deviceId, memberId, MessageType.ANALOG_EXTORT, token, om.readTree(json));
+    }
+
+    /**
+     * @hidden
+     */
+    @JsonIgnore
+    public static MessageFrame factorySendPingData(Long configId, String version, String deviceId, String memberId, String token, PingDataPayload analogData) throws JsonProcessingException {
+        String json = om.writeValueAsString(analogData);
+        return new MessageFrame(configId, version, deviceId, memberId, MessageType.PING, token, om.readTree(json));
     }
 
 }

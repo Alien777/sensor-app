@@ -1,4 +1,4 @@
-package pl.lasota.sensor.security;
+package pl.lasota.sensor.security.services;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -9,14 +9,14 @@ import org.springframework.security.oauth2.client.authentication.OAuth2Authentic
 import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
-import pl.lasota.sensor.exceptions.SensorException;
 import pl.lasota.sensor.configs.properties.GuiProperties;
-import pl.lasota.sensor.exceptions.AuthException;
-import pl.lasota.sensor.security.model.GoogleUserInfo;
 import pl.lasota.sensor.entities.Member;
 import pl.lasota.sensor.entities.Provider;
+import pl.lasota.sensor.exceptions.AuthException;
+import pl.lasota.sensor.exceptions.SensorException;
 import pl.lasota.sensor.exceptions.SensorMemberException;
-import pl.lasota.sensor.member.MemberService;
+import pl.lasota.sensor.member.MemberServiceInterface;
+import pl.lasota.sensor.security.model.GoogleUserInfo;
 
 import java.io.IOException;
 
@@ -24,7 +24,7 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class SensorAuthenticationSuccessOAuthHandler implements AuthenticationSuccessHandler {
 
-    private final MemberService memberService;
+    private final MemberServiceInterface memberService;
     private final AuthService authService;
     private final GuiProperties properties;
 

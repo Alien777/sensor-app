@@ -1,10 +1,8 @@
-package pl.lasota.sensor.member;
+package pl.lasota.sensor.member.services;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,21 +10,23 @@ import pl.lasota.sensor.entities.Member;
 import pl.lasota.sensor.entities.Provider;
 import pl.lasota.sensor.entities.Role;
 import pl.lasota.sensor.exceptions.SensorMemberException;
+import pl.lasota.sensor.member.MemberLoginDetailsServiceInterface;
+import pl.lasota.sensor.member.MemberServiceInterface;
 import pl.lasota.sensor.member.repositories.MemberRepository;
-import pl.lasota.sensor.member.services.GeneratorService;
 
 import java.util.Optional;
 
 
 @Service
 @RequiredArgsConstructor
-public class MemberService {
+public class MemberLoginService implements MemberServiceInterface, MemberLoginDetailsServiceInterface {
 
     private final MemberRepository memberRepository;
     private final GeneratorService generateKeyPair;
     private final BCryptPasswordEncoder passwordEncoder;
 
     @Transactional
+    @Override
     public void createGoogle(String name, String email) {
         Member user = create(name, email);
         user.setProvider(Provider.GOOGLE);
@@ -34,16 +34,8 @@ public class MemberService {
         save(user);
     }
 
-    public void auth(String memberId) {
-        Member member = getMember(memberId);
-        Authentication authentication = new UsernamePasswordAuthenticationToken(member,
-                null,
-                member.getAuthorities());
 
-        SecurityContextHolder.getContext()
-                .setAuthentication(authentication);
-    }
-
+    @Override
     public void save(Member member) {
         try {
             memberRepository.save(member);
@@ -51,6 +43,42 @@ public class MemberService {
             throw new SensorMemberException("Occurred while saving member", e);
         }
 
+    }
+
+
+    @Override
+    public Member findByEmailAndProvider(String username, Provider provider) {
+        return memberRepository.findByEmailAndProvider(username, provider)
+                .orElseThrow(() -> new SensorMemberException("User not found"));
+
+    }
+
+    @Override
+    public boolean checkCredential(String username, String password, Provider provider) {
+        Member member = memberRepository.findByEmailAndProvider(username, provider)
+                .orElseThrow(() -> new SensorMemberException("User not found"));
+
+        if (member.getPassword() == null || member.getPassword().isBlank()) {
+            return false;
+        }
+        return passwordEncoder.matches(password, member.getPassword());
+    }
+
+    @Override
+    public boolean isMemberExistByMemberId(String memberId) {
+        return memberRepository.existsById(memberId);
+    }
+
+    @Override
+    public Member loggedMember() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Member principal = (Member) authentication.getPrincipal();
+        return memberRepository.findMemberById(principal.getUsername()).orElseThrow(() -> new SensorMemberException("User not found"));
+    }
+
+    @Override
+    public Member getMember(String memberId) {
+        return memberRepository.findMemberById(memberId).orElseThrow(() -> new SensorMemberException("User not found"));
     }
 
     private Member create(String name, String email) {
@@ -67,42 +95,5 @@ public class MemberService {
         user.setId(generateKeyPair.generateRandomString());
 
         return user;
-    }
-
-    public Member findByEmailAndProvider(String username, Provider provider) {
-
-
-        return memberRepository.findByEmailAndProvider(username, provider)
-                .orElseThrow(() -> new SensorMemberException("User not found"));
-
-    }
-
-    public boolean checkCredential(String username, String password, Provider provider) {
-        Member member = memberRepository.findByEmailAndProvider(username, provider)
-                .orElseThrow(() -> new SensorMemberException("User not found"));
-
-        if (member.getPassword() == null || member.getPassword().isBlank()) {
-            return false;
-        }
-        return passwordEncoder.matches(password, member.getPassword());
-    }
-
-    public boolean isMemberExistByMemberId(String memberId) {
-        return memberRepository.existsById(memberId);
-    }
-
-    public Member loggedMember() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        UserDetails principal = (UserDetails) authentication.getPrincipal();
-        return memberRepository.findMemberById(principal.getUsername()).orElseThrow(() -> new SensorMemberException("User not found"));
-    }
-
-    public Member loggedUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return (Member) authentication.getPrincipal();
-    }
-
-    public Member getMember(String memberId) {
-        return memberRepository.findMemberById(memberId).orElseThrow(() -> new SensorMemberException("User not found"));
     }
 }

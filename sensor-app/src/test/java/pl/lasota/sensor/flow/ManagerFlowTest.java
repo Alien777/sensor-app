@@ -22,7 +22,7 @@ import pl.lasota.sensor.flow.services.nodes.builder.FlowsBuilder;
 import pl.lasota.sensor.flow.services.nodes.nodes.*;
 import pl.lasota.sensor.flow.services.nodes.utils.FlowContext;
 import pl.lasota.sensor.flow.services.nodes.utils.GlobalContext;
-import pl.lasota.sensor.member.MemberService;
+import pl.lasota.sensor.member.services.MemberLoginService;
 
 import java.time.Duration;
 import java.util.concurrent.CountDownLatch;
@@ -39,7 +39,7 @@ class ManagerFlowTest {
     private JsonNode jn;
 
     @Mock
-    private MemberService msMock;
+    private MemberLoginService msMock;
 
     @Mock
     private Member memberMock;

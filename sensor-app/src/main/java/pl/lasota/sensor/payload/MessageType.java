@@ -32,12 +32,17 @@ public enum MessageType {
     /**
      * During Host send digital value
      **/
-    DIGITAL_WRITE;
+    DIGITAL_WRITE,
+
+    PING,
+
+    PING_ACK;
 
 
     public static List<MessageType> getListMessageTypeFromDevice() {
         return List.of(DEVICE_CONNECTED, ANALOG);
     }
+
     public static boolean isFromDevice(MessageType messageType) {
         return getListMessageTypeFromDevice().contains(messageType);
     }

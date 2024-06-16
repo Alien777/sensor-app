@@ -4,7 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.context.ApplicationContext;
-import pl.lasota.sensor.device.DeviceApiInterface;
+import pl.lasota.sensor.device.DeviceConfigInterface;
+import pl.lasota.sensor.device.DeviceSendMessageInterface;
 import pl.lasota.sensor.device.model.SendPwmI;
 import pl.lasota.sensor.exceptions.SensorFlowException;
 import pl.lasota.sensor.flow.services.nodes.FlowNode;
@@ -23,12 +24,12 @@ import static pl.lasota.sensor.flow.services.nodes.builder.ParserFlows.fString;
 public class SendPwmValueNode extends Node {
 
     private final Data data;
-    private final DeviceApiInterface deviceApiInterface;
+    private final DeviceSendMessageInterface deviceSendMessageInterface;
 
-    private SendPwmValueNode(String id, GlobalContext globalContext, Data data, DeviceApiInterface deviceApiInterface) {
+    private SendPwmValueNode(String id, GlobalContext globalContext, Data data, DeviceSendMessageInterface deviceSendMessageInterface) {
         super(id, globalContext);
         this.data = data;
-        this.deviceApiInterface = deviceApiInterface;
+        this.deviceSendMessageInterface = deviceSendMessageInterface;
     }
 
     public static Node create(String ref, GlobalContext globalContext, JsonNode node, ApplicationContext context) {
@@ -36,19 +37,20 @@ public class SendPwmValueNode extends Node {
         Integer pin = fInteger(node, "pin");
         String valueKey = fString(node, "valueVariable");
         Data data = Data.create(deviceId, valueKey, pin);
-        DeviceApiInterface sae = context.getBean(DeviceApiInterface.class);
-        List<Integer> configPwmPins = sae.getConfigPwmPins(data.getDeviceId());
+        DeviceSendMessageInterface dsmi = context.getBean(DeviceSendMessageInterface.class);
+        DeviceConfigInterface dci = context.getBean(DeviceConfigInterface.class);
+        List<Integer> configPwmPins = dci.getConfigPwmPins(data.getDeviceId());
         if (!configPwmPins.contains(data.getPin())) {
             throw new SensorFlowException("Pwm pin {} not found for device {}", pin, deviceId);
         }
-        return new SendPwmValueNode(ref, globalContext, data, sae);
+        return new SendPwmValueNode(ref, globalContext, data, dsmi);
     }
 
     @Override
     public void execute(LocalContext localContext) throws Exception {
         Optional<Long> value = NodeUtils.getValue(data.valueVariable, localContext, flowContext, globalContext, Long.class);
         if (value.isPresent()) {
-            deviceApiInterface.sendPwmValueToDevice(new SendPwmI(data.deviceId, data.pin, value.get()));
+            deviceSendMessageInterface.sendPwmValueToDevice(new SendPwmI(data.deviceId, data.pin, value.get()));
             super.execute(localContext);
         }
     }
