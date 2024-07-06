@@ -238,18 +238,37 @@ void set_digital(Message *message)
     gpio_set_level(message->digital_setup.pin, message->digital_setup.value);
 }
 
+ 
+void pwm_timer_callback(TimerHandle_t xTimer) {
+    int channel = (int) pvTimerGetTimerID(xTimer);
+    ledc_set_duty(LEDC_HIGH_SPEED_MODE, channel, 0);
+    ledc_update_duty(LEDC_HIGH_SPEED_MODE, channel);
+    ESP_LOGI("PWM", "Duty cycle set to 0 for channel: %d", channel);
+    xTimerDelete(xTimer, 0); // Usunięcie timera po zakończeniu
+}
+
 void set_pwm(Message *message)
 {
-    if (message->message_type != PWM)
-    {
-        ESP_LOGD("TASK", "This not pwm message");
+  if (message->message_type != PWM) {
+        ESP_LOGD("TASK", "This is not a PWM message");
         return;
     }
-    ESP_LOGI("PWM", "Setup duty: %d for pin: %d", message->pwn_setup.duty, message->pwn_setup.pin);
+    ESP_LOGI("PWM", "Setup duty: %d duration: %d for pin: %d", message->pwn_setup.duty, message->pwn_setup.duration, message->pwn_setup.pin);
     int channel = pwm_pin_to_channel[message->pwn_setup.pin];
     ledc_set_duty(LEDC_HIGH_SPEED_MODE, channel, message->pwn_setup.duty);
     ledc_update_duty(LEDC_HIGH_SPEED_MODE, channel);
+
+    if (message->pwn_setup.duration > 0) {
+        TimerHandle_t pwm_timer = xTimerCreate("pwm_timer", pdMS_TO_TICKS(message->pwn_setup.duration), pdFALSE, (void *) channel, pwm_timer_callback);
+        if (pwm_timer != NULL) {
+            xTimerStart(pwm_timer, 0);
+        } else {
+            ESP_LOGE("PWM", "Failed to create timer");
+        }
+    }
 }
+
+
 
 void analog_extort(Message *message)
 {
