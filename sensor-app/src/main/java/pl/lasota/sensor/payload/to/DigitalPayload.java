@@ -9,21 +9,18 @@ import lombok.Data;
  */
 @Data
 @AllArgsConstructor
-public class PwmPayload {
+public class DigitalPayload {
 
     /**z
      * @hidden
      */
-    public PwmPayload() {
+    public DigitalPayload() {
     }
 
     @JsonProperty("pin")
     private int pin;
 
-    @JsonProperty("duty")
-    private long duty;
-
-    @JsonProperty("duration")
-    private long duration;
+    @JsonProperty("value")
+    private long value;
 
 }

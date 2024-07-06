@@ -9,15 +9,20 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import pl.lasota.sensor.entities.Member;
 import pl.lasota.sensor.gateway.gui.model.UserInfo;
-import pl.lasota.sensor.security.AuthService;
+import pl.lasota.sensor.member.MemberLoginDetailsServiceInterface;
+import pl.lasota.sensor.security.AuthServiceInterface;
+
+import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
 @RequestMapping("/api/auth")
 public class AuthController {
 
-    private final AuthService authService;
+    private final AuthServiceInterface authService;
+    private final MemberLoginDetailsServiceInterface memberLoginDetailsService;
 
     @GetMapping("/token")
     public ResponseEntity<String> token(HttpServletRequest request, HttpServletResponse response) {
@@ -33,6 +38,8 @@ public class AuthController {
     @GetMapping("/user-details")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<UserInfo> getUserDetails() {
-        return ResponseEntity.ok(authService.getUserDetails());
+        Member member = memberLoginDetailsService.loggedMember();
+        UserInfo userInfo = new UserInfo(member.getId(), List.of(member.getRole().toString()));
+        return ResponseEntity.ok(userInfo);
     }
 }

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {defineProps, onMounted, ref} from 'vue'
-import {type Edge, MarkerType, useVueFlow, VueFlow} from '@vue-flow/core'
+import {type Connection, type Edge, MarkerType, useVueFlow, VueFlow} from '@vue-flow/core'
 import {
   type ConfigNode,
   draggableItems,
@@ -13,6 +13,7 @@ import useDragAndDrop from "~/composables/useDnD";
 import {MiniMap} from "@vue-flow/minimap";
 import {flowApi} from "~/composables/api/FlowApi";
 import {Notify, useQuasar} from "quasar";
+import EdgeWithButton from "~/components/flows/EdgeWithButton.vue";
 
 
 definePageMeta({
@@ -26,7 +27,7 @@ const {onDragStart} = useDragAndDrop();
 const {onDragOver, onDrop, onDragLeave, isDragOver, insertNode, insertEdge} = useDragAndDrop()
 const innerTab = ref('')
 const splitterModel = ref(200)
-const {onConnect, addEdges, toObject, setViewport} = useVueFlow()
+const {onConnect, getEdges, removeEdges, addEdges, toObject, setViewport} = useVueFlow()
 const runtimeConfig = useRuntimeConfig();
 const {saveFlow, getAll, deleteFlow, get, startFlow, stopFlow} = flowApi(runtimeConfig)
 
@@ -96,11 +97,17 @@ onMounted(() => {
 
   }, 100)
 })
-const handleConnect = (params: any) => {
-  const {sourceHandle, targetHandle} = params;
-  if (sourceHandle.endsWith('__handle-bottom') && targetHandle.endsWith('__handle-top')) {
-    addEdges([params]);
-  }
+const handleConnect = (params: Connection) => {
+  const {source, sourceHandle, target, targetHandle} = params;
+  const edgeExists = getEdges.value.some(
+      (edge) =>
+          edge.source == source &&
+          edge.target == target
+  );
+  console.log(edgeExists)
+  // if (!edgeExists && sourceHandle.endsWith('__handle-bottom') && targetHandle.endsWith('__handle-top')) {
+  //   addEdges([params]);
+  // }
 };
 
 const {data: flows} = useAsyncData('flows', getAll);
@@ -205,12 +212,26 @@ const $q = useQuasar();
 
     </template>
     <template v-slot:after>
-      <VueFlow :nodes="nodes" :edges="edges" delete-key-code=false :default-edge-options="{
-      type: 'step',
+      <VueFlow :connection-radius="30" auto-connect :nodes="nodes" :edges="edges" delete-key-code=false
+               :default-edge-options="{
+      type: 'button',
       style: { stroke: 'black' },
       markerEnd: MarkerType.ArrowClosed,
       animated: true
     }" style="width: 100%; height: 100%" @dragover="onDragOver" @dragleave="onDragLeave">
+        <template #edge-button="buttonEdgeProps">
+          <EdgeWithButton
+              :id="buttonEdgeProps.id"
+              :source-x="buttonEdgeProps.sourceX"
+              :source-y="buttonEdgeProps.sourceY"
+              :target-x="buttonEdgeProps.targetX"
+              :target-y="buttonEdgeProps.targetY"
+              :source-position="buttonEdgeProps.sourcePosition"
+              :target-position="buttonEdgeProps.targetPosition"
+              :marker-end="buttonEdgeProps.markerEnd"
+              :style="buttonEdgeProps.style"
+          />
+        </template>
         <MiniMap/>
         <DropzoneBackground
             :style="{

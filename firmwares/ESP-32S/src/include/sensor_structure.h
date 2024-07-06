@@ -21,15 +21,16 @@
 #include <esp_log.h>
 #include <esp_err.h>
 
-
 typedef struct WifiNetwork WifiNetwork;
 typedef struct AnalogTask AnalogTask;
 typedef struct PwmTask PwmTask;
 typedef struct Message Message;
 typedef struct AnalogConfig AnalogConfig;
 typedef struct PwmConfig PwmConfig;
+typedef struct DigitalConfig DigitalConfig;
 typedef struct ConfigEps ConfigEps;
 typedef struct PwmSetup PwmSetup;
+typedef struct DigitalSetup DigitalSetup;
 typedef struct AnalogReadData AnalogReadData;
 
 typedef enum
@@ -39,6 +40,9 @@ typedef enum
     ANALOG_EXTORT,
     PWM,
     CONFIG,
+    PING,
+    PING_ACK,
+    DIGITAL_WRITE,
     UNKNOWN,
 } message_type;
 
@@ -47,6 +51,11 @@ struct PwmConfig
     int resolution;
     int freq;
     int channel;
+    int pin;
+};
+
+struct DigitalConfig
+{
     int pin;
 };
 
@@ -80,14 +89,19 @@ struct PwmSetup
 {
     int pin;
     int duty;
+    int duration;
 };
 
+struct DigitalSetup
+{
+    int pin;
+    int value;
+};
 
 struct AnalogReadData
 {
     int pin;
 };
-
 
 struct Message
 {
@@ -100,11 +114,14 @@ struct Message
 
     PwmConfig pwm_configs[MAX_S];
     AnalogConfig analog_configs[MAX_S];
+    DigitalConfig digital_configs[MAX_S];
     PwmSetup pwn_setup;
+    DigitalSetup digital_setup;
     AnalogReadData analog_read_data;
 
     int analog_configs_size;
     int pwm_configs_size;
+    int digital_configs_size;
 };
 
 struct WifiNetwork
@@ -123,7 +140,6 @@ struct ConfigEps
     char server_ip[17];
     char token[37];
 };
-
 
 const char *convert_wifi_network_to_json(WifiNetwork *head);
 const char *message_type_convert_to_chars(message_type state);

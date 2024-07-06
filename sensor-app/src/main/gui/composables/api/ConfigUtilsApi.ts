@@ -1,5 +1,12 @@
 export const configUtilsApi = (runtimeConfig: any) => {
     let {fetchApiRequest} = fetchUtils(runtimeConfig);
+
+    const getDigitalPins = async (deviceId: string): Promise<number[]> => {
+        let value = await fetchApiRequest<number[]>(`/config-utils/${deviceId}/digital/pins`,
+            {method: 'get'});
+        return value.data.value;
+    }
+
     const getPwmsPins = async (deviceId: string): Promise<number[]> => {
         let value = await fetchApiRequest<number[]>(`/config-utils/${deviceId}/pwm/pins`,
             {method: 'get'});
@@ -19,7 +26,7 @@ export const configUtilsApi = (runtimeConfig: any) => {
 
 
     return {
-        getPwmsPins, getAnalogsPins, getMessageTypes
+        getPwmsPins, getAnalogsPins, getDigitalPins, getMessageTypes
     }
 }
 

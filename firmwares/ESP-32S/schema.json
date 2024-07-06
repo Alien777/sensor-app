@@ -52,6 +52,40 @@
         }
       }
     },
+    "digital_configs": {
+      "type": "array",
+      "maxItems": 4,
+      "items": {
+        "type": "object",
+        "properties": {
+          "pin": {
+            "enum": [
+              32,
+              33,
+              25,
+              26,
+              27,
+              14,
+              12,
+              13,
+              23,
+              22,
+              1,
+              3,
+              21,
+              19,
+              18,
+              5,
+              17,
+              16,
+              4,
+              2,
+              15
+            ]
+          }
+        }
+      }
+    },
     "analog_configs": {
       "type": "array",
       "maxItems": 4,

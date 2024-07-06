@@ -24,4 +24,7 @@ public class ConfigPayload {
     @JsonProperty("pwm_configs")
     private List<PwmConfig> pwmConfig = new ArrayList<>();
 
+    @JsonProperty("digital_configs")
+    private List<DigitalConfig> digitalConfig = new ArrayList<>();
+
 }

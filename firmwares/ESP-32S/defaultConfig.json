@@ -1,4 +1,5 @@
 {
   "analog_configs": [],
-  "pwm_configs": []
+  "pwm_configs": [],
+  "digital_configs": []
 }

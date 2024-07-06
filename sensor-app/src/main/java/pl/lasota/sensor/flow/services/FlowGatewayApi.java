@@ -1,4 +1,4 @@
-package pl.lasota.sensor.flow;
+package pl.lasota.sensor.flow.services;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -6,11 +6,10 @@ import org.springframework.stereotype.Service;
 import pl.lasota.sensor.entities.Flow;
 import pl.lasota.sensor.entities.Member;
 import pl.lasota.sensor.exceptions.SensorFlowException;
+import pl.lasota.sensor.flow.FlowApiInterface;
 import pl.lasota.sensor.flow.model.FlowI;
 import pl.lasota.sensor.flow.model.FlowSaveI;
-import pl.lasota.sensor.flow.services.FlowDataService;
-import pl.lasota.sensor.flow.services.ManagerFlowService;
-import pl.lasota.sensor.member.MemberService;
+import pl.lasota.sensor.member.MemberLoginDetailsServiceInterface;
 
 import java.util.List;
 import java.util.Optional;
@@ -19,11 +18,11 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Slf4j
 @Service
-public class FlowApi implements FlowApiInterface {
+public class FlowGatewayApi implements FlowApiInterface {
 
     private final ManagerFlowService managerFlowService;
     private final FlowDataService flowDataService;
-    private final MemberService ms;
+    private final MemberLoginDetailsServiceInterface ms;
 
     @Override
     public void save(FlowSaveI flowSaveI) throws SensorFlowException {

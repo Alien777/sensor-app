@@ -25,7 +25,7 @@ public class FilterChain implements Chain<Object> {
                 filter.execute(request, context, this);
                 filter.postExecute(request, context);
             } catch (Exception e) {
-                throw new SensorApiException("Index of chain " + index + " of " + filters.size(), e);
+                throw new SensorApiException(e, "Index of chain " + index + " of " + filters.size());
             }
         }
     }

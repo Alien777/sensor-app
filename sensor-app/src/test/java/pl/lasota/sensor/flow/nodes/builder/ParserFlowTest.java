@@ -8,6 +8,8 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.context.ApplicationContext;
 import pl.lasota.sensor.device.DeviceApiInterface;
+import pl.lasota.sensor.device.DeviceConfigInterface;
+import pl.lasota.sensor.device.DeviceSendMessageInterface;
 import pl.lasota.sensor.entities.Member;
 import pl.lasota.sensor.flow.services.nodes.Node;
 import pl.lasota.sensor.flow.services.nodes.builder.ParserFlows;
@@ -15,7 +17,7 @@ import pl.lasota.sensor.flow.services.nodes.nodes.AsyncNode;
 import pl.lasota.sensor.flow.services.nodes.nodes.ExecuteCodeNode;
 import pl.lasota.sensor.flow.services.nodes.nodes.ListeningSensorNode;
 import pl.lasota.sensor.flow.services.nodes.utils.GlobalContext;
-import pl.lasota.sensor.member.MemberService;
+import pl.lasota.sensor.member.services.MemberLoginService;
 import pl.lasota.sensor.configs.properties.FlowsProperties;
 
 import java.util.Collections;
@@ -35,7 +37,13 @@ class ParserFlowTest {
     private DeviceApiInterface saeMock;
 
     @Mock
-    private MemberService msMock;
+    private DeviceConfigInterface dciMock;
+
+    @Mock
+    private DeviceSendMessageInterface dsmiMock;
+
+    @Mock
+    private MemberLoginService msMock;
 
     @Mock
     private Member memberMock;
@@ -142,8 +150,8 @@ class ParserFlowTest {
     public void flow_3_test() {
 
         Mockito.when(msMock.loggedMember()).thenReturn(memberMock);
-        Mockito.when(ac.getBean(DeviceApiInterface.class)).thenReturn(saeMock);
-        Mockito.when(saeMock.getConfigPwmPins(Mockito.any())).thenReturn(Collections.singletonList(23));
+        Mockito.when(ac.getBean(DeviceConfigInterface.class)).thenReturn(dciMock);
+        Mockito.when(dciMock.getConfigPwmPins(Mockito.any())).thenReturn(Collections.singletonList(23));
 
         List<Node> root = new ParserFlows(fp, ac).flows("""
                 {

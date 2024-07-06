@@ -23,7 +23,6 @@ public class AudioToTextConverter implements Converter<String, AudioInputStream>
     public AudioToTextConverter(String modelPath, int sampleRate) throws IOException {
         Model model = new Model(modelPath);
         recognizer = new Recognizer(model, sampleRate);
-
     }
 
     byte[] buffer = new byte[BUFFER_SIZE];

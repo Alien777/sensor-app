@@ -1,18 +1,18 @@
-package pl.lasota.sensor.device;
+package pl.lasota.sensor.device.services;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.RestController;
 import pl.lasota.sensor.configs.properties.DeviceProperties;
+import pl.lasota.sensor.device.DeviceApiInterface;
+import pl.lasota.sensor.device.DeviceConfigInterface;
+import pl.lasota.sensor.device.DeviceSendMessageInterface;
 import pl.lasota.sensor.device.model.*;
-import pl.lasota.sensor.device.services.DeviceConfigService;
-import pl.lasota.sensor.device.services.DeviceDataService;
-import pl.lasota.sensor.device.services.DeviceMessagePublish;
 import pl.lasota.sensor.entities.Device;
 import pl.lasota.sensor.entities.DeviceConfig;
 import pl.lasota.sensor.entities.Member;
 import pl.lasota.sensor.exceptions.SensorApiException;
-import pl.lasota.sensor.member.MemberService;
+import pl.lasota.sensor.member.MemberLoginDetailsServiceInterface;
 
 import java.io.IOException;
 import java.util.List;
@@ -22,10 +22,10 @@ import java.util.Optional;
 @RestController()
 @RequiredArgsConstructor
 @Slf4j
-public class DeviceApi implements DeviceApiInterface {
+public class DeviceGatewayApi implements DeviceApiInterface, DeviceSendMessageInterface, DeviceConfigInterface {
 
     private final DeviceMessagePublish deviceMessagePublish;
-    private final MemberService ms;
+    private final MemberLoginDetailsServiceInterface ms;
     private final DeviceDataService ds;
     private final DeviceProperties ap;
     private final DeviceConfigService dsu;
@@ -37,13 +37,27 @@ public class DeviceApi implements DeviceApiInterface {
     }
 
     @Override
+    public void sendDigitalValueToDevice(SendDigitalI configS) throws Exception {
+        Member member = ms.loggedMember();
+        deviceMessagePublish.sendDigital(member.getId(), configS.deviceId(), configS.pin(), configS.value());
+    }
+
+
+    @Override
     public void sendPwmValueToDevice(SendPwmI configS) throws Exception {
         Member member = ms.loggedMember();
-        deviceMessagePublish.sendPwm(member.getId(), configS.deviceId(), configS.pin(), configS.value());
+        deviceMessagePublish.sendPwm(member.getId(), configS.deviceId(), configS.pin(), configS.value(), configS.duration());
     }
 
     @Override
     public void sendRequestForDataAnalog(SendForAnalogDataI configS) throws Exception {
+        Member member = ms.loggedMember();
+        deviceMessagePublish.sendForAnalogData(member.getId(), configS.deviceId(), configS.pin());
+    }
+
+
+    @Override
+    public void sendPing(SendDigitalI configS) throws Exception {
         Member member = ms.loggedMember();
         deviceMessagePublish.sendForAnalogData(member.getId(), configS.deviceId(), configS.pin());
     }
@@ -130,6 +144,13 @@ public class DeviceApi implements DeviceApiInterface {
         Member member = ms.loggedMember();
         return ds.getMessageType(member.getId(), deviceId).stream().map(Enum::name).toList();
     }
+
+    @Override
+    public List<Integer> getConfigDigitalPins(String deviceId) {
+        Member member = ms.loggedMember();
+        return ds.getDigitalPins(member.getId(), deviceId);
+    }
+
 
     @Override
     public String getMqttIp() {

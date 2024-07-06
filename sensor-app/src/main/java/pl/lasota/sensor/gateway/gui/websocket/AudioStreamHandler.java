@@ -1,6 +1,7 @@
 package pl.lasota.sensor.gateway.gui.websocket;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.socket.BinaryMessage;
 import org.springframework.web.socket.CloseStatus;
@@ -10,7 +11,8 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 import pl.lasota.sensor.bus.AudioWaveInputStreamBus;
 import pl.lasota.sensor.bus.broadcast.impl.AudioBroadcasterStream;
 import pl.lasota.sensor.entities.Member;
-import pl.lasota.sensor.security.AuthService;
+import pl.lasota.sensor.member.MemberLoginDetailsServiceInterface;
+import pl.lasota.sensor.security.AuthServiceInterface;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -18,18 +20,15 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
+@RequiredArgsConstructor
 public class AudioStreamHandler extends TextWebSocketHandler {
 
     private final ConcurrentHashMap<WebSocketSession, AudioBroadcasterStream>
             currentActiveSession = new ConcurrentHashMap<>();
 
     private final AudioWaveInputStreamBus audioWaveInputStreamBus;
-    private final AuthService authService;
-
-    public AudioStreamHandler(AudioWaveInputStreamBus audioWaveInputStreamBus, AuthService authService) throws Exception {
-        this.audioWaveInputStreamBus = audioWaveInputStreamBus;
-        this.authService = authService;
-    }
+    private final AuthServiceInterface authService;
+    private final MemberLoginDetailsServiceInterface memberLoginDetailsServiceInterface;
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
@@ -40,7 +39,8 @@ public class AudioStreamHandler extends TextWebSocketHandler {
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
         Map<String, String> payload = new ObjectMapper().readValue(message.getPayload(), Map.class);
         try {
-            Member member = authService.checkAuthToken(payload);
+            authService.initialAuthenticationByOnlyToken(payload);
+            Member member = memberLoginDetailsServiceInterface.loggedMember();
             currentActiveSession.put(session, audioWaveInputStreamBus.takeBroadcaster(member));
         } catch (Exception e) {
             log.error("Problem with login {}", message.getPayload(), e);
@@ -66,6 +66,7 @@ public class AudioStreamHandler extends TextWebSocketHandler {
         }
 
     }
+
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {

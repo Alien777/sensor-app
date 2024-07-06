@@ -9,7 +9,7 @@ import pl.lasota.sensor.device.services.DeviceMessagePublish;
 import pl.lasota.sensor.device.services.filters.BeforeValidMessageFilter;
 import pl.lasota.sensor.device.services.filters.FilterChain;
 import pl.lasota.sensor.device.services.filters.SaveSensorValueFilter;
-import pl.lasota.sensor.member.MemberService;
+import pl.lasota.sensor.member.services.MemberLoginService;
 import pl.lasota.sensor.payload.MessageFrame;
 import pl.lasota.sensor.payload.MessageType;
 
@@ -20,7 +20,7 @@ class MessageReceiverTest {
     @Test
     public void execute_post_filter_test() throws Exception {
         MessageFrame mfMock = Mockito.mock(MessageFrame.class);
-        MemberService msMock = Mockito.mock(MemberService.class);
+        MemberLoginService msMock = Mockito.mock(MemberLoginService.class);
         DeviceDataService dsMock = Mockito.mock(DeviceDataService.class);
         DeviceMessagePublish uMock = Mockito.mock(DeviceMessagePublish.class);
 

@@ -86,6 +86,7 @@ export const draggableItems = ref([
     {type: 'input', name: 'FireOnceNode', readableName: "Fire once", description: "Node important for api fire-once"},
     {type: 'input', name: 'VoiceFireCommendNode', readableName: "Run flow by voice commend", description: "Run commend by voice"},
     {type: 'default', name: 'SendPwmValueNode', readableName: "Send PWM to Device"},
+    {type: 'default', name: 'SendDigitalValueNode', readableName: "Send value as for digital input"},
     {type: 'default', name: 'RequestAnalogDataNode', readableName: "Analog data query"},
     {type: 'default', name: 'ExecuteCodeNode', readableName: "Custom code"},
     {type: 'default', name: 'AsyncNode', readableName: "Execute as none block flow"},

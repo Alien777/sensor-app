@@ -11,7 +11,7 @@
 static char topic[50] = {0};
 static void analog_read_json(cJSON *analog_reader_c, Message *msg);
 static void pwm_read_json(cJSON *pwm_configs_c, Message *msg);
-
+static void digital_read_json(cJSON *digital_configs_c, Message *msg);
 const char *message_type_convert_to_chars(message_type state)
 {
     switch (state)
@@ -26,6 +26,12 @@ const char *message_type_convert_to_chars(message_type state)
         return "ANALOG_EXTORT";
     case PWM:
         return "PWM";
+    case DIGITAL_WRITE:
+        return "DIGITAL_WRITE";
+    case PING:
+        return "PING";
+    case PING_ACK:
+        return "PING_ACK";
     default:
         return "UNKNOWN";
     }
@@ -52,6 +58,18 @@ message_type chars_convert_to_message_type(const char *state)
     else if (strcmp(state, "PWM") == 0)
     {
         return PWM;
+    }
+    else if (strcmp(state, "DIGITAL_WRITE") == 0)
+    {
+        return DIGITAL_WRITE;
+    }
+    else if (strcmp(state, "PING") == 0)
+    {
+        return PING;
+    }
+    else if (strcmp(state, "PING_ACK") == 0)
+    {
+        return PING_ACK;
     }
     else
     {
@@ -190,6 +208,7 @@ esp_err_t json_to_message(const char *j, Message *msg)
         cJSON_Delete(json);
         return ESP_FAIL;
     }
+
     if (msg->message_type == CONFIG)
     {
 
@@ -198,12 +217,15 @@ esp_err_t json_to_message(const char *j, Message *msg)
 
         cJSON *pwm_reader_c = cJSON_GetObjectItemCaseSensitive(payload_c, "pwm_configs");
         pwm_read_json(pwm_reader_c, msg);
+
+        cJSON *digital_reader_c = cJSON_GetObjectItemCaseSensitive(payload_c, "digital_configs");
+        digital_read_json(digital_reader_c, msg);
     }
     else if (msg->message_type == PWM)
     {
         cJSON *pin_pwm_c = cJSON_GetObjectItemCaseSensitive(payload_c, "pin");
         cJSON *duty_pwm_c = cJSON_GetObjectItemCaseSensitive(payload_c, "duty");
-
+        cJSON *duration_pwm_c = cJSON_GetObjectItemCaseSensitive(payload_c, "duration");
         if (pin_pwm_c != NULL && cJSON_IsNumber(pin_pwm_c))
         {
             msg->pwn_setup.pin = pin_pwm_c->valueint;
@@ -211,6 +233,10 @@ esp_err_t json_to_message(const char *j, Message *msg)
         if (duty_pwm_c != NULL && cJSON_IsNumber(duty_pwm_c))
         {
             msg->pwn_setup.duty = duty_pwm_c->valueint;
+        }
+        if (duration_pwm_c != NULL && cJSON_IsNumber(duration_pwm_c))
+        {
+            msg->pwn_setup.duration = duration_pwm_c->valueint;
         }
     }
     else if (msg->message_type == ANALOG_EXTORT)
@@ -220,6 +246,20 @@ esp_err_t json_to_message(const char *j, Message *msg)
         if (pin_pwm_c != NULL && cJSON_IsNumber(pin_pwm_c))
         {
             msg->analog_read_data.pin = pin_pwm_c->valueint;
+        }
+    }
+    else if (msg->message_type == DIGITAL_WRITE)
+    {
+        cJSON *pin_digital_c = cJSON_GetObjectItemCaseSensitive(payload_c, "pin");
+        cJSON *value_digital_c = cJSON_GetObjectItemCaseSensitive(payload_c, "value");
+
+        if (pin_digital_c != NULL && cJSON_IsNumber(pin_digital_c))
+        {
+            msg->digital_setup.pin = pin_digital_c->valueint;
+        }
+        if (value_digital_c != NULL && cJSON_IsNumber(value_digital_c))
+        {
+            msg->digital_setup.value = value_digital_c->valueint;
         }
     }
 
@@ -233,7 +273,7 @@ void pwm_read_json(cJSON *pwm_configs_c, Message *msg)
     {
         int input_count = cJSON_GetArraySize(pwm_configs_c);
         msg->pwm_configs_size = MIN(input_count, MAX_S);
-        for (int i = 0; i < msg->analog_configs_size; ++i)
+        for (int i = 0; i < msg->pwm_configs_size; ++i)
         {
             cJSON *output_item = cJSON_GetArrayItem(pwm_configs_c, i);
             if (output_item != NULL && cJSON_IsObject(output_item))
@@ -254,6 +294,29 @@ void pwm_read_json(cJSON *pwm_configs_c, Message *msg)
                 if (resolution_c != NULL && cJSON_IsNumber(resolution_c))
                 {
                     msg->pwm_configs[i].resolution = resolution_c->valueint;
+                }
+            }
+        }
+    }
+}
+
+void digital_read_json(cJSON *digital_configs_c, Message *msg)
+{
+    if (digital_configs_c != NULL && cJSON_IsArray(digital_configs_c))
+    {
+        int input_count = cJSON_GetArraySize(digital_configs_c);
+        msg->digital_configs_size = MIN(input_count, MAX_S);
+        for (int i = 0; i < msg->digital_configs_size; ++i)
+        {
+            cJSON *output_item = cJSON_GetArrayItem(digital_configs_c, i);
+            if (output_item != NULL && cJSON_IsObject(output_item))
+            {
+
+                cJSON *pin_c = cJSON_GetObjectItemCaseSensitive(output_item, "pin");
+
+                if (pin_c != NULL && cJSON_IsNumber(pin_c))
+                {
+                    msg->digital_configs[i].pin = pin_c->valueint;
                 }
             }
         }

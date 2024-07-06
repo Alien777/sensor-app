@@ -1,4 +1,4 @@
-package pl.lasota.sensor.device;
+package pl.lasota.sensor.device.services;
 
 
 import pl.lasota.sensor.device.model.ConfigI;

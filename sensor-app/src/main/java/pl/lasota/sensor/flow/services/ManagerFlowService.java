@@ -12,7 +12,7 @@ import pl.lasota.sensor.flow.services.nodes.builder.ParserFlows;
 import pl.lasota.sensor.flow.services.nodes.nodes.FireOnceNode;
 import pl.lasota.sensor.flow.services.nodes.utils.FlowContext;
 import pl.lasota.sensor.flow.services.nodes.utils.GlobalContext;
-import pl.lasota.sensor.member.MemberService;
+import pl.lasota.sensor.member.MemberLoginDetailsServiceInterface;
 
 import java.util.List;
 import java.util.Map;
@@ -25,7 +25,7 @@ public class ManagerFlowService {
 
     private final ParserFlows pf;
     private final FlowDataService fs;
-    private final MemberService ms;
+    private final MemberLoginDetailsServiceInterface ms;
 
     private final Map<Long, ActiveFlow> startedFlow = new ConcurrentHashMap<>();
 
@@ -43,7 +43,7 @@ public class ManagerFlowService {
                     continue;
                 }
                 if (!(node instanceof FireOnceNode)) {
-                    ((StartFlowNode) node).start(new FlowContext(ms.loggedUser()));
+                    ((StartFlowNode) node).start(new FlowContext(ms.loggedMember()));
                 }
             }
 

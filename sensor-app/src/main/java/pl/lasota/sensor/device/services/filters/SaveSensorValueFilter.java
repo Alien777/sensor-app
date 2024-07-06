@@ -46,8 +46,8 @@ public class SaveSensorValueFilter implements Filter<MessageFrame, MessageFrame>
                     .setMessageType(sensor.getMessageType().name());
 
             FlowSensorI fT = switch (sensor.getMessageType()) {
-                case DEVICE_CONNECTED -> flowSensorI;
-                case CONFIG, PWM, ANALOG_EXTORT -> null;
+                case DEVICE_CONNECTED, PING_ACK -> flowSensorI;
+                case CONFIG, PWM, ANALOG_EXTORT, DIGITAL_WRITE, PING -> null;
                 case ANALOG -> {
                     AnalogSensor aSensor = (AnalogSensor) sensor;
                     yield new FlowSensorAnalogI(flowSensorI).setPin(aSensor.getPin()).setValue(aSensor.getAdcRaw());
