@@ -30,6 +30,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import static pl.lasota.sensor.payload.MessageType.DEVICE_CONNECTED;
+import static pl.lasota.sensor.payload.MessageType.PING_ACK;
 
 @Service
 @RequiredArgsConstructor
@@ -58,7 +59,7 @@ public class DeviceDataService {
         }
         Optional<DeviceConfig> configOptional = dcr.getDeviceConfig(device.getId(), messageFrame.getConfigIdentifier());
 
-        if (configOptional.isEmpty() && !DEVICE_CONNECTED.equals(messageFrame.getMessageType())) {
+        if (configOptional.isEmpty() && !DEVICE_CONNECTED.equals(messageFrame.getMessageType()) && !PING_ACK.equals(messageFrame.getMessageType())) {
             throw new SensorApiException("Not found device config");
         }
 
@@ -210,6 +211,10 @@ public class DeviceDataService {
 
     public boolean isCurrentTokenValid(String memberId, String deviceId, String token) {
         return dr.isCurrentTokenValid(memberId, deviceId, token);
+    }
+
+    public List<Device> getAllDevices() {
+        return dr.findAll();
     }
 
     public List<Device> getAllDeviceBy(String memberId) {

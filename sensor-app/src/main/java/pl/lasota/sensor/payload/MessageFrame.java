@@ -9,6 +9,7 @@ import lombok.Data;
 import pl.lasota.sensor.entities.Sensor;
 import pl.lasota.sensor.payload.from.AnalogValuePayload;
 import pl.lasota.sensor.payload.from.ConnectDevicePayload;
+import pl.lasota.sensor.payload.from.PingDevicePayload;
 import pl.lasota.sensor.payload.to.DigitalPayload;
 import pl.lasota.sensor.payload.to.ForceReadingOfAnalogDataPayload;
 import pl.lasota.sensor.payload.to.PingDataPayload;
@@ -86,7 +87,8 @@ public class MessageFrame {
     @JsonIgnore
     public Sensor.SensorBuilder getPayloadFromDriver() {
         return switch (messageType) {
-            case DEVICE_CONNECTED, PING_ACK -> new ConnectDevicePayload().parse(this);
+            case DEVICE_CONNECTED -> new ConnectDevicePayload().parse(this);
+            case PING_ACK -> new PingDevicePayload().parse(this);
             case CONFIG, PWM, ANALOG_EXTORT, DIGITAL_WRITE, PING -> throw new UnsupportedOperationException();
             case ANALOG -> new AnalogValuePayload().parse(this);
         };

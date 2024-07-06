@@ -52,6 +52,13 @@ static void mqttEventHandler(void *handler_args, esp_event_base_t base, int32_t 
                 ESP_LOGE(TAG_MQTT, "Problem with convert message");
                 break;
             }
+            if (message->message_type == PING)
+            {
+
+                publish(-1, "{}", PING_ACK);
+                free(message);
+                return;
+            }
             config_json(message);
             set_pwm(message);
             set_digital(message);

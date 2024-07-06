@@ -51,12 +51,12 @@ public class DeviceMessagePublish {
 
     }
 
-    public void sendPwm(String memberId, String deviceId, int pin, long value) throws Exception {
+    public void sendPwm(String memberId, String deviceId, int pin, long value, long duration) throws Exception {
         DeviceConfig lastDeviceConfig = deviceDataService.currentDeviceConfig(memberId, deviceId);
         Optional<Device> deviceOptional = deviceDataService.getDevice(memberId, deviceId);
         if (deviceOptional.isPresent()) {
             Device device = deviceOptional.get();
-            MessageFrame mf = MessageFrame.factoryPwmPayload(lastDeviceConfig.getId(), lastDeviceConfig.getForVersion(), deviceId, memberId, device.getCurrentDeviceToken().getToken(), new PwmPayload(pin, value));
+            MessageFrame mf = MessageFrame.factoryPwmPayload(lastDeviceConfig.getId(), lastDeviceConfig.getForVersion(), deviceId, memberId, device.getCurrentDeviceToken().getToken(), new PwmPayload(pin, value,duration));
             mqttMessagePublish.publish(mf);
         }
 

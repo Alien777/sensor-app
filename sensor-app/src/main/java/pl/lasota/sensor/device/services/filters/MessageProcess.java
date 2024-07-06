@@ -34,7 +34,7 @@ public class MessageProcess {
         try {
             filterChain.doFilter(messageFrame);
         } catch (SensorApiException e) {
-            log.error("Occurred problem with execute chain", e);
+            log.error("Occurred problem with execute chain: {}", e.getMessage(), e.getCause());
         }
     }
 }

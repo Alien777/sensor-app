@@ -28,6 +28,10 @@ const char *message_type_convert_to_chars(message_type state)
         return "PWM";
     case DIGITAL_WRITE:
         return "DIGITAL_WRITE";
+    case PING:
+        return "PING";
+    case PING_ACK:
+        return "PING_ACK";
     default:
         return "UNKNOWN";
     }
@@ -58,6 +62,14 @@ message_type chars_convert_to_message_type(const char *state)
     else if (strcmp(state, "DIGITAL_WRITE") == 0)
     {
         return DIGITAL_WRITE;
+    }
+    else if (strcmp(state, "PING") == 0)
+    {
+        return PING;
+    }
+    else if (strcmp(state, "PING_ACK") == 0)
+    {
+        return PING_ACK;
     }
     else
     {
@@ -196,6 +208,7 @@ esp_err_t json_to_message(const char *j, Message *msg)
         cJSON_Delete(json);
         return ESP_FAIL;
     }
+
     if (msg->message_type == CONFIG)
     {
 
@@ -212,7 +225,7 @@ esp_err_t json_to_message(const char *j, Message *msg)
     {
         cJSON *pin_pwm_c = cJSON_GetObjectItemCaseSensitive(payload_c, "pin");
         cJSON *duty_pwm_c = cJSON_GetObjectItemCaseSensitive(payload_c, "duty");
-
+        cJSON *duration_pwm_c = cJSON_GetObjectItemCaseSensitive(payload_c, "duration");
         if (pin_pwm_c != NULL && cJSON_IsNumber(pin_pwm_c))
         {
             msg->pwn_setup.pin = pin_pwm_c->valueint;
@@ -220,6 +233,10 @@ esp_err_t json_to_message(const char *j, Message *msg)
         if (duty_pwm_c != NULL && cJSON_IsNumber(duty_pwm_c))
         {
             msg->pwn_setup.duty = duty_pwm_c->valueint;
+        }
+        if (duration_pwm_c != NULL && cJSON_IsNumber(duration_pwm_c))
+        {
+            msg->pwn_setup.duration = duration_pwm_c->valueint;
         }
     }
     else if (msg->message_type == ANALOG_EXTORT)
@@ -231,7 +248,7 @@ esp_err_t json_to_message(const char *j, Message *msg)
             msg->analog_read_data.pin = pin_pwm_c->valueint;
         }
     }
-      else if (msg->message_type == DIGITAL_WRITE)
+    else if (msg->message_type == DIGITAL_WRITE)
     {
         cJSON *pin_digital_c = cJSON_GetObjectItemCaseSensitive(payload_c, "pin");
         cJSON *value_digital_c = cJSON_GetObjectItemCaseSensitive(payload_c, "value");

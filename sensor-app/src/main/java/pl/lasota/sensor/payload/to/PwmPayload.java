@@ -23,4 +23,7 @@ public class PwmPayload {
     @JsonProperty("duty")
     private long duty;
 
+    @JsonProperty("duration")
+    private long duration;
+
 }

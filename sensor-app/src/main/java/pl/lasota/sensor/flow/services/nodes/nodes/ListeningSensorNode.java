@@ -92,7 +92,7 @@ public class ListeningSensorNode extends Node implements StartFlowNode, AsyncNod
         }
 
         return switch (sensor.getMessageType()) {
-            case "DEVICE_CONNECTED" -> {
+            case "DEVICE_CONNECTED", "PING_ACK" -> {
                 yield true;
             }
             case "ANALOG" -> {

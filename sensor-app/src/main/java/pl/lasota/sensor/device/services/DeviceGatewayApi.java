@@ -46,7 +46,7 @@ public class DeviceGatewayApi implements DeviceApiInterface, DeviceSendMessageIn
     @Override
     public void sendPwmValueToDevice(SendPwmI configS) throws Exception {
         Member member = ms.loggedMember();
-        deviceMessagePublish.sendPwm(member.getId(), configS.deviceId(), configS.pin(), configS.value());
+        deviceMessagePublish.sendPwm(member.getId(), configS.deviceId(), configS.pin(), configS.value(), configS.duration());
     }
 
     @Override
@@ -144,6 +144,7 @@ public class DeviceGatewayApi implements DeviceApiInterface, DeviceSendMessageIn
         Member member = ms.loggedMember();
         return ds.getMessageType(member.getId(), deviceId).stream().map(Enum::name).toList();
     }
+
     @Override
     public List<Integer> getConfigDigitalPins(String deviceId) {
         Member member = ms.loggedMember();

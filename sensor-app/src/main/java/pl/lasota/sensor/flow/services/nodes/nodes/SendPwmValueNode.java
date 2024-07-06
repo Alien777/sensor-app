@@ -36,7 +36,8 @@ public class SendPwmValueNode extends Node {
         String deviceId = fString(node, "deviceId");
         Integer pin = fInteger(node, "pin");
         String valueKey = fString(node, "valueVariable");
-        Data data = Data.create(deviceId, valueKey, pin);
+        String durationKey = fString(node, "durationVariable");
+        Data data = Data.create(deviceId, valueKey, durationKey, pin);
         DeviceSendMessageInterface dsmi = context.getBean(DeviceSendMessageInterface.class);
         DeviceConfigInterface dci = context.getBean(DeviceConfigInterface.class);
         List<Integer> configPwmPins = dci.getConfigPwmPins(data.getDeviceId());
@@ -49,8 +50,9 @@ public class SendPwmValueNode extends Node {
     @Override
     public void execute(LocalContext localContext) throws Exception {
         Optional<Long> value = NodeUtils.getValue(data.valueVariable, localContext, flowContext, globalContext, Long.class);
+        Optional<Long> duration = NodeUtils.getValue(data.durationVariable, localContext, flowContext, globalContext, Long.class);
         if (value.isPresent()) {
-            deviceSendMessageInterface.sendPwmValueToDevice(new SendPwmI(data.deviceId, data.pin, value.get()));
+            deviceSendMessageInterface.sendPwmValueToDevice(new SendPwmI(data.deviceId, data.pin, value.get(),duration.orElse(0L)));
             super.execute(localContext);
         }
     }
@@ -60,6 +62,7 @@ public class SendPwmValueNode extends Node {
     public static class Data {
         private final String deviceId;
         private final String valueVariable;
+        private final String durationVariable;
         private final int pin;
     }
 }

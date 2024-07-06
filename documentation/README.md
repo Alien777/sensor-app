@@ -65,6 +65,16 @@ ESP-32S schema reduces it to values 0, 1, 2, 3
     - **Description**: Indicates that the Application Server (AS) sends a value to the PWM pin.
     - **Communication way**: AS to DEVICE
 
+- `PING`:
+  - **Type**: String
+  - **Description**: AS send to Device message to pinging
+  - **Communication way**: AS to DEVICE
+
+- `PING_ACK`:
+  - **Type**: String
+  - **Description**: Response on the message ping
+  - **Communication way**: DEVICE to AS
+
 ## Payload
 
 ### ConfigPayload (`CONFIG`)
@@ -125,10 +135,14 @@ ESP-32S schema reduces it to values 0, 1, 2, 3
 - `pin`:
     - **Type**: Integer
     - **Description**: Identifies a specific pin capable of PWM output.
-
+    - 
 - `value`:
     - **Type**: Integer
     - **Description**: The PWM value to be set on the specified pin.
+  
+- `duration`:
+  - **Type**: Integer
+  - **Description**: Time in millisecond then after this time pwm will be set 0 on the device
 
 ### AnalogValuePayload (`ANALOG`)
 
@@ -141,6 +155,14 @@ ESP-32S schema reduces it to values 0, 1, 2, 3
     - **Description**: The analog value.
 
 ### ConnectDevicePayload (`DEVICE_CONNECTED`)
+
+- No fields required.
+
+### PingDataPayload (`PING`)
+
+- No fields required.
+
+### PingDevicePayload (`PING_ACK`)
 
 - No fields required.
 

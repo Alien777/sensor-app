@@ -21,7 +21,6 @@
 #include <esp_log.h>
 #include <esp_err.h>
 
-
 typedef struct WifiNetwork WifiNetwork;
 typedef struct AnalogTask AnalogTask;
 typedef struct PwmTask PwmTask;
@@ -41,6 +40,8 @@ typedef enum
     ANALOG_EXTORT,
     PWM,
     CONFIG,
+    PING,
+    PING_ACK,
     DIGITAL_WRITE,
     UNKNOWN,
 } message_type;
@@ -53,11 +54,9 @@ struct PwmConfig
     int pin;
 };
 
-
 struct DigitalConfig
 {
     int pin;
-
 };
 
 struct AnalogConfig
@@ -90,6 +89,7 @@ struct PwmSetup
 {
     int pin;
     int duty;
+    int duration;
 };
 
 struct DigitalSetup
@@ -102,7 +102,6 @@ struct AnalogReadData
 {
     int pin;
 };
-
 
 struct Message
 {
@@ -141,7 +140,6 @@ struct ConfigEps
     char server_ip[17];
     char token[37];
 };
-
 
 const char *convert_wifi_network_to_json(WifiNetwork *head);
 const char *message_type_convert_to_chars(message_type state);
