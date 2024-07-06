@@ -4,6 +4,7 @@
 #include <esp_log.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
+#include "freertos/timers.h"
 #include <driver/adc.h> //DEPRICATED
 #include "sensor_mqtt.h"
 #include "sensor_structure.h"
