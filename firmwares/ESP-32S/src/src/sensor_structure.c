@@ -26,6 +26,8 @@ const char *message_type_convert_to_chars(message_type state)
         return "ANALOG_EXTORT";
     case PWM:
         return "PWM";
+    case PWM_ACK:
+        return "PWM_ACK";
     case DIGITAL_WRITE:
         return "DIGITAL_WRITE";
     case PING:
@@ -40,41 +42,25 @@ const char *message_type_convert_to_chars(message_type state)
 message_type chars_convert_to_message_type(const char *state)
 {
     if (strcmp(state, "DEVICE_CONNECTED") == 0)
-    {
         return DEVICE_CONNECTED;
-    }
     else if (strcmp(state, "ANALOG") == 0)
-    {
         return ANALOG;
-    }
     else if (strcmp(state, "CONFIG") == 0)
-    {
         return CONFIG;
-    }
     else if (strcmp(state, "ANALOG_EXTORT") == 0)
-    {
         return ANALOG_EXTORT;
-    }
     else if (strcmp(state, "PWM") == 0)
-    {
         return PWM;
-    }
+    else if (strcmp(state, "PWM_ACK") == 0)
+        return PWM_ACK;
     else if (strcmp(state, "DIGITAL_WRITE") == 0)
-    {
         return DIGITAL_WRITE;
-    }
     else if (strcmp(state, "PING") == 0)
-    {
         return PING;
-    }
     else if (strcmp(state, "PING_ACK") == 0)
-    {
         return PING_ACK;
-    }
     else
-    {
         return UNKNOWN;
-    }
 }
 
 const char *convert_wifi_network_to_json(WifiNetwork *head)
@@ -160,6 +146,19 @@ esp_err_t json_to_message(const char *j, Message *msg)
     else
     {
         strncpy(msg->token, token->valuestring, sizeof(msg->token) - 1);
+    }
+
+    cJSON *request_id = cJSON_GetObjectItemCaseSensitive(json, "request_id");
+    if (request_id == NULL || !cJSON_IsString(request_id) || (request_id->valuestring == NULL))
+    {
+        cJSON_Delete(json);
+        return ESP_FAIL;
+    }
+    else
+    {
+        strncpy(msg->request_id, request_id->valuestring, sizeof(msg->request_id) - 1);
+        msg->request_id[sizeof(msg->request_id) - 1] = '\0'; 
+        ESP_LOGI("RECIVED", "Type message of receivedaaaaaaaaaaaaaaaaaaaaaaaaaaa %s", msg->request_id);
     }
 
     cJSON *msg_type = cJSON_GetObjectItemCaseSensitive(json, "message_type");

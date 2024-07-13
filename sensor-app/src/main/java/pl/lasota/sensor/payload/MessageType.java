@@ -25,22 +25,34 @@ public enum MessageType {
     ANALOG_EXTORT,
 
     /**
-     * During Host send pwm value to Device
+     *  Host send pwm value to Device
      **/
     PWM,
+
+    /**
+     * Answering on the pwm setup
+     **/
+    PWM_ACK,
+
 
     /**
      * During Host send digital value
      **/
     DIGITAL_WRITE,
 
+    /**
+     * Send ping to device
+     **/
     PING,
 
+    /**
+     * Answering on the ping
+     **/
     PING_ACK;
 
 
     public static List<MessageType> getListMessageTypeFromDevice() {
-        return List.of(DEVICE_CONNECTED, ANALOG, PING_ACK);
+        return List.of(DEVICE_CONNECTED, ANALOG, PING_ACK, PWM_ACK);
     }
 
     public static boolean isFromDevice(MessageType messageType) {

@@ -7,7 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.graalvm.polyglot.*;
 import org.graalvm.polyglot.io.IOAccess;
 import pl.lasota.sensor.flow.services.nodes.Node;
-import pl.lasota.sensor.flow.services.nodes.StartFlowNode;
+import pl.lasota.sensor.flow.services.nodes.NodeStart;
 
 import java.util.Map;
 import java.util.Optional;
@@ -90,7 +90,7 @@ public final class NodeUtils {
 
 
     public static boolean isRoot(Node node) {
-        return node instanceof StartFlowNode;
+        return node instanceof NodeStart;
     }
 
     @Getter

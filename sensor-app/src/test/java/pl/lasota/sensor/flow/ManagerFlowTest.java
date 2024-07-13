@@ -17,7 +17,7 @@ import pl.lasota.sensor.entities.Member;
 import pl.lasota.sensor.entities.Role;
 import pl.lasota.sensor.flow.model.FlowSensorAnalogI;
 import pl.lasota.sensor.flow.services.nodes.Node;
-import pl.lasota.sensor.flow.services.nodes.StartFlowNode;
+import pl.lasota.sensor.flow.services.nodes.NodeStart;
 import pl.lasota.sensor.flow.services.nodes.builder.FlowsBuilder;
 import pl.lasota.sensor.flow.services.nodes.nodes.*;
 import pl.lasota.sensor.flow.services.nodes.utils.FlowContext;
@@ -88,15 +88,15 @@ class ManagerFlowTest {
         Mockito.doAnswer(invocation -> {
             latch.countDown();
             return null;
-        }).when(node).execute(Mockito.any());
+        }).when(node).fireChildNodes(Mockito.any());
 
-        ((StartFlowNode) root).start(flowContext);
+        ((NodeStart) root).config(flowContext);
         slm.takeBroadcaster(null).write(flowSensorAnalogI);
         Thread.sleep(10);
         slm.takeBroadcaster(null).write(flowSensorAnalogI);
 
         assertTrue(latch.await(2, TimeUnit.SECONDS), "Test did not complete in time");
-        Mockito.verify(node, Mockito.times(2)).execute(Mockito.any());
+        Mockito.verify(node, Mockito.times(2)).fireChildNodes(Mockito.any());
     }
 
     @Test
@@ -115,10 +115,10 @@ class ManagerFlowTest {
         NodeMock node = Mockito.mock(NodeMock.class);
         FlowsBuilder.root(root)
                 .add(root, node);
-        ((StartFlowNode) root).start(flowContext);
+        ((NodeStart) root).config(flowContext);
         Thread.sleep(2000);
 
-        Mockito.verify(node, Mockito.times(2)).execute(Mockito.any());
+        Mockito.verify(node, Mockito.times(2)).fireChildNodes(Mockito.any());
     }
 
     //
@@ -139,11 +139,11 @@ class ManagerFlowTest {
         NodeMock node = Mockito.mock(NodeMock.class);
         FlowsBuilder.root(root)
                 .add(root, node);
-        ((StartFlowNode) root).start(flowContext);
+        ((NodeStart) root).config(flowContext);
         Thread.sleep(3000);
         root.clear();
         Thread.sleep(3000);
-        Mockito.verify(node, Mockito.times(3)).execute(Mockito.any());
+        Mockito.verify(node, Mockito.times(3)).fireChildNodes(Mockito.any());
     }
 
     //    //
@@ -183,13 +183,13 @@ class ManagerFlowTest {
                 .add(async, sleep)
                 .add(sleep, nodeAsyncEnd);
 
-        ((StartFlowNode) root).start(flowContext);
+        ((NodeStart) root).config(flowContext);
         slm.takeBroadcaster(null).write(flowSensorAnalogI);
         Thread.sleep(Duration.ofSeconds(3));
 
         InOrder inOrder = Mockito.inOrder(nodeMainThreadEnd, nodeAsyncEnd);
-        inOrder.verify(nodeMainThreadEnd, Mockito.times(1)).execute(Mockito.any());
-        inOrder.verify(nodeAsyncEnd, Mockito.times(1)).execute(Mockito.any());
+        inOrder.verify(nodeMainThreadEnd, Mockito.times(1)).fireChildNodes(Mockito.any());
+        inOrder.verify(nodeAsyncEnd, Mockito.times(1)).fireChildNodes(Mockito.any());
 
     }
 
@@ -224,18 +224,18 @@ class ManagerFlowTest {
         Mockito.doAnswer(invocation -> {
             latch.countDown();
             return null;
-        }).when(nodeEnd).execute(Mockito.any());
+        }).when(nodeEnd).fireChildNodes(Mockito.any());
 
         FlowsBuilder.root(root)
                 .add(root, executeIfNode)
                 .add(executeIfNode, nodeEnd);
 
-        ((StartFlowNode) root).start(flowContext);
+        ((NodeStart) root).config(flowContext);
 
         slm.takeBroadcaster(null).write(flowSensorAnalogI);
         assertTrue(latch.await(5, TimeUnit.SECONDS), "Test did not complete in time");
 
-        Mockito.verify(nodeEnd, Mockito.times(1)).execute(Mockito.any());
+        Mockito.verify(nodeEnd, Mockito.times(1)).fireChildNodes(Mockito.any());
     }
 
 
@@ -270,12 +270,12 @@ class ManagerFlowTest {
                 .add(root, executeIfNode)
                 .add(executeIfNode, nodeEnd);
 
-        ((StartFlowNode) root).start(flowContext);
+        ((NodeStart) root).config(flowContext);
 
         slm.takeBroadcaster(null).write(flowSensorAnalogI);
         Thread.sleep(500);
 
-        Mockito.verify(nodeEnd, Mockito.times(0)).execute(Mockito.any());
+        Mockito.verify(nodeEnd, Mockito.times(0)).fireChildNodes(Mockito.any());
     }
 
     @Test
@@ -315,7 +315,7 @@ class ManagerFlowTest {
         Mockito.doAnswer(invocation -> {
             latch.countDown();
             return null;
-        }).when(nodeEnd).execute(Mockito.any());
+        }).when(nodeEnd).fireChildNodes(Mockito.any());
 
 
         FlowsBuilder.root(root)
@@ -323,15 +323,15 @@ class ManagerFlowTest {
                 .add(executeCodeNode, nodeEnd);
 
         Assertions.assertEquals(true, globalContext.getVariable("my_var"));
-        ((StartFlowNode) root).start(flowContext);
+        ((NodeStart) root).config(flowContext);
         slm.takeBroadcaster("TEST").write(flowSensorAnalogI);
 
         assertTrue(latch.await(2, TimeUnit.SECONDS), "Test did not complete in time");
 
-        Mockito.verify(nodeEnd, Mockito.times(1)).execute(Mockito.any());
+        Mockito.verify(nodeEnd, Mockito.times(1)).fireChildNodes(Mockito.any());
         Assertions.assertEquals(12, globalContext.getVariable("my_var"));
 
-        Mockito.verify(nodeEnd, Mockito.times(1)).execute(Mockito.any());
+        Mockito.verify(nodeEnd, Mockito.times(1)).fireChildNodes(Mockito.any());
         Assertions.assertEquals(18, globalContext.getVariable("my_var_new"));
     }
 

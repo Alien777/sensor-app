@@ -1,4 +1,4 @@
-package pl.lasota.sensor.payload.to;
+package pl.lasota.sensor.payload.to.dependet;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;

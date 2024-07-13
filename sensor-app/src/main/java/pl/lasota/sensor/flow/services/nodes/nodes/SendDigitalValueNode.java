@@ -47,11 +47,11 @@ public class SendDigitalValueNode extends Node {
     }
 
     @Override
-    public void execute(LocalContext localContext) throws Exception {
+    protected void fireChildNodes(LocalContext localContext) throws Exception {
         Optional<Integer> value = NodeUtils.getValue(data.valueVariable, localContext, flowContext, globalContext, Integer.class);
         if (value.isPresent()) {
             deviceApiInterface.sendDigitalValueToDevice(new SendDigitalI(data.deviceId, data.pin, value.get()));
-            super.execute(localContext);
+            super.fireChildNodes(localContext);
         }
     }
 

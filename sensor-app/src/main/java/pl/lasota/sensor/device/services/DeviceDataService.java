@@ -13,10 +13,10 @@ import pl.lasota.sensor.exceptions.SensorApiException;
 import pl.lasota.sensor.exceptions.SensorException;
 import pl.lasota.sensor.payload.MessageFrame;
 import pl.lasota.sensor.payload.MessageType;
-import pl.lasota.sensor.payload.to.AnalogConfig;
+import pl.lasota.sensor.payload.to.dependet.AnalogConfig;
 import pl.lasota.sensor.payload.to.ConfigPayload;
-import pl.lasota.sensor.payload.to.DigitalConfig;
-import pl.lasota.sensor.payload.to.PwmConfig;
+import pl.lasota.sensor.payload.to.dependet.DigitalConfig;
+import pl.lasota.sensor.payload.to.dependet.PwmConfig;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -29,8 +29,7 @@ import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import static pl.lasota.sensor.payload.MessageType.DEVICE_CONNECTED;
-import static pl.lasota.sensor.payload.MessageType.PING_ACK;
+import static pl.lasota.sensor.payload.MessageType.*;
 
 @Service
 @RequiredArgsConstructor

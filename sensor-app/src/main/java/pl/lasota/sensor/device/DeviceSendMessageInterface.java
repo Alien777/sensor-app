@@ -6,17 +6,19 @@ import pl.lasota.sensor.device.model.SendDigitalI;
 import pl.lasota.sensor.device.model.SendForAnalogDataI;
 import pl.lasota.sensor.device.model.SendPwmI;
 
+import java.util.UUID;
+
 
 public interface DeviceSendMessageInterface {
 
-    void sendConfigToDevice(SendConfigI configS) throws Exception;
+    UUID sendConfigToDevice(SendConfigI configS) throws Exception;
 
-    void sendPwmValueToDevice(@RequestBody SendPwmI configS) throws Exception;
+    UUID sendPwmValueToDevice(@RequestBody SendPwmI configS) throws Exception;
 
-    void sendRequestForDataAnalog(@RequestBody SendForAnalogDataI configS) throws Exception;
+    UUID sendRequestForDataAnalog(@RequestBody SendForAnalogDataI configS) throws Exception;
 
-    void sendDigitalValueToDevice(SendDigitalI configS) throws Exception;
+    UUID sendDigitalValueToDevice(SendDigitalI configS) throws Exception;
 
-    void sendPing(SendDigitalI configS) throws Exception;
+    UUID sendPing(SendDigitalI configS) throws Exception;
 
 }

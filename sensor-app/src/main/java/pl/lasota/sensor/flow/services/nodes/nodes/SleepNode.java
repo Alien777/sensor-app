@@ -32,9 +32,9 @@ public class SleepNode extends Node {
     }
 
     @Override
-    public void execute(LocalContext localContext) throws Exception {
+    protected void fireChildNodes(LocalContext localContext) throws Exception {
         Thread.sleep(Duration.ofSeconds(sleepTimeSeconds));
-        super.execute(localContext);
+        super.fireChildNodes(localContext);
     }
 
 }

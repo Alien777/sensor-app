@@ -1,4 +1,4 @@
-package pl.lasota.sensor.payload.to;
+package pl.lasota.sensor.payload.to.dependet;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -9,21 +9,14 @@ import lombok.Data;
  */
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class PwmConfig {
+public class DigitalConfig {
 
     /**
      * @hidden
      */
-    public PwmConfig() {
+    public DigitalConfig() {
     }
 
     @JsonProperty("pin")
     public int pin;
-
-    @JsonProperty("freq")
-    public int freq;
-
-    @JsonProperty("resolution")
-    public int resolution;
-
 }

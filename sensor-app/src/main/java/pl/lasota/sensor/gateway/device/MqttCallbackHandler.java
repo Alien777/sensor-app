@@ -48,7 +48,12 @@ public class MqttCallbackHandler implements MqttCallback {
 
     @Override
     public void deliveryComplete(IMqttToken token) {
-
+        try {
+            int messageId = token.getMessageId();
+            log.info("Message with ID {} has been delivered successfully", messageId);
+        } catch (Exception e) {
+            log.error("Failed to get message ID from token", e);
+        }
     }
 
     @Override

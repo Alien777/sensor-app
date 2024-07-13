@@ -11,7 +11,7 @@ import pl.lasota.sensor.flow.model.FlowSensorI;
 import pl.lasota.sensor.flow.services.nodes.AsyncNodeConsumer;
 import pl.lasota.sensor.flow.services.nodes.FlowNode;
 import pl.lasota.sensor.flow.services.nodes.Node;
-import pl.lasota.sensor.flow.services.nodes.StartFlowNode;
+import pl.lasota.sensor.flow.services.nodes.NodeStart;
 import pl.lasota.sensor.flow.services.nodes.utils.FlowContext;
 import pl.lasota.sensor.flow.services.nodes.utils.GlobalContext;
 import pl.lasota.sensor.flow.services.nodes.utils.LocalContext;
@@ -20,7 +20,7 @@ import static pl.lasota.sensor.flow.services.nodes.builder.ParserFlows.fString;
 
 @FlowNode
 @Slf4j
-public class ListeningSensorNode extends Node implements StartFlowNode, AsyncNodeConsumer<String, FlowSensorI> {
+public class ListeningSensorNode extends NodeStart implements AsyncNodeConsumer<String, FlowSensorI> {
 
     private final Data data;
     private final FlowSensorIInputStreamBus slm;
@@ -39,13 +39,7 @@ public class ListeningSensorNode extends Node implements StartFlowNode, AsyncNod
     }
 
     @Override
-    public void execute(LocalContext localContext) {
-        throw new UnsupportedOperationException("Please execute start instead execute");
-    }
-
-
-    @Override
-    public void start(FlowContext flowContext) throws Exception {
+    public void config(FlowContext flowContext) throws Exception {
         super.propagateFlowContext(flowContext);
         slm.addConsumer(this);
     }
@@ -74,8 +68,7 @@ public class ListeningSensorNode extends Node implements StartFlowNode, AsyncNod
         if (!analyze(flowSensorI, localContext)) {
             return;
         }
-
-        ListeningSensorNode.super.execute(localContext);
+        fireChildNodes(localContext);
     }
 
     @AllArgsConstructor(staticName = "create")
@@ -92,7 +85,7 @@ public class ListeningSensorNode extends Node implements StartFlowNode, AsyncNod
         }
 
         return switch (sensor.getMessageType()) {
-            case "DEVICE_CONNECTED", "PING_ACK" -> {
+            case "DEVICE_CONNECTED", "PING_ACK", "PWM_ACK" -> {
                 yield true;
             }
             case "ANALOG" -> {

@@ -4,6 +4,7 @@ package pl.lasota.sensor.device.mqtt;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import pl.lasota.sensor.bus.FlowSensorIInputStreamBus;
+import pl.lasota.sensor.bus.WaitForResponseInputStreamBus;
 import pl.lasota.sensor.device.services.DeviceDataService;
 import pl.lasota.sensor.device.services.DeviceMessagePublish;
 import pl.lasota.sensor.device.services.filters.BeforeValidMessageFilter;
@@ -38,7 +39,7 @@ class MessageReceiverTest {
 
         FilterChain filterChain = new FilterChain();
         BeforeValidMessageFilter beforeValidMessageFilter = new BeforeValidMessageFilter(dsMock);
-        SaveSensorValueFilter saveSensorValueFilter = new SaveSensorValueFilter(dsMock, uMock, new FlowSensorIInputStreamBus());
+        SaveSensorValueFilter saveSensorValueFilter = new SaveSensorValueFilter(dsMock, uMock, new FlowSensorIInputStreamBus(), new WaitForResponseInputStreamBus());
         filterChain
                 .addFilter(beforeValidMessageFilter)
                 .addFilter(saveSensorValueFilter);

@@ -39,6 +39,7 @@ typedef enum
     ANALOG,
     ANALOG_EXTORT,
     PWM,
+    PWM_ACK,
     CONFIG,
     PING,
     PING_ACK,
@@ -74,6 +75,7 @@ struct PwmTask
     char member_key[17];
     char device_key[13];
     int config_id;
+    char request_id[37];
     PwmConfig pwm_config;
 };
 
@@ -82,6 +84,7 @@ struct AnalogTask
     char member_key[17];
     char device_key[13];
     int config_id;
+    char request_id[37];
     AnalogConfig analog_config;
 };
 
@@ -109,6 +112,7 @@ struct Message
     char device_key[13];
     char token[37];
     char version[8];
+    char request_id[37];
     int config_id;
     message_type message_type;
 

@@ -10,7 +10,7 @@ public class NodeMock extends Node {
     }
 
     @Override
-    public void execute(LocalContext localContext)  {
+    public void fireChildNodes(LocalContext localContext)  {
 
     }
 

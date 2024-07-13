@@ -5,14 +5,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContext;
 import pl.lasota.sensor.flow.services.nodes.FlowNode;
 import pl.lasota.sensor.flow.services.nodes.Node;
-import pl.lasota.sensor.flow.services.nodes.StartFlowNode;
+import pl.lasota.sensor.flow.services.nodes.NodeStart;
 import pl.lasota.sensor.flow.services.nodes.utils.FlowContext;
 import pl.lasota.sensor.flow.services.nodes.utils.GlobalContext;
 import pl.lasota.sensor.flow.services.nodes.utils.LocalContext;
 
 @Slf4j
 @FlowNode
-public class FireOnceNode extends Node implements StartFlowNode {
+public class FireOnceNode extends NodeStart {
 
     public FireOnceNode(String id, GlobalContext globalContext) {
         super(id, globalContext);
@@ -23,19 +23,7 @@ public class FireOnceNode extends Node implements StartFlowNode {
     }
 
     @Override
-    public void execute(LocalContext localContext) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public void clear() {
-        super.clear();
-    }
-
-    @Override
-    public void start(FlowContext flowContext) throws Exception {
-        propagateFlowContext(flowContext);
-        LocalContext localContext = new LocalContext();
-        super.execute(localContext);
+    public void config(FlowContext flowContext) throws Exception {
+        fireChildNodes(new LocalContext());
     }
 }

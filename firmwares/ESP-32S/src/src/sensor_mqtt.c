@@ -2,7 +2,7 @@
 #include "sensor_memory.h"
 #include "sensor_mqtt.h"
 #include "sensor_wifi.h"
-#include "sensor_runner.h"
+#include "core/sensor_config.h"
 
 const static char *TAG_MQTT = "MQTT";
 
@@ -19,20 +19,17 @@ static void mqttEventHandler(void *handler_args, esp_event_base_t base, int32_t 
     {
     case MQTT_EVENT_CONNECTED:
         ESP_LOGI(TAG_MQTT, "MQTT_EVENT_CONNECTED");
-        publish(-1, "{}", DEVICE_CONNECTED);
+        publish(-1, "DEVICE_CONNECTION", "{}", DEVICE_CONNECTED);
         esp_mqtt_client_subscribe(client, topicSubscribe(), 0); // Subscribe to the topic
         break;
     case MQTT_EVENT_DISCONNECTED:
         ESP_LOGI(TAG_MQTT, "MQTT_EVENT_DISCONNECTED");
         break;
     case MQTT_EVENT_SUBSCRIBED:
-        // Handle subscribed event
         break;
     case MQTT_EVENT_UNSUBSCRIBED:
-        // Handle unsubscribed event
         break;
     case MQTT_EVENT_PUBLISHED:
-        // Handle published event
         break;
     case MQTT_EVENT_DATA:
         if (strncmp(event->topic, topicSubscribe(), event->topic_len) == 0)
@@ -54,27 +51,25 @@ static void mqttEventHandler(void *handler_args, esp_event_base_t base, int32_t 
             }
             if (message->message_type == PING)
             {
-
-                publish(-1, "{}", PING_ACK);
+                publish(-1, message->request_id, "{}", PING_ACK);
                 free(message);
                 return;
             }
-            config_json(message);
+            setup_config(message);
             set_pwm(message);
             set_digital(message);
-            analog_extort(message);
+            request_for_analog_value(message);
             free(message);
         }
         break;
     case MQTT_EVENT_ERROR:
-        // Handle error event
         break;
     default:
         break;
     }
 }
 
-void publish(const int config_id, const char *message, message_type type)
+void publish(const int config_id, const char *request_id, const char *message, message_type type)
 {
     ConfigEps config;
     if (load_config(&config) == ESP_FAIL)
@@ -85,8 +80,9 @@ void publish(const int config_id, const char *message, message_type type)
     const char *message_type = message_type_convert_to_chars(type);
 
     int requiredSize = snprintf(NULL, 0,
-                                "{\"%s\":\"%s\",\"%s\":%d,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"payload\":%s,\"message_type\":\"%s\"}", "token", config.token, "config_identifier", config_id, "version_firmware", VERSION_FIRMWARE,
-                                DEVICE_KEY, device_key, MEMBER_KEY, config.member_id, message, message_type) +
+                                "{\"%s\":\"%s\",\"%s\":%d,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"payload\":%s,\"message_type\":\"%s\",\"request_id\":\"%s\"}",
+                                "token", config.token, "config_identifier", config_id, "version_firmware", VERSION_FIRMWARE,
+                                DEVICE_KEY, device_key, MEMBER_KEY, config.member_id, message, message_type, request_id) +
                        1;
 
     char *json = (char *)malloc(requiredSize);
@@ -94,12 +90,16 @@ void publish(const int config_id, const char *message, message_type type)
     if (json != NULL)
     {
         snprintf(json, requiredSize,
-                 "{\"%s\":\"%s\",\"%s\":%d,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"payload\":%s,\"message_type\":\"%s\"}", "token", config.token, "config_identifier", config_id, "version_firmware", VERSION_FIRMWARE,
-                 DEVICE_KEY, device_key, MEMBER_KEY, config.member_id, message, message_type);
-        esp_mqtt_client_publish(client, PUBLISH_TOPIC, json, 0, 2, 0);
+                 "{\"%s\":\"%s\",\"%s\":%d,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"payload\":%s,\"message_type\":\"%s\",\"request_id\":\"%s\"}",
+                 "token", config.token, "config_identifier", config_id, "version_firmware", VERSION_FIRMWARE,
+                 DEVICE_KEY, device_key, MEMBER_KEY, config.member_id, message, message_type, request_id);
+
+
+        esp_mqtt_client_publish(client, PUBLISH_TOPIC, json, 0, 1, 0);
         free(json);
     }
 }
+
 
 void mqtt_initial()
 {

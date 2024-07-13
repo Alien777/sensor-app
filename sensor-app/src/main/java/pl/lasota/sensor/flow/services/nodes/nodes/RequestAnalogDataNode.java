@@ -33,9 +33,9 @@ public class RequestAnalogDataNode extends Node {
     }
 
     @Override
-    public void execute(LocalContext localContext) throws Exception {
+    protected void fireChildNodes(LocalContext localContext) throws Exception {
         deviceSendMessageInterface.sendRequestForDataAnalog(new SendForAnalogDataI(data.deviceId, data.pin));
-        super.execute(localContext);
+        super.fireChildNodes(localContext);
     }
 
     @AllArgsConstructor(staticName = "create")

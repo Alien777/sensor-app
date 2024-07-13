@@ -1,22 +1,21 @@
 package pl.lasota.sensor.payload.to;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 /**
- * Contract describing configure analog pin
+ * A model describing the contract for sending data to the device to set the pwm value
  */
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class DigitalConfig {
+public class PingPayload {
+
 
     /**
      * @hidden
      */
-    public DigitalConfig() {
+    public PingPayload() {
     }
 
-    @JsonProperty("pin")
-    public int pin;
+
 }

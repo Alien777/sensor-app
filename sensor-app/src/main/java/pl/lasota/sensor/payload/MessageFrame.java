@@ -9,11 +9,14 @@ import lombok.Data;
 import pl.lasota.sensor.entities.Sensor;
 import pl.lasota.sensor.payload.from.AnalogValuePayload;
 import pl.lasota.sensor.payload.from.ConnectDevicePayload;
-import pl.lasota.sensor.payload.from.PingDevicePayload;
+import pl.lasota.sensor.payload.from.PingAckDevicePayload;
+import pl.lasota.sensor.payload.from.PwmAckDevicePayload;
 import pl.lasota.sensor.payload.to.DigitalPayload;
 import pl.lasota.sensor.payload.to.ForceReadingOfAnalogDataPayload;
-import pl.lasota.sensor.payload.to.PingDataPayload;
+import pl.lasota.sensor.payload.to.PingPayload;
 import pl.lasota.sensor.payload.to.PwmPayload;
+
+import java.util.UUID;
 
 @Data
 public class MessageFrame {
@@ -45,6 +48,9 @@ public class MessageFrame {
     @JsonProperty("token")
     private String token;
 
+    @JsonProperty("request_id")
+    private String requestId;
+
     @JsonProperty("message_type")
     private MessageType messageType;
 
@@ -67,6 +73,7 @@ public class MessageFrame {
         this.memberId = memberId;
         this.messageType = messageType;
         this.payload = payload;
+        this.requestId = UUID.randomUUID().toString();
     }
 
     /**
@@ -75,7 +82,7 @@ public class MessageFrame {
     @JsonIgnore
     public String makePayloadForDevice() throws JsonProcessingException {
         return switch (messageType) {
-            case DEVICE_CONNECTED, ANALOG, PING_ACK -> throw new UnsupportedOperationException();
+            case DEVICE_CONNECTED, ANALOG, PING_ACK, PWM_ACK -> throw new UnsupportedOperationException();
             case CONFIG, PWM, ANALOG_EXTORT, DIGITAL_WRITE, PING -> om.writeValueAsString(this);
 
         };
@@ -88,7 +95,8 @@ public class MessageFrame {
     public Sensor.SensorBuilder getPayloadFromDriver() {
         return switch (messageType) {
             case DEVICE_CONNECTED -> new ConnectDevicePayload().parse(this);
-            case PING_ACK -> new PingDevicePayload().parse(this);
+            case PING_ACK -> new PingAckDevicePayload().parse(this);
+            case PWM_ACK -> new PwmAckDevicePayload().parse(this);
             case CONFIG, PWM, ANALOG_EXTORT, DIGITAL_WRITE, PING -> throw new UnsupportedOperationException();
             case ANALOG -> new AnalogValuePayload().parse(this);
         };
@@ -132,7 +140,7 @@ public class MessageFrame {
      * @hidden
      */
     @JsonIgnore
-    public static MessageFrame factorySendPingData(Long configId, String version, String deviceId, String memberId, String token, PingDataPayload analogData) throws JsonProcessingException {
+    public static MessageFrame factorySendPingData(Long configId, String version, String deviceId, String memberId, String token, PingPayload analogData) throws JsonProcessingException {
         String json = om.writeValueAsString(analogData);
         return new MessageFrame(configId, version, deviceId, memberId, MessageType.PING, token, om.readTree(json));
     }

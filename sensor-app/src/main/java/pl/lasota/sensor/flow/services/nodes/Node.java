@@ -16,6 +16,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @EqualsAndHashCode(of = "id")
 public abstract class Node {
+
     @Getter
     private final List<Node> nodes = new ArrayList<>();
 
@@ -25,7 +26,7 @@ public abstract class Node {
 
     protected FlowContext flowContext;
 
-    public void execute(LocalContext localContext) throws Exception {
+    protected void fireChildNodes(LocalContext localContext) throws Exception {
         for (Node node : nodes) {
             if (globalContext.isStopped()) {
                 break;
@@ -33,7 +34,7 @@ public abstract class Node {
             try {
                 log.info("Executing node {}", id);
                 flowContext.recreateSecurityHolder();
-                node.execute(localContext);
+                node.fireChildNodes(localContext);
             } catch (Exception e) {
                 throw new SensorFlowException(e, "Occurred error during executing node FROM {} TO {}", id, node.id);
             }

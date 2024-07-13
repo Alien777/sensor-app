@@ -2,6 +2,9 @@ package pl.lasota.sensor.payload.to;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
+import pl.lasota.sensor.payload.to.dependet.AnalogConfig;
+import pl.lasota.sensor.payload.to.dependet.DigitalConfig;
+import pl.lasota.sensor.payload.to.dependet.PwmConfig;
 
 import java.util.ArrayList;
 import java.util.List;
