@@ -28,6 +28,7 @@ class MessageReceiverTest {
 
         Mockito.when(mfMock.getMemberId()).thenReturn("memberId_1234567");
         Mockito.when(mfMock.getDeviceId()).thenReturn("deviceId_123");
+        Mockito.when(mfMock.getRequestId()).thenReturn("received_id");
         Mockito.when(mfMock.getToken()).thenReturn("token");
         Mockito.when(mfMock.getVersionFirmware()).thenReturn("1.0");
         Mockito.when(mfMock.getMessageType()).thenReturn(MessageType.DEVICE_CONNECTED);
@@ -35,6 +36,7 @@ class MessageReceiverTest {
         Mockito.when(dsMock.moveToDeviceFromTemporary("memberId_1234567", "deviceId_123", "token")).thenReturn(true);
         Mockito.when(dsMock.isCurrentTokenValid("memberId_1234567", "deviceId_123", "token")).thenReturn(true);
         Mockito.when(dsMock.isDeviceExist("memberId_1234567", "deviceId_123")).thenReturn(true);
+
 
 
         FilterChain filterChain = new FilterChain();

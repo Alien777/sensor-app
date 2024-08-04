@@ -206,7 +206,7 @@ class MessageTypeTest {
         MessageFrame newMessage = new MessageFrame().revertConvert(convert);
         Assertions.assertEquals(1L, newMessage.getConfigIdentifier());
         Assertions.assertEquals("version", newMessage.getVersionFirmware());
-        Assertions.assertEquals(null, newMessage.getDeviceId());
+        Assertions.assertEquals("NULL", newMessage.getDeviceId());
         Assertions.assertEquals("memberId", newMessage.getMemberId());
         Assertions.assertEquals(uuid.toString(), newMessage.getToken());
 

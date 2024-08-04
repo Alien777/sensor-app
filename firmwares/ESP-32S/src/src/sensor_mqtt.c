@@ -47,18 +47,47 @@ static void mqttEventHandler(void *handler_args, esp_event_base_t base, int32_t 
             ESP_LOGI(TAG_MQTT, "Received data: %s", received_data);
 
             MessageFrame new_frame;
-            revertConvert(&new_frame, received_data);
+            memset(&new_frame, 0, sizeof(MessageFrame));
 
-            printMessageFrame(&new_frame);
+            chars_to_message_frame(&new_frame, received_data);
+
+            print_message_frame(&new_frame);
 
             if (new_frame.messageType == PING)
             {
-                publish(-1, new_frame.requestId, ";", PING_ACK);
+                publish(-1, new_frame.request_id, ";", PING_ACK);
+                return;
+            }
+            ConfigEps config;
+            if (load_config(&config) != ESP_OK)
+            {
+                memset(&config, 0, sizeof(ConfigEps));
+                return;
+            }
+
+            if (strcmp(new_frame.token, config.token) != 0)
+            {
+                return;
+            }
+
+            if (strcmp(new_frame.member_id, config.member_id) != 0)
+            {
+                return;
+            }
+
+            if (strcmp(new_frame.device_id, get_mac_address()) != 0)
+            {
+                return;
+            }
+
+            if (strcmp(new_frame.firmware, VERSION_FIRMWARE) != 0)
+            {
                 return;
             }
 
             Message message;
-            convertToInternal(&message, &new_frame);
+            memset(&message, 0, sizeof(Message));
+            convert_message_frame_to_internal_object(&message, &new_frame);
 
             setup_config(&message);
             set_pwm(&message);
@@ -83,12 +112,12 @@ void publish(const int config_id, const char *request_id, const char *payload, M
     }
 
     MessageFrame frame;
-    createMessageFrame(&frame, config_id, VERSION_FIRMWARE, get_mac_address(),
-                       config.member_id, type, config.token, request_id, payload);
+    create_message_frame_by_field(&frame, config_id, VERSION_FIRMWARE, get_mac_address(),
+                                  config.member_id, type, config.token, request_id, payload);
 
     char messageFrameToSend[512];
-    convert(&frame, messageFrameToSend);
-    printMessageFrame(&frame);
+    message_frame_to_chars(&frame, messageFrameToSend);
+    print_message_frame(&frame);
     esp_mqtt_client_publish(client, PUBLISH_TOPIC, messageFrameToSend, 0, 1, 0);
 }
 

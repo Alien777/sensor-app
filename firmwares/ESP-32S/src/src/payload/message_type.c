@@ -1,5 +1,4 @@
 #include "payload/message_type.h"
-#include <stddef.h>
 
 const char* message_type_to_string(MessageType messageType) {
     switch (messageType) {

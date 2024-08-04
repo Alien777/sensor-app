@@ -1,7 +1,3 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
 #include "payload/message_frame.h"
 #include "payload/message_type.h"
 #include "sensor_structure.h"

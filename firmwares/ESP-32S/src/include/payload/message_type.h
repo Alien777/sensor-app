@@ -3,6 +3,7 @@
 
 #include <stdbool.h>
 #include <string.h>
+#include <stddef.h>
 typedef enum
 {
     DEVICE_CONNECTED = 1,

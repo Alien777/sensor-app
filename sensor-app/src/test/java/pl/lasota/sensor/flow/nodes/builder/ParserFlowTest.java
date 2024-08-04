@@ -194,7 +194,8 @@ class ParserFlowTest {
                       "sensor": {
                         "pin": 23,
                         "deviceId": "DDDDDDDDDDDD",
-                        "valueVariable": "g_c.pwm_value"
+                        "valueVariable": "g_c.pwm_value",
+                        "durationVariable": "g_c.duration"
                       },
                       "childed": [],
                       "position": {
