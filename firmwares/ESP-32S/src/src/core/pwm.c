@@ -45,6 +45,8 @@ void set_pwm(Message *message)
                 if (xTimerStart(pwm_timers[channel], 0) != pdPASS)
                 {
                     ESP_LOGE(TAG, "Failed to start timer for channel: %d", channel);
+                    xTimerDelete(pwm_timers[channel], 0);
+                    pwm_timers[channel] = NULL;
                 }
             }
             else
@@ -55,7 +57,6 @@ void set_pwm(Message *message)
     }
     ledc_set_duty(LEDC_HIGH_SPEED_MODE, channel, duty);
     ledc_update_duty(LEDC_HIGH_SPEED_MODE, channel);
-
 }
 
 void setup_pwm(Message *message)
