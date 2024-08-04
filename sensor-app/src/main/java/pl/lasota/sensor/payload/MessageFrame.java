@@ -3,7 +3,7 @@ package pl.lasota.sensor.payload;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
-import pl.lasota.sensor.payload.from.AnalogValuePayload;
+import pl.lasota.sensor.payload.from.AnalogAckDevicePayload;
 import pl.lasota.sensor.payload.from.ConnectDevicePayload;
 import pl.lasota.sensor.payload.from.PingAckDevicePayload;
 import pl.lasota.sensor.payload.from.PwmAckDevicePayload;
@@ -75,8 +75,8 @@ public class MessageFrame implements Parse<MessageFrame, String> {
             case PING_ACK -> new PingAckDevicePayload().revertConvert(source);
             case PWM_ACK -> new PwmAckDevicePayload().revertConvert(source);
             case CONFIG -> new ConfigPayload().revertConvert(source);
-            case ANALOG -> new ForceReadingOfAnalogDataPayload().revertConvert(source);
-            case ANALOG_ACK -> new AnalogValuePayload().revertConvert(source);
+            case ANALOG -> new AnalogDataPayload().revertConvert(source);
+            case ANALOG_ACK -> new AnalogAckDevicePayload().revertConvert(source);
             case PWM -> new PwmPayload().revertConvert(source);
             case DIGITAL_WRITE -> new DigitalPayload().revertConvert(source);
             case PING -> new PingPayload().revertConvert(source);
@@ -111,8 +111,8 @@ public class MessageFrame implements Parse<MessageFrame, String> {
      */
     @JsonIgnore
     public static MessageFrame factorySendForAnalogData(Long configId, String version, String deviceId, String memberId,
-                                                        String token, ForceReadingOfAnalogDataPayload forceReadingOfAnalogDataPayload) {
-        return new MessageFrame(configId, version, deviceId, memberId, MessageType.ANALOG, token, forceReadingOfAnalogDataPayload.convert());
+                                                        String token, AnalogDataPayload analogDataPayload) {
+        return new MessageFrame(configId, version, deviceId, memberId, MessageType.ANALOG, token, analogDataPayload.convert());
     }
 
     /**

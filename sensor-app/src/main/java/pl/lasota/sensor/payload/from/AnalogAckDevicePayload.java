@@ -9,12 +9,12 @@ import pl.lasota.sensor.payload.Parse;
 /**
  * A model describing the available fields from device during reading analog value
  */
-public class AnalogValuePayload implements Parse<Sensor.SensorBuilder, String> {
+public class AnalogAckDevicePayload implements Parse<Sensor.SensorBuilder, String> {
 
     /**
      * @hidden
      */
-    public AnalogValuePayload() {
+    public AnalogAckDevicePayload() {
     }
 
     @JsonProperty("pin")

@@ -47,6 +47,6 @@ public class AnalogConfig implements Parse<AnalogConfig, String> {
 
 
     public static int length() {
-        return 6;
+        return 3;
     }
 }

@@ -74,7 +74,7 @@ public class DeviceMessagePublish {
         if (deviceOptional.isPresent()) {
             Device device = deviceOptional.get();
             MessageFrame mf = MessageFrame.factorySendForAnalogData(lastDeviceConfig.getId(),
-                    lastDeviceConfig.getForVersion(), deviceId, memberId, device.getCurrentDeviceToken().getToken(), new ForceReadingOfAnalogDataPayload(pin));
+                    lastDeviceConfig.getForVersion(), deviceId, memberId, device.getCurrentDeviceToken().getToken(), new AnalogDataPayload(pin));
             mqttMessagePublish.publish(mf);
             return UUID.fromString(mf.getRequestId());
         }

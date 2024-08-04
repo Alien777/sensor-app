@@ -160,7 +160,7 @@ class MessageTypeTest {
     public void simple_test_force_analog() {
         UUID uuid = UUID.randomUUID();
         MessageFrame messageFrame = MessageFrame.factorySendForAnalogData(1L, "version", "deviceId",
-                "memberId", uuid.toString(), new ForceReadingOfAnalogDataPayload(12));
+                "memberId", uuid.toString(), new AnalogDataPayload(12));
 
         String convert = messageFrame.convert();
         MessageFrame newMessage = new MessageFrame().revertConvert(convert);
@@ -170,7 +170,7 @@ class MessageTypeTest {
         Assertions.assertEquals("memberId", newMessage.getMemberId());
         Assertions.assertEquals(uuid.toString(), newMessage.getToken());
 
-        ForceReadingOfAnalogDataPayload pd = (ForceReadingOfAnalogDataPayload) newMessage.getPayloadFromDriver(newMessage.getPayload());
+        AnalogDataPayload pd = (AnalogDataPayload) newMessage.getPayloadFromDriver(newMessage.getPayload());
 
         Assertions.assertEquals(pd.getPin(), 12);
 

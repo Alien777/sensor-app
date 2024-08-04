@@ -10,12 +10,12 @@ import pl.lasota.sensor.payload.Parse;
  */
 @Data
 @AllArgsConstructor
-public class ForceReadingOfAnalogDataPayload implements Parse<ForceReadingOfAnalogDataPayload, String> {
+public class AnalogDataPayload implements Parse<AnalogDataPayload, String> {
 
     /**
      * @hidden
      */
-    public ForceReadingOfAnalogDataPayload() {
+    public AnalogDataPayload() {
     }
 
     @JsonProperty("pin")
@@ -29,7 +29,7 @@ public class ForceReadingOfAnalogDataPayload implements Parse<ForceReadingOfAnal
     }
 
     @Override
-    public ForceReadingOfAnalogDataPayload revertConvert(String source) {
+    public AnalogDataPayload revertConvert(String source) {
         String[] split = source.split(";");
         this.pin = Integer.parseInt(split[0]);
         return this;

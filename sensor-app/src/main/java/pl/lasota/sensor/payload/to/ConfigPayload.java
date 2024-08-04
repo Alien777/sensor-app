@@ -59,9 +59,8 @@ public class ConfigPayload implements Parse<ConfigPayload, String> {
         int pwmConfigSize = Integer.parseInt(lines[1]);
         int digitalConfigSize = Integer.parseInt(lines[2]);
 
-        int index = 3;  // start after the sizes
+        int index = 3;
 
-        // Parsing AnalogConfig
         for (int i = 0; i < analogReaderSize; i++) {
             String[] analogConfigData = Arrays.copyOfRange(lines, index, index + AnalogConfig.length());
             AnalogConfig analogConfig = new AnalogConfig();
@@ -70,7 +69,7 @@ public class ConfigPayload implements Parse<ConfigPayload, String> {
             index += AnalogConfig.length();
         }
 
-        // Parsing PwmConfig
+
         for (int i = 0; i < pwmConfigSize; i++) {
             String[] pwmConfigData = Arrays.copyOfRange(lines, index, index + PwmConfig.length());
             PwmConfig pwmConfigItem = new PwmConfig();
@@ -79,7 +78,6 @@ public class ConfigPayload implements Parse<ConfigPayload, String> {
             index += PwmConfig.length();
         }
 
-        // Parsing DigitalConfig
         for (int i = 0; i < digitalConfigSize; i++) {
             String[] digitalConfigData = Arrays.copyOfRange(lines, index, index + DigitalConfig.length());
             DigitalConfig digitalConfigItem = new DigitalConfig();
