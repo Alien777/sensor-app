@@ -55,7 +55,7 @@ public class VoiceFireCommendNode extends NodeStart implements AsyncNodeConsumer
 
     @Override
     public void config(FlowContext flowContext) throws Exception {
-        super.propagateFlowContext(flowContext);
+        propagateFlowContext(flowContext);
         audioWaveInputStreamBus.addConsumer(this);
     }
 

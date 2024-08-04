@@ -9,6 +9,8 @@ import org.eclipse.paho.mqttv5.common.MqttMessage;
 import org.springframework.stereotype.Component;
 import pl.lasota.sensor.payload.MessageFrame;
 
+import java.nio.charset.StandardCharsets;
+
 @Component
 @Slf4j
 @RequiredArgsConstructor
@@ -17,9 +19,8 @@ public class MqttMessagePublish {
     private final IMqttClient iMqttClient;
 
     public void publish(MessageFrame messageFrame) throws MqttException, JsonProcessingException {
-        String json = messageFrame.makePayloadForDevice();
-        iMqttClient.publish("/" + messageFrame.getMemberId() + "/" + messageFrame.getDeviceId(), new MqttMessage(json.getBytes()));
-        log.info("Sent messageFrame  {}", json);
+        iMqttClient.publish("/" + messageFrame.getMemberId() + "/" + messageFrame.getDeviceId(), new MqttMessage(messageFrame.convert().getBytes(StandardCharsets.UTF_8)));
+        log.info("Sent messageFrame  {}", messageFrame.getMessageType());
     }
 
 }

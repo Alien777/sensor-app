@@ -37,6 +37,7 @@ public class ManagerFlowService {
         log.info("Start flow id {} config {}", id, config);
         try {
             List<Node> flows = pf.flows(config, new GlobalContext());
+
             startedFlow.put(id, new ActiveFlow(flows, config));
             for (Node node : flows) {
                 if (node == null) {

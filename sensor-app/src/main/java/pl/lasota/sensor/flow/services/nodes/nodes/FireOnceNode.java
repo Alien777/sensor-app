@@ -24,6 +24,7 @@ public class FireOnceNode extends NodeStart {
 
     @Override
     public void config(FlowContext flowContext) throws Exception {
+        propagateFlowContext(flowContext);
         fireChildNodes(new LocalContext());
     }
 }

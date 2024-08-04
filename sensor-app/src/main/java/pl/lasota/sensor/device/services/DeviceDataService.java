@@ -52,7 +52,7 @@ public class DeviceDataService {
         }
         Device device = deviceOptional.get();
 
-        var sensorBuilder = messageFrame.getPayloadFromDriver();
+        var sensorBuilder = (Sensor.SensorBuilder) messageFrame.getPayloadFromDriver(messageFrame.getPayload());
         if (sensorBuilder == null) {
             return null;
         }

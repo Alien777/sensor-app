@@ -41,6 +41,7 @@ public class CronNode extends NodeStart implements Runnable {
 
     @Override
     public void config(FlowContext flowContext) throws Exception {
+        propagateFlowContext(flowContext);
         ScheduledFuture<?> newSchedule;
         Map<String, ScheduledFuture<?>> schedules = flowContext.getSchedules();
         if (cron.matches("\\d+")) {

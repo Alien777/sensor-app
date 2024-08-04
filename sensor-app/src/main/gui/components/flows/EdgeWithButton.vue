@@ -1,5 +1,5 @@
 <script setup>
-import {BaseEdge, EdgeLabelRenderer, getBezierPath, useVueFlow} from '@vue-flow/core'
+import {BaseEdge, EdgeLabelRenderer, getBezierPath, getSmoothStepPath, useVueFlow} from '@vue-flow/core'
 import {computed} from 'vue'
 
 const props = defineProps({
@@ -43,7 +43,7 @@ const props = defineProps({
 
 const {removeEdges} = useVueFlow()
 
-const path = computed(() => getBezierPath(props))
+const path = computed(() => getSmoothStepPath(props))
 </script>
 
 <script>
@@ -52,6 +52,7 @@ export default {
 }
 </script>
 <template>
+
   <BaseEdge :id="id" :style="style" :path="path[0]" :marker-end="markerEnd"/>
   <EdgeLabelRenderer>
     <div
@@ -60,6 +61,7 @@ export default {
         position: 'absolute',
         transform: `translate(-50%, -50%) translate(${path[1]}px,${path[2]}px)`,
       }"
+
         class="nodrag nopan"
     >
       <q-btn @click="removeEdges(id)" size="xs" icon="delete" color="red"/>

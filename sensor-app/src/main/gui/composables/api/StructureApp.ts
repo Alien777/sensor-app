@@ -90,5 +90,6 @@ export const draggableItems = ref([
     {type: 'default', name: 'RequestAnalogDataNode', readableName: "Analog data query"},
     {type: 'default', name: 'ExecuteCodeNode', readableName: "Custom code"},
     {type: 'default', name: 'AsyncNode', readableName: "Execute as none block flow"},
-    {type: 'default', name: 'SleepNode', readableName: "Sleep flow"}
+    {type: 'default', name: 'SleepNode', readableName: "Sleep flow"},
+    {type: 'default', name: 'StopCurrentProcessFlowNode', readableName: "Restart flow"}
 ]);

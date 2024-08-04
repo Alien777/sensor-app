@@ -1,6 +1,7 @@
 package pl.lasota.sensor.device.services;
 
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -9,10 +10,7 @@ import pl.lasota.sensor.entities.DeviceConfig;
 import pl.lasota.sensor.exceptions.SensorApiException;
 import pl.lasota.sensor.gateway.device.MqttMessagePublish;
 import pl.lasota.sensor.payload.MessageFrame;
-import pl.lasota.sensor.payload.to.DigitalPayload;
-import pl.lasota.sensor.payload.to.ForceReadingOfAnalogDataPayload;
-import pl.lasota.sensor.payload.to.PingPayload;
-import pl.lasota.sensor.payload.to.PwmPayload;
+import pl.lasota.sensor.payload.to.*;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -31,7 +29,11 @@ public class DeviceMessagePublish {
         if (deviceOptional.isPresent()) {
             Device device = deviceOptional.get();
             try {
-                MessageFrame mf = MessageFrame.factoryConfigPayload(lastDeviceConfig.getId(), lastDeviceConfig.getForVersion(), deviceId, memberId, device.getCurrentDeviceToken().getToken(), lastDeviceConfig.getConfig());
+                ObjectMapper objectMapper = new ObjectMapper();
+                MessageFrame mf = MessageFrame.factoryConfigPayload(lastDeviceConfig.getId(),
+                        lastDeviceConfig.getForVersion(), deviceId,
+                        memberId, device.getCurrentDeviceToken().getToken(),
+                        objectMapper.readValue(lastDeviceConfig.getConfig(), ConfigPayload.class));
                 mqttMessagePublish.publish(mf);
                 return UUID.fromString(mf.getRequestId());
             } catch (Exception e) {

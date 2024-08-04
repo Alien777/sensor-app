@@ -16,7 +16,7 @@
           <q-input label="Username" v-model="username"/>
           <q-input label="Password" type="password" v-model="password"/>
           <br>
-          <q-btn label="Login" icon="login" color="green" @click="login"/>
+          <q-btn  label="Login" icon="login" color="green" @click="login"/>
         </q-card-section>
       </q-card>
     </div>

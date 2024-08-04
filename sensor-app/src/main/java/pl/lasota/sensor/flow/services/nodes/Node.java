@@ -24,6 +24,8 @@ public abstract class Node {
 
     protected final GlobalContext globalContext;
 
+    private boolean isCleaned;
+
     protected FlowContext flowContext;
 
     protected void fireChildNodes(LocalContext localContext) throws Exception {
@@ -43,6 +45,10 @@ public abstract class Node {
 
     public void clear() {
         globalContext.stopFlow();
+        if (isCleaned) {
+            return;
+        }
+        isCleaned = true;
         for (Node node : nodes) {
             try {
                 node.clear();
@@ -50,6 +56,7 @@ public abstract class Node {
                 log.error("Problem with clear component {}", id);
             }
         }
+
     }
 
     public void add(Node node) {
@@ -61,6 +68,9 @@ public abstract class Node {
     }
 
     protected void propagateFlowContext(FlowContext flowContext) {
+        if (this.flowContext != null) {
+            return;
+        }
         this.flowContext = flowContext;
         for (Node node : nodes) {
             node.propagateFlowContext(flowContext);

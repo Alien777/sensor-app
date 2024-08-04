@@ -162,7 +162,7 @@ class ManagerFlowTest {
         Mockito.when(messageTypeMock.asText()).thenReturn("ANALOG");
 
         JsonNode IntervalSleepMock = Mockito.mock(JsonNode.class);
-        Mockito.when(jn.findValue(Mockito.same("sleepTimeSeconds"))).thenReturn(IntervalSleepMock);
+        Mockito.when(jn.findValue(Mockito.same("sleepTime"))).thenReturn(IntervalSleepMock);
         Mockito.when(IntervalSleepMock.asLong()).thenReturn(1L);
 
         FlowSensorIInputStreamBus slm = new FlowSensorIInputStreamBus();

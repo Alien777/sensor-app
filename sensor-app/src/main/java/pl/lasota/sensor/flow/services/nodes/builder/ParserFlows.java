@@ -63,8 +63,8 @@ public class ParserFlows {
     private List<Node> createStructured(Map<String, RawNode> nodesRaw) {
 
         List<Map.Entry<String, RawNode>> roots = nodesRaw.entrySet().stream().filter(n -> NodeUtils.isRoot(n.getValue().node)).toList();
-
-        return roots.stream().map(root -> {
+        Set<String> created = new HashSet<>();
+        List<Node> collect = roots.stream().map(root -> {
 
             RawNode rootRaw = root.getValue();
             FlowsBuilder fb = FlowsBuilder.root(rootRaw.node);
@@ -81,12 +81,16 @@ public class ParserFlows {
                     log.info("Parent is: {}, {} and has child: {}, {} ", parentNodeRaw.ref, parentNodeRaw.node.getClass().getSimpleName(),
                             childNodeRaw.ref, childNodeRaw.node.getClass().getSimpleName());
                     addNode(parentNodeRaw.node, childNodeRaw.node, fb);
-
-                    currentProcess.addFirst(childNodeRaw);
+                    if (!created.contains(parentNodeRaw.ref)) {
+                        currentProcess.addFirst(childNodeRaw);
+                        created.add(parentNodeRaw.ref);
+                    }
                 }
             }
             return root.getValue().node;
         }).collect(Collectors.toList());
+
+        return collect;
     }
 
 

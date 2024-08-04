@@ -3,13 +3,16 @@ package pl.lasota.sensor.payload.to.dependet;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
+import pl.lasota.sensor.payload.Parse;
+
+import static pl.lasota.sensor.payload.Utils.integer;
 
 /**
  * Contract describing configure analog pin
  */
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class AnalogConfig {
+public class AnalogConfig implements Parse<AnalogConfig, String> {
 
 
     /**
@@ -27,13 +30,23 @@ public class AnalogConfig {
     @JsonProperty("atten")
     public Integer atten;
 
-    @JsonProperty("max_adc")
-    public Integer maxAdc;
 
-    @JsonProperty("min_adc")
-    public Integer minAdc;
+    @Override
+    public String convert() {
+        return pin + ";" + width + ";" + atten;
+    }
 
-    @JsonProperty("sampling")
-    public Integer sampling;
+    @Override
+    public AnalogConfig revertConvert(String source) {
+        String[] buffer = source.split(";");
+        this.pin = Integer.parseInt(buffer[0]);
+        this.width = Integer.parseInt(buffer[1]);
+        this.atten = integer(buffer[2]);
+        return this;
+    }
 
+
+    public static int length() {
+        return 6;
+    }
 }

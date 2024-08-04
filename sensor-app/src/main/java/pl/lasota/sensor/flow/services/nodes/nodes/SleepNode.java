@@ -14,16 +14,16 @@ import static pl.lasota.sensor.flow.services.nodes.builder.ParserFlows.fLong;
 
 @FlowNode
 public class SleepNode extends Node {
-    private final long sleepTimeSeconds;
+    private final long sleepTime;
 
-    private SleepNode(String id, GlobalContext globalContext, long sleepTimeSeconds) {
+    private SleepNode(String id, GlobalContext globalContext, long sleepTime) {
         super(id, globalContext);
-        this.sleepTimeSeconds = sleepTimeSeconds;
+        this.sleepTime = sleepTime;
     }
 
     public static Node create(String ref, GlobalContext globalContext, JsonNode node, ApplicationContext context) {
-        Long sleepTimeSeconds = fLong(node, "sleepTimeSeconds");
-        return new SleepNode(ref, globalContext, sleepTimeSeconds);
+        Long sleepTime = fLong(node, "sleepTime");
+        return new SleepNode(ref, globalContext, sleepTime);
     }
 
     @Override
@@ -33,7 +33,7 @@ public class SleepNode extends Node {
 
     @Override
     protected void fireChildNodes(LocalContext localContext) throws Exception {
-        Thread.sleep(Duration.ofSeconds(sleepTimeSeconds));
+        Thread.sleep(Duration.ofMillis(sleepTime));
         super.fireChildNodes(localContext);
     }
 

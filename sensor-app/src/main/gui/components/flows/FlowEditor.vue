@@ -9,7 +9,7 @@ import {
   type NodeDraggable
 } from "~/composables/api/StructureApp";
 import DropzoneBackground from "~/components/flows/DropzoneBackground.vue";
-import useDragAndDrop from "~/composables/useDnD";
+import useDragAndDrop from "~/composables/VueFlowUtils";
 import {MiniMap} from "@vue-flow/minimap";
 import {flowApi} from "~/composables/api/FlowApi";
 import {Notify, useQuasar} from "quasar";
@@ -104,10 +104,6 @@ const handleConnect = (params: Connection) => {
           edge.source == source &&
           edge.target == target
   );
-  console.log(edgeExists)
-  // if (!edgeExists && sourceHandle.endsWith('__handle-bottom') && targetHandle.endsWith('__handle-top')) {
-  //   addEdges([params]);
-  // }
 };
 
 const {data: flows} = useAsyncData('flows', getAll);
@@ -161,20 +157,22 @@ const $q = useQuasar();
              :rules="nameRules"
              v-model="name">
     </q-input>
-    <q-btn-group spread>
-      <q-btn icon="save" class="bg-green-1" @click="onSave">{{
+    <q-btn-group  spread>
+      <q-btn no-caps icon="save" class="bg-green-1" @click="onSave">{{
           flow && flow.id ? 'Save flow' : 'Save new flow'
         }}
       </q-btn>
-      <q-btn @click="()=>
+      <q-btn no-caps @click="()=>
         startFlow(flow.id).finally(() => props.onChangeFlow())
  " v-if="flow && !flow.isActivate" icon="start" class="bg-green-3">Start
       </q-btn>
-      <q-btn @click="()=> stopFlow(flow.id).finally(() => props.onChangeFlow())" v-else-if="flow && flow.isActivate"
+      <q-btn no-caps @click="()=> stopFlow(flow.id).finally(() => props.onChangeFlow())"
+             v-else-if="flow && flow.isActivate"
              icon="stop" class="bg-red-1">Stop
       </q-btn>
 
-      <q-btn v-if="flow" @click="()=>  {
+      <q-btn  v-if="flow" @click="()=>  {
+
        $q.dialog({
         title: 'Confirm',
         message: `Would you like to turn delete flow ${name}`,
@@ -185,7 +183,7 @@ const $q = useQuasar();
        deleteFlow(flow.id).finally(() => props.onChangeFlow())
       });
       }"
-             icon="delete" class="bg-red-4">Delete
+             no-caps icon="delete" class="bg-red-4">Delete
       </q-btn>
     </q-btn-group>
 

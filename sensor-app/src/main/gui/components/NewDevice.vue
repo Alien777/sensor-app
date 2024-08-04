@@ -120,10 +120,10 @@ const provideVersions = (value: any) => {
               :disabled="!canProceed"
               color="primary"
               label="Next"/>
-          <q-btn v-if="!loading && step === stepPath[stepPath.length-2]" @click="()=>onFinish($refs) && loading"
+          <q-btn no-caps  v-if="!loading && step === stepPath[stepPath.length-2]" @click="()=>onFinish($refs) && loading"
                  :disabled="!canProceed"
                  color="primary" label="Finish"/>
-          <q-btn v-if=" !loading && step !== stepPath[0] && step !== stepPath[stepPath.length-1]  && loading" flat
+          <q-btn no-caps  v-if=" !loading && step !== stepPath[0] && step !== stepPath[stepPath.length-1]  && loading" flat
                  color="primary"
                  @click="$refs.stepper.previous()" label="Back"
                  class="q-ml-sm"/>

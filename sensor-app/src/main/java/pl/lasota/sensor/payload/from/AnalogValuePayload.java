@@ -1,16 +1,15 @@
 package pl.lasota.sensor.payload.from;
 
-import pl.lasota.sensor.entities.AnalogSensor;
-import pl.lasota.sensor.payload.Parse;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import pl.lasota.sensor.entities.AnalogAckSensor;
 import pl.lasota.sensor.entities.Sensor;
-import pl.lasota.sensor.payload.MessageFrame;
-
+import pl.lasota.sensor.payload.Parse;
 
 
 /**
  * A model describing the available fields from device during reading analog value
  */
-public class AnalogValuePayload implements Parse {
+public class AnalogValuePayload implements Parse<Sensor.SensorBuilder, String> {
 
     /**
      * @hidden
@@ -18,26 +17,24 @@ public class AnalogValuePayload implements Parse {
     public AnalogValuePayload() {
     }
 
-    /**
-     * Raw analog value Double
-     */
-    private static final String ADC_RAW = "adc_raw";
+    @JsonProperty("pin")
+    public int pin;
 
-    /**
-     * Pin number Integer
-     */
-    private static final String PIN = "pin";
+    @JsonProperty("adcRaw")
+    public double adcRaw;
 
-    /**
-     * @hidden
-     */
+
     @Override
-    public Sensor.SensorBuilder parse(MessageFrame messageFrame) {
-        double adcRaw = messageFrame.getPayload().findValue(ADC_RAW).asDouble();
-        int pin = messageFrame.getPayload().findValue(PIN).asInt();
+    public String convert() {
+        return STR."\{pin};\{adcRaw}";
+    }
 
-        return AnalogSensor.builder()
-                .pin(pin)
-                .adcRaw(adcRaw);
+    @Override
+    public Sensor.SensorBuilder revertConvert(String source) {
+        String[] split = source.split(";");
+        return AnalogAckSensor.builder()
+                .pin(Integer.parseInt(split[0]))
+                .adcRaw(Double.parseDouble(split[1]));
+
     }
 }

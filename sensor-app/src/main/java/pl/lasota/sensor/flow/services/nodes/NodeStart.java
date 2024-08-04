@@ -13,7 +13,6 @@ import java.util.concurrent.locks.ReentrantLock;
 public abstract class NodeStart extends Node {
 
     private final ReentrantLock lock = new ReentrantLock();
-    protected FlowContext flowContext;
 
     public NodeStart(String id, GlobalContext globalContext) {
         super(id, globalContext);
@@ -22,7 +21,6 @@ public abstract class NodeStart extends Node {
     public abstract void config(FlowContext flowContext) throws Exception;
 
     public void initiate(FlowContext flowContext) throws Exception {
-        propagateFlowContext(flowContext);
         config(flowContext);
     }
 

@@ -43,7 +43,9 @@ public class MqttCallbackHandler implements MqttCallback {
 
     @Override
     public void messageArrived(String topic, MqttMessage message) {
-        receiver.received(new MessagePayload(topic, new String(message.getPayload())));
+        byte[] payload = message.getPayload();
+        String s = new String(payload);
+        receiver.received(new MessagePayload(topic,s));
     }
 
     @Override

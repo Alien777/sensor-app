@@ -69,6 +69,16 @@ public class SendPwmValueNode extends Node {
         }
     }
 
+    @Override
+    public void clear() {
+        try {
+            deviceSendMessageInterface.sendPwmValueToDevice(new SendPwmI(data.deviceId, data.pin, 0, 0));
+        } catch (Exception e) {
+            log.info("Problem to send value pwm during clear", e);
+        }
+        super.clear();
+    }
+
     @AllArgsConstructor(staticName = "create")
     @Getter
     public static class Data {

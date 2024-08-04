@@ -40,7 +40,7 @@ public class ListeningSensorNode extends NodeStart implements AsyncNodeConsumer<
 
     @Override
     public void config(FlowContext flowContext) throws Exception {
-        super.propagateFlowContext(flowContext);
+        propagateFlowContext(flowContext);
         slm.addConsumer(this);
     }
 
