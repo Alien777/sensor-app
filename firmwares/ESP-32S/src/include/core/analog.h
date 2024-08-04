@@ -7,8 +7,8 @@
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 #include <freertos/timers.h>
-#include <driver/adc.h>  
-
+#include "esp_adc/adc_oneshot.h"
+ 
 #include "sensor_mqtt.h"
 #include "sensor_structure.h"
 #include "payload/message_type.h"
