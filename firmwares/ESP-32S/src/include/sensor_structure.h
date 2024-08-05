@@ -20,7 +20,7 @@
 #include <stdbool.h>
 #include <esp_log.h>
 #include <esp_err.h>
-
+#include "payload/message_type.h"
 typedef struct WifiNetwork WifiNetwork;
 typedef struct AnalogTask AnalogTask;
 typedef struct PwmTask PwmTask;
@@ -32,19 +32,6 @@ typedef struct ConfigEps ConfigEps;
 typedef struct PwmSetup PwmSetup;
 typedef struct DigitalSetup DigitalSetup;
 typedef struct AnalogReadData AnalogReadData;
-
-typedef enum
-{
-    DEVICE_CONNECTED,
-    ANALOG,
-    ANALOG_EXTORT,
-    PWM,
-    CONFIG,
-    PING,
-    PING_ACK,
-    DIGITAL_WRITE,
-    UNKNOWN,
-} message_type;
 
 struct PwmConfig
 {
@@ -64,24 +51,19 @@ struct AnalogConfig
     int pin;
     int width;
     int atten;
-    int sampling;
-    int min_adc;
-    int max_adc;
 };
 
 struct PwmTask
 {
-    char member_key[17];
-    char device_key[13];
     int config_id;
+    char request_id[37];
     PwmConfig pwm_config;
 };
 
 struct AnalogTask
 {
-    char member_key[17];
-    char device_key[13];
     int config_id;
+    char request_id[37];
     AnalogConfig analog_config;
 };
 
@@ -105,12 +87,9 @@ struct AnalogReadData
 
 struct Message
 {
-    char member_key[17];
-    char device_key[13];
-    char token[37];
-    char version[8];
     int config_id;
-    message_type message_type;
+    char *request_id;
+    MessageType message_type;
 
     PwmConfig pwm_configs[MAX_S];
     AnalogConfig analog_configs[MAX_S];
@@ -142,8 +121,6 @@ struct ConfigEps
 };
 
 const char *convert_wifi_network_to_json(WifiNetwork *head);
-const char *message_type_convert_to_chars(message_type state);
 const char *topicSubscribe();
-message_type chars_convert_to_message_type(const char *state);
-esp_err_t json_to_message(const char *j, Message *msg);
+ 
 #endif

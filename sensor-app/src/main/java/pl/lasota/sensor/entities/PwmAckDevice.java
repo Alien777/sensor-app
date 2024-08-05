@@ -11,6 +11,6 @@ import lombok.experimental.SuperBuilder;
 @Setter
 @SuperBuilder
 @AllArgsConstructor
-public class PingDevice extends Sensor {
+public class PwmAckDevice extends Sensor {
 
 }

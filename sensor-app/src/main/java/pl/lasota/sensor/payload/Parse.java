@@ -1,14 +1,14 @@
 package pl.lasota.sensor.payload;
 
-import pl.lasota.sensor.entities.Sensor;
-
-
 /**
  * @hidden
  */
-public interface Parse {
+public interface Parse<A, B> {
     /**
      * @hidden
      */
-    Sensor.SensorBuilder parse(MessageFrame messageFrame);
+    B convert();
+
+    A revertConvert(B source);
+
 }

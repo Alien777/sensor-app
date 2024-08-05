@@ -12,7 +12,7 @@ import lombok.experimental.SuperBuilder;
 @Setter
 @SuperBuilder
 @NoArgsConstructor
-public class AnalogSensor extends Sensor {
+public class AnalogAckSensor extends Sensor {
 
     @Column(name = "adc_raw")
     private double adcRaw;

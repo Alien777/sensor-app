@@ -3,13 +3,13 @@ package pl.lasota.sensor.flow.services.nodes.nodes;
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContext;
+import pl.lasota.sensor.flow.services.nodes.NodeStart;
 import pl.lasota.sensor.utils.Tokenizer;
 import pl.lasota.sensor.bus.AudioWaveInputStreamBus;
 import pl.lasota.sensor.entities.Member;
 import pl.lasota.sensor.flow.services.nodes.AsyncNodeConsumer;
 import pl.lasota.sensor.flow.services.nodes.FlowNode;
 import pl.lasota.sensor.flow.services.nodes.Node;
-import pl.lasota.sensor.flow.services.nodes.StartFlowNode;
 import pl.lasota.sensor.flow.services.nodes.utils.FlowContext;
 import pl.lasota.sensor.flow.services.nodes.utils.GlobalContext;
 import pl.lasota.sensor.flow.services.nodes.utils.LocalContext;
@@ -22,7 +22,7 @@ import static pl.lasota.sensor.flow.services.nodes.builder.ParserFlows.fString;
 
 @Slf4j
 @FlowNode
-public class VoiceFireCommendNode extends Node implements StartFlowNode, AsyncNodeConsumer<Member, String> {
+public class VoiceFireCommendNode extends NodeStart implements AsyncNodeConsumer<Member, String> {
 
     private final List<List<String>> commends;
     private final AudioWaveInputStreamBus audioWaveInputStreamBus;
@@ -54,8 +54,8 @@ public class VoiceFireCommendNode extends Node implements StartFlowNode, AsyncNo
     }
 
     @Override
-    public void start(FlowContext flowContext) throws Exception {
-        super.propagateFlowContext(flowContext);
+    public void config(FlowContext flowContext) throws Exception {
+        propagateFlowContext(flowContext);
         audioWaveInputStreamBus.addConsumer(this);
     }
 
@@ -68,7 +68,7 @@ public class VoiceFireCommendNode extends Node implements StartFlowNode, AsyncNo
     public void consume(Member member, String s) throws Exception {
         if (tokenizer.matchText(s, commends)) {
             LocalContext localContext = new LocalContext();
-            VoiceFireCommendNode.super.execute(localContext);
+            fireChildNodes(localContext);
         }
     }
 }

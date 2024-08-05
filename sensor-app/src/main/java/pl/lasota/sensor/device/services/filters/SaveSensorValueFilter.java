@@ -5,9 +5,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import pl.lasota.sensor.bus.FlowSensorIInputStreamBus;
+import pl.lasota.sensor.bus.WaitForResponseInputStreamBus;
 import pl.lasota.sensor.device.services.DeviceDataService;
 import pl.lasota.sensor.device.services.DeviceMessagePublish;
-import pl.lasota.sensor.entities.AnalogSensor;
+import pl.lasota.sensor.entities.AnalogAckSensor;
 import pl.lasota.sensor.entities.Sensor;
 import pl.lasota.sensor.flow.model.FlowSensorAnalogI;
 import pl.lasota.sensor.flow.model.FlowSensorI;
@@ -24,6 +25,7 @@ public class SaveSensorValueFilter implements Filter<MessageFrame, MessageFrame>
     private final DeviceDataService deviceDataService;
     private final DeviceMessagePublish deviceMessagePublish;
     private final FlowSensorIInputStreamBus flowApi;
+    private final WaitForResponseInputStreamBus wait;
 
     @Override
     public void execute(MessageFrame request, FilterContext filterContext, Chain<MessageFrame> chain) throws Exception {
@@ -38,6 +40,7 @@ public class SaveSensorValueFilter implements Filter<MessageFrame, MessageFrame>
         if (request.getMessageType().equals(MessageType.DEVICE_CONNECTED)) {
             deviceMessagePublish.sendConfig(request.getMemberId(), request.getDeviceId());
         }
+        wait.takeBroadcaster(null).write(request.getRequestId());
 
         Sensor sensor = filterContext.getSensor();
         if (sensor != null) {
@@ -46,10 +49,10 @@ public class SaveSensorValueFilter implements Filter<MessageFrame, MessageFrame>
                     .setMessageType(sensor.getMessageType().name());
 
             FlowSensorI fT = switch (sensor.getMessageType()) {
-                case DEVICE_CONNECTED, PING_ACK -> flowSensorI;
-                case CONFIG, PWM, ANALOG_EXTORT, DIGITAL_WRITE, PING -> null;
+                case DEVICE_CONNECTED, PING_ACK, PWM_ACK -> flowSensorI;
+                case CONFIG, PWM, ANALOG_ACK, DIGITAL_WRITE, PING -> null;
                 case ANALOG -> {
-                    AnalogSensor aSensor = (AnalogSensor) sensor;
+                    AnalogAckSensor aSensor = (AnalogAckSensor) sensor;
                     yield new FlowSensorAnalogI(flowSensorI).setPin(aSensor.getPin()).setValue(aSensor.getAdcRaw());
                 }
             };

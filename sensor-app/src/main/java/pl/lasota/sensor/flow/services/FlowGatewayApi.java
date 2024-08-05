@@ -33,16 +33,16 @@ public class FlowGatewayApi implements FlowApiInterface {
             flowDataService.saveFlows(member.getId(), null, flowSaveI.name(), flowSaveI.config());
         } else {
             boolean isRunning = flowsInDb.get().isActivate();
-            this.disabling(flowSaveI.id());
+            this.stopFlows(flowSaveI.id());
             flowDataService.saveFlows(member.getId(), flowSaveI.id(), flowSaveI.name(), flowSaveI.config());
             if (isRunning) {
-                this.enabling(flowSaveI.id());
+                this.startFlows(flowSaveI.id());
             }
         }
     }
 
     @Override
-    public void enabling(Long id) {
+    public void startFlows(Long id) {
         Member member = ms.loggedMember();
         Optional<Flow> flowsInDb = flowDataService.findFlows(member.getId(), id);
         if (flowsInDb.isEmpty()) {
@@ -53,13 +53,13 @@ public class FlowGatewayApi implements FlowApiInterface {
         if (managerFlowService.contains(id)) {
             return;
         }
-
+        log.info("Start flow {}", id);
         managerFlowService.start(id, flow.getConfig());
     }
 
 
     @Override
-    public void disabling(Long id) throws SensorFlowException {
+    public void stopFlows(Long id) throws SensorFlowException {
         Member member = ms.loggedMember();
         Optional<Flow> flowsInDb = flowDataService.findFlows(member.getId(), id);
         if (flowsInDb.isEmpty()) {
@@ -67,9 +67,15 @@ public class FlowGatewayApi implements FlowApiInterface {
         }
 
         if (managerFlowService.contains(id)) {
+            log.info("Stop flow {}", id);
             managerFlowService.stop(id);
         }
+    }
 
+    @Override
+    public void restartFlow(Long id) throws SensorFlowException {
+        stopFlows(id);
+        startFlows(id);
     }
 
     @Override
@@ -82,6 +88,7 @@ public class FlowGatewayApi implements FlowApiInterface {
         Flow flow = flowsInDb.get();
         managerFlowService.start(id, flow.getConfig());
     }
+
 
     @Override
     public void delete(Long id) {

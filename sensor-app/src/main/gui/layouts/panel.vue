@@ -9,7 +9,7 @@
           Sensor
         </q-toolbar-title>
         <MicRecover></MicRecover>
-        <q-btn dense flat round icon="menu" @click="toggleRightDrawer"/>
+        <q-btn no-caps  dense flat round icon="menu" @click="toggleRightDrawer"/>
       </q-toolbar>
     </q-header>
     <q-drawer show-if-above v-model="rightDrawerOpen" side="right" elevated>

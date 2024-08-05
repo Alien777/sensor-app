@@ -21,11 +21,11 @@ public class AsyncNode extends Node {
     }
 
     @Override
-    public void execute(LocalContext localContext) {
+    protected void fireChildNodes(LocalContext localContext) {
         Thread thread = new Thread(() -> {
             try {
                 try {
-                    super.execute(new LocalContext());
+                    super.fireChildNodes(new LocalContext());
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }

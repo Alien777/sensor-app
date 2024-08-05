@@ -13,11 +13,13 @@ public interface FlowApiInterface {
 
     void save(@RequestBody FlowSaveI flowSaveI) throws SensorFlowException;
 
-    void enabling(@PathVariable(value = "id") Long id) throws SensorFlowException;
+    void startFlows(@PathVariable(value = "id") Long id) throws SensorFlowException;
 
-    void disabling(@PathVariable(value = "id") Long id) throws SensorFlowException;
+    void stopFlows(@PathVariable(value = "id") Long id) throws SensorFlowException;
 
     void fireOnce(@PathVariable(value = "id") Long id) throws SensorFlowException;
+
+    void restartFlow(@PathVariable(value = "id") Long id) throws SensorFlowException;
 
     void delete(@PathVariable(value = "id") Long id) throws SensorFlowException;
 

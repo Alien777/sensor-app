@@ -2,21 +2,18 @@ package pl.lasota.sensor.payload;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Data;
-import pl.lasota.sensor.entities.Sensor;
-import pl.lasota.sensor.payload.from.AnalogValuePayload;
+import pl.lasota.sensor.payload.from.AnalogAckDevicePayload;
 import pl.lasota.sensor.payload.from.ConnectDevicePayload;
-import pl.lasota.sensor.payload.from.PingDevicePayload;
-import pl.lasota.sensor.payload.to.DigitalPayload;
-import pl.lasota.sensor.payload.to.ForceReadingOfAnalogDataPayload;
-import pl.lasota.sensor.payload.to.PingDataPayload;
-import pl.lasota.sensor.payload.to.PwmPayload;
+import pl.lasota.sensor.payload.from.PingAckDevicePayload;
+import pl.lasota.sensor.payload.from.PwmAckDevicePayload;
+import pl.lasota.sensor.payload.to.*;
+
+import java.util.Arrays;
+import java.util.UUID;
 
 @Data
-public class MessageFrame {
+public class MessageFrame implements Parse<MessageFrame, String> {
 
     /**
      * @hidden
@@ -24,42 +21,39 @@ public class MessageFrame {
     public MessageFrame() {
     }
 
-    /**
-     * @hidden
-     */
-    @JsonIgnore
-    private static final ObjectMapper om = new ObjectMapper();
-
     @JsonProperty("config_identifier")
     private Long configIdentifier;
 
     @JsonProperty("version_firmware")
-    private String versionFirmware;
+    private String versionFirmware;//max 12 chars
 
     @JsonProperty("device_id")
-    private String deviceId;
+    private String deviceId;//max 12 chars
 
     @JsonProperty("member_id")
-    private String memberId;
+    private String memberId;//max 16 chars
 
     @JsonProperty("token")
-    private String token;
+    private String token; // max 36 chars
+
+    @JsonProperty("request_id")
+    private String requestId;// max 36 chars
 
     @JsonProperty("message_type")
-    private MessageType messageType;
+    private MessageType messageType; //max 20 chars
 
     @JsonProperty("payload")
-    private JsonNode payload;
+    private String payload;
 
 
     public String getDeviceId() {
-        return deviceId.toUpperCase();
+        return deviceId == null ? null : deviceId.toUpperCase();
     }
 
     /**
      * @hidden
      */
-    public MessageFrame(Long configId, String version, String deviceId, String memberId, MessageType messageType, String token, JsonNode payload) {
+    private MessageFrame(Long configId, String version, String deviceId, String memberId, MessageType messageType, String token, String payload) {
         this.configIdentifier = configId;
         this.versionFirmware = version;
         this.token = token;
@@ -67,17 +61,25 @@ public class MessageFrame {
         this.memberId = memberId;
         this.messageType = messageType;
         this.payload = payload;
+        this.requestId = UUID.randomUUID().toString();
     }
+
 
     /**
      * @hidden
      */
     @JsonIgnore
-    public String makePayloadForDevice() throws JsonProcessingException {
+    public Object getPayloadFromDriver(String source) {
         return switch (messageType) {
-            case DEVICE_CONNECTED, ANALOG, PING_ACK -> throw new UnsupportedOperationException();
-            case CONFIG, PWM, ANALOG_EXTORT, DIGITAL_WRITE, PING -> om.writeValueAsString(this);
-
+            case DEVICE_CONNECTED -> new ConnectDevicePayload().revertConvert(source);
+            case PING_ACK -> new PingAckDevicePayload().revertConvert(source);
+            case PWM_ACK -> new PwmAckDevicePayload().revertConvert(source);
+            case CONFIG -> new ConfigPayload().revertConvert(source);
+            case ANALOG -> new AnalogDataPayload().revertConvert(source);
+            case ANALOG_ACK -> new AnalogAckDevicePayload().revertConvert(source);
+            case PWM -> new PwmPayload().revertConvert(source);
+            case DIGITAL_WRITE -> new DigitalPayload().revertConvert(source);
+            case PING -> new PingPayload().revertConvert(source);
         };
     }
 
@@ -85,56 +87,66 @@ public class MessageFrame {
      * @hidden
      */
     @JsonIgnore
-    public Sensor.SensorBuilder getPayloadFromDriver() {
-        return switch (messageType) {
-            case DEVICE_CONNECTED -> new ConnectDevicePayload().parse(this);
-            case PING_ACK -> new PingDevicePayload().parse(this);
-            case CONFIG, PWM, ANALOG_EXTORT, DIGITAL_WRITE, PING -> throw new UnsupportedOperationException();
-            case ANALOG -> new AnalogValuePayload().parse(this);
-        };
+    public static MessageFrame factoryConfigPayload(Long configId, String version, String deviceId, String memberId, String token, ConfigPayload configPayload) {
+        return new MessageFrame(configId, version, deviceId, memberId, MessageType.CONFIG, token, configPayload.convert());
     }
 
     /**
      * @hidden
      */
     @JsonIgnore
-    public static MessageFrame factoryConfigPayload(Long configId, String version, String deviceId, String memberId, String token, String config) throws JsonProcessingException {
-        return new MessageFrame(configId, version, deviceId, memberId, MessageType.CONFIG, token, om.readTree(config));
+    public static MessageFrame factoryPwmPayload(Long configId, String version, String deviceId, String memberId, String token, PwmPayload pwmPayload) {
+        return new MessageFrame(configId, version, deviceId, memberId, MessageType.PWM, token, pwmPayload.convert());
+    }
+
+    /**
+     * @hidden
+     */
+    public static MessageFrame factoryDigitalPayload(Long configId, String version, String deviceId, String memberId, String token, DigitalPayload digitalPayload) {
+        return new MessageFrame(configId, version, deviceId, memberId, MessageType.DIGITAL_WRITE, token, digitalPayload.convert());
     }
 
     /**
      * @hidden
      */
     @JsonIgnore
-    public static MessageFrame factoryPwmPayload(Long configId, String version, String deviceId, String memberId, String token, PwmPayload pwmPayload) throws JsonProcessingException {
-        String json = om.writeValueAsString(pwmPayload);
-        return new MessageFrame(configId, version, deviceId, memberId, MessageType.PWM, token, om.readTree(json));
-    }
-
-    /**
-     * @hidden
-     */
-    public static MessageFrame factoryDigitalPayload(Long configId, String version, String deviceId, String memberId, String token, DigitalPayload pwmPayload) throws JsonProcessingException {
-        String json = om.writeValueAsString(pwmPayload);
-        return new MessageFrame(configId, version, deviceId, memberId, MessageType.DIGITAL_WRITE, token, om.readTree(json));
+    public static MessageFrame factorySendForAnalogData(Long configId, String version, String deviceId, String memberId,
+                                                        String token, AnalogDataPayload analogDataPayload) {
+        return new MessageFrame(configId, version, deviceId, memberId, MessageType.ANALOG, token, analogDataPayload.convert());
     }
 
     /**
      * @hidden
      */
     @JsonIgnore
-    public static MessageFrame factorySendForAnalogData(Long configId, String version, String deviceId, String memberId, String token, ForceReadingOfAnalogDataPayload analogData) throws JsonProcessingException {
-        String json = om.writeValueAsString(analogData);
-        return new MessageFrame(configId, version, deviceId, memberId, MessageType.ANALOG_EXTORT, token, om.readTree(json));
+    public static MessageFrame factorySendPingData(Long configId, String version, String deviceId, String memberId, String token, PingPayload pingPayload) {
+        return new MessageFrame(configId, version, deviceId, memberId, MessageType.PING, token, pingPayload.convert());
     }
 
-    /**
-     * @hidden
-     */
-    @JsonIgnore
-    public static MessageFrame factorySendPingData(Long configId, String version, String deviceId, String memberId, String token, PingDataPayload analogData) throws JsonProcessingException {
-        String json = om.writeValueAsString(analogData);
-        return new MessageFrame(configId, version, deviceId, memberId, MessageType.PING, token, om.readTree(json));
+    @Override
+    public String convert() {
+        return deviceId + ";"
+                + memberId + ";"
+                + token + ";"
+                + versionFirmware + ";" +
+                (configIdentifier != null ? configIdentifier : 0) + ";"
+                + requestId + ";"
+                + messageType.name() + ";"
+                + payload;
     }
 
+    @Override
+    public MessageFrame revertConvert(String source) {
+        String[] split = source.split(";");
+
+        this.deviceId = split[0];
+        this.memberId = split[1];
+        this.token = split[2];
+        this.versionFirmware = split[3];
+        this.configIdentifier = Long.valueOf(split[4]);
+        this.requestId = split[5];
+        this.messageType = MessageType.valueOf(split[6]);
+        this.payload =  String.join(";", Arrays.copyOfRange(split, 7, split.length));
+        return this;
+    }
 }

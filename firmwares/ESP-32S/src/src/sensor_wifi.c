@@ -74,8 +74,8 @@ void connect(const char *ssid, const char *password)
     }
     ESP_LOGI(TAG_WIF, "Connecting to SSID: %s, Password: %s", ssid, password);
     wifi_config_t wifi_config = {};
-    strncpy((char *)wifi_config.sta.ssid, ssid, 32);         
-    strncpy((char *)wifi_config.sta.password, password, 64);  
+    strncpy((char *)wifi_config.sta.ssid, ssid, 32);
+    strncpy((char *)wifi_config.sta.password, password, 64);
     wifi_config.sta.threshold.authmode = ESP_WIFI_SCAN_AUTH_MODE_THRESHOLD;
     wifi_config.sta.sae_pwe_h2e = WPA3_SAE_PWE_BOTH;
     if (xSemaphoreTake(mutex, portMAX_DELAY))
@@ -203,7 +203,6 @@ static void connect_task(void *pvParameters)
         const TickType_t xDelay = pdMS_TO_TICKS(10000);
 
         vTaskDelay(xDelay);
-
         ESP_LOGI("WIFI", "Attempting to acquire WiFi mutex.");
 
         if (xSemaphoreTake(mutex, portMAX_DELAY))
@@ -212,9 +211,10 @@ static void connect_task(void *pvParameters)
             ESP_LOGI("WIFI", "Check connection");
             if (is_connected == false)
             {
-         
+
                 ESP_LOGW("WIFI", "Failed to initiate WiFi connection (ENABLED AP): ");
                 enableAccessPoint();
+                connection_initial();
             }
             else
             {
@@ -237,13 +237,13 @@ void connection_initial()
     ConfigEps configEsp;
     load_config(&configEsp);
     esp_err_t ret = load_config(&configEsp);
-    ESP_LOGW("MAIN", "ssid or password is empty %s %s ",configEsp.wifi_ssid, configEsp.wifi_password);
+    ESP_LOGW("MAIN", "ssid or password is empty %s %s ", configEsp.wifi_ssid, configEsp.wifi_password);
     if (ret == ESP_OK)
     {
-   
+
         if (strlen(configEsp.wifi_ssid) > 0 && strlen(configEsp.wifi_password) > 0)
         {
-            ESP_LOGE("MAIN", "ssid or password is empty %s %s ",configEsp.wifi_ssid, configEsp.wifi_password);
+            ESP_LOGE("MAIN", "ssid or password is empty %s %s ", configEsp.wifi_ssid, configEsp.wifi_password);
             connect(configEsp.wifi_ssid, configEsp.wifi_password);
         }
         else

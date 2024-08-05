@@ -194,7 +194,8 @@ class ParserFlowTest {
                       "sensor": {
                         "pin": 23,
                         "deviceId": "DDDDDDDDDDDD",
-                        "valueVariable": "g_c.pwm_value"
+                        "valueVariable": "g_c.pwm_value",
+                        "durationVariable": "g_c.duration"
                       },
                       "childed": [],
                       "position": {
@@ -227,4 +228,111 @@ class ParserFlowTest {
                 """, gc);
 
     }
+
+
+    @Test
+    public void flow_4_test() {
+
+        Mockito.when(msMock.loggedMember()).thenReturn(memberMock);
+        Mockito.when(ac.getBean(DeviceConfigInterface.class)).thenReturn(dciMock);
+        Mockito.when(dciMock.getConfigPwmPins(Mockito.any())).thenReturn(List.of(23));
+        Mockito.when(dciMock.getConfigDigitalPins(Mockito.any())).thenReturn(List.of(22));
+
+        List<Node> root = new ParserFlows(fp, ac).flows("""
+                {
+                  "nodes": [
+                    {
+                      "ref": "VoiceFireCommendNode_7",
+                      "name": "VoiceFireCommendNode",
+                      "type": "input",
+                      "sensor": {
+                        "commends": "Zamknij"
+                      },
+                      "childed": [
+                        "ExecuteCodeNode_8"
+                      ],
+                      "position": {
+                        "x": -302,
+                        "y": -128
+                      }
+                    },
+                    {
+                      "ref": "ExecuteCodeNode_8",
+                      "name": "ExecuteCodeNode",
+                      "type": "default",
+                      "sensor": {
+                        "code": "let result=true\\ng_c.pwm=1000\\ng_c.duration=800\\ng_c.digit=1"
+                      },
+                      "childed": [
+                        "SleepNode_9"
+                      ],
+                      "position": {
+                        "x": -199,
+                        "y": 12
+                      }
+                    },
+                    {
+                      "ref": "SleepNode_9",
+                      "name": "SleepNode",
+                      "type": "default",
+                      "sensor": {
+                        "sleepTime": "500"
+                      },
+                      "childed": [
+                        "SendDigitalValueNode_10"
+                      ],
+                      "position": {
+                        "x": 139,
+                        "y": 104
+                      }
+                    },
+                    {
+                      "ref": "SendDigitalValueNode_10",
+                      "name": "SendDigitalValueNode",
+                      "type": "default",
+                      "sensor": {
+                        "pin": 22,
+                        "deviceId": "device",
+                        "valueVariable": "g_c.digit"
+                      },
+                      "childed": [
+                        "SendPwmValueNode_11"
+                      ],
+                      "position": {
+                        "x": 439,
+                        "y": 329
+                      }
+                    },
+                    {
+                      "ref": "SendPwmValueNode_11",
+                      "name": "SendPwmValueNode",
+                      "type": "default",
+                      "sensor": {
+                        "pin": 23,
+                        "deviceId": "device",
+                        "valueVariable": "g_c.duty",
+                        "durationVariable": "g_c.duration"
+                      },
+                      "childed": [
+                        "SleepNode_9"
+                      ],
+                      "position": {
+                        "x": -140.79999999999995,
+                        "y": 488.1999999999998
+                      }
+                    }
+                  ],
+                  "viewport": {
+                    "x": 292,
+                    "y": -85.19999999999982,
+                    "zoom": 1
+                  }
+                }
+                """, gc);
+
+        System.out.println(root);
+
+    }
+
+
 }

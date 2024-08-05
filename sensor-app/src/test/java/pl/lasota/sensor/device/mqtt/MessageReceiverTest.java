@@ -4,6 +4,7 @@ package pl.lasota.sensor.device.mqtt;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import pl.lasota.sensor.bus.FlowSensorIInputStreamBus;
+import pl.lasota.sensor.bus.WaitForResponseInputStreamBus;
 import pl.lasota.sensor.device.services.DeviceDataService;
 import pl.lasota.sensor.device.services.DeviceMessagePublish;
 import pl.lasota.sensor.device.services.filters.BeforeValidMessageFilter;
@@ -27,6 +28,7 @@ class MessageReceiverTest {
 
         Mockito.when(mfMock.getMemberId()).thenReturn("memberId_1234567");
         Mockito.when(mfMock.getDeviceId()).thenReturn("deviceId_123");
+        Mockito.when(mfMock.getRequestId()).thenReturn("received_id");
         Mockito.when(mfMock.getToken()).thenReturn("token");
         Mockito.when(mfMock.getVersionFirmware()).thenReturn("1.0");
         Mockito.when(mfMock.getMessageType()).thenReturn(MessageType.DEVICE_CONNECTED);
@@ -36,9 +38,10 @@ class MessageReceiverTest {
         Mockito.when(dsMock.isDeviceExist("memberId_1234567", "deviceId_123")).thenReturn(true);
 
 
+
         FilterChain filterChain = new FilterChain();
         BeforeValidMessageFilter beforeValidMessageFilter = new BeforeValidMessageFilter(dsMock);
-        SaveSensorValueFilter saveSensorValueFilter = new SaveSensorValueFilter(dsMock, uMock, new FlowSensorIInputStreamBus());
+        SaveSensorValueFilter saveSensorValueFilter = new SaveSensorValueFilter(dsMock, uMock, new FlowSensorIInputStreamBus(), new WaitForResponseInputStreamBus());
         filterChain
                 .addFilter(beforeValidMessageFilter)
                 .addFilter(saveSensorValueFilter);

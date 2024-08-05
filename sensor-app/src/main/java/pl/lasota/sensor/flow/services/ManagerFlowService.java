@@ -7,7 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import pl.lasota.sensor.exceptions.SensorFlowException;
 import pl.lasota.sensor.flow.services.nodes.Node;
-import pl.lasota.sensor.flow.services.nodes.StartFlowNode;
+import pl.lasota.sensor.flow.services.nodes.NodeStart;
 import pl.lasota.sensor.flow.services.nodes.builder.ParserFlows;
 import pl.lasota.sensor.flow.services.nodes.nodes.FireOnceNode;
 import pl.lasota.sensor.flow.services.nodes.utils.FlowContext;
@@ -37,13 +37,14 @@ public class ManagerFlowService {
         log.info("Start flow id {} config {}", id, config);
         try {
             List<Node> flows = pf.flows(config, new GlobalContext());
+
             startedFlow.put(id, new ActiveFlow(flows, config));
             for (Node node : flows) {
                 if (node == null) {
                     continue;
                 }
                 if (!(node instanceof FireOnceNode)) {
-                    ((StartFlowNode) node).start(new FlowContext(ms.loggedMember()));
+                    ((NodeStart) node).initiate(new FlowContext(ms.loggedMember()));
                 }
             }
 

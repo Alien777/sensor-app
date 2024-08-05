@@ -1,7 +1,7 @@
 <template>
   <div>
-    <q-btn size="xs" color="green" v-if="!socket" @click="startRecording">Start voice commend</q-btn>
-    <q-btn size="xs" color="red" v-if="socket" @click="stopRecording">Stop voice commend</q-btn>
+    <q-btn  no-caps  color="green" v-if="!socket" @click="startRecording">Start voice commend</q-btn>
+    <q-btn no-caps  color="red" v-if="socket" @click="stopRecording">Stop voice commend</q-btn>
   </div>
 </template>
 

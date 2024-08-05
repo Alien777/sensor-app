@@ -17,6 +17,7 @@ import pl.lasota.sensor.member.MemberLoginDetailsServiceInterface;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 
 @RestController()
@@ -31,35 +32,35 @@ public class DeviceGatewayApi implements DeviceApiInterface, DeviceSendMessageIn
     private final DeviceConfigService dsu;
 
     @Override
-    public void sendConfigToDevice(SendConfigI configS) throws Exception {
+    public UUID sendConfigToDevice(SendConfigI configS) throws Exception {
         Member member = ms.loggedMember();
-        deviceMessagePublish.sendConfig(member.getId(), configS.deviceId());
+        return deviceMessagePublish.sendConfig(member.getId(), configS.deviceId());
     }
 
     @Override
-    public void sendDigitalValueToDevice(SendDigitalI configS) throws Exception {
+    public UUID sendDigitalValueToDevice(SendDigitalI configS) throws Exception {
         Member member = ms.loggedMember();
-        deviceMessagePublish.sendDigital(member.getId(), configS.deviceId(), configS.pin(), configS.value());
-    }
-
-
-    @Override
-    public void sendPwmValueToDevice(SendPwmI configS) throws Exception {
-        Member member = ms.loggedMember();
-        deviceMessagePublish.sendPwm(member.getId(), configS.deviceId(), configS.pin(), configS.value(), configS.duration());
-    }
-
-    @Override
-    public void sendRequestForDataAnalog(SendForAnalogDataI configS) throws Exception {
-        Member member = ms.loggedMember();
-        deviceMessagePublish.sendForAnalogData(member.getId(), configS.deviceId(), configS.pin());
+        return deviceMessagePublish.sendDigital(member.getId(), configS.deviceId(), configS.pin(), configS.value());
     }
 
 
     @Override
-    public void sendPing(SendDigitalI configS) throws Exception {
+    public UUID sendPwmValueToDevice(SendPwmI configS) throws Exception {
         Member member = ms.loggedMember();
-        deviceMessagePublish.sendForAnalogData(member.getId(), configS.deviceId(), configS.pin());
+        return deviceMessagePublish.sendPwm(member.getId(), configS.deviceId(), configS.pin(), configS.value(), configS.duration());
+    }
+
+    @Override
+    public UUID sendRequestForDataAnalog(SendForAnalogDataI configS) throws Exception {
+        Member member = ms.loggedMember();
+        return deviceMessagePublish.sendForAnalogData(member.getId(), configS.deviceId(), configS.pin());
+    }
+
+
+    @Override
+    public UUID sendPing(SendDigitalI configS) throws Exception {
+        Member member = ms.loggedMember();
+        return deviceMessagePublish.sendForAnalogData(member.getId(), configS.deviceId(), configS.pin());
     }
 
     @Override

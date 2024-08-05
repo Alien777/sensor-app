@@ -78,8 +78,8 @@ const selectConfig = (config: DeviceConfigT) => {
     <hr>
     <div class="q-pb-md">
       <q-btn-group spread>
-        <q-btn icon="save" class="bg-green-1" @click="saveConfigAction">Save as new config</q-btn>
-        <q-btn icon="check" @click="activateConfigAction"
+        <q-btn  no-caps  icon="save" class="bg-green-1" @click="saveConfigAction">Save as new config</q-btn>
+        <q-btn  no-caps icon="check" @click="activateConfigAction"
                v-if="currentConfigEditRef.forVersion===device.version && currentConfigEditRef.id!==currentConfigDevice.id"
                class="bg-green-2">Activate config
         </q-btn>

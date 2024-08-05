@@ -37,5 +37,5 @@ function handleUpdate() {
 </script>
 
 <template>
-  <q-input label="Time execute" hint="Cron format e.g. */30 * * * *" @keyup="handleUpdate" v-model="cron"></q-input>
+  <q-input label="Time execute" hint="Cron format e.g. */30 * * * *  or 100 in millisecond" @keyup="handleUpdate" v-model="cron"></q-input>
 </template>

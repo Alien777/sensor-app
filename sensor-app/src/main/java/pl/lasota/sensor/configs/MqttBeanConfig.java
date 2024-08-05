@@ -23,7 +23,7 @@ public class MqttBeanConfig {
 
     @Bean("connected")
     public SimpleCallback connected(IMqttClient mqttClient) {
-        return () -> mqttClient.subscribe(properties.getMqtt().getTopic(), 2);
+        return () -> mqttClient.subscribe(properties.getMqtt().getTopic(), 1);
     }
 
     @Bean("disconnected")

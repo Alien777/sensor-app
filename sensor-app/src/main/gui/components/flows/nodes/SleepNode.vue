@@ -2,7 +2,7 @@
 import {onMounted, ref, watch} from 'vue'
 import {useVueFlow} from "@vue-flow/core";
 
-const sleepTimeSeconds = ref("5");
+const sleepTime = ref("5000");
 const props = defineProps({
   id: {
     type: String,
@@ -18,23 +18,23 @@ onMounted(() => {
   if (!props.sensor) {
     return;
   }
-  sleepTimeSeconds.value = props.sensor.sleepTimeSeconds
+  sleepTime.value = props.sensor.sleepTime
 })
 const {updateNode} = useVueFlow()
 
-watch(sleepTimeSeconds, () => {
+watch(sleepTime, () => {
   handleUpdate();
 })
 
 function handleUpdate() {
   updateNode(props.id, {
     sensor: {
-      sleepTimeSeconds: sleepTimeSeconds
+      sleepTime: sleepTime
     }
   } as any)
 }
 </script>
 
 <template>
-  <q-input label="Sleep time [s]" @keyup="handleUpdate" v-model="sleepTimeSeconds"></q-input>
+  <q-input label="Sleep time [millisecond]" @keyup="handleUpdate" v-model="sleepTime"></q-input>
 </template>

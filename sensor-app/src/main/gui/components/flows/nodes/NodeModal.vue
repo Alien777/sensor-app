@@ -55,13 +55,13 @@ onClickOutside(target, event => {
     <p style="margin: 0 0 4px;"><strong> {{ props.nodeDefault.readableName }}</strong></p>
     <p style="margin: 0 0 4px;">{{ props.id }}</p>
     <hr>
-    <q-btn size="xs" icon="edit" color="primary" @click="open"/>
-    <q-btn v-if="props.nodeDefault.description" size="xs" icon="info" color="info">
+    <q-btn no-caps   size="xs" icon="edit" color="primary" @click="open"/>
+    <q-btn no-caps  v-if="props.nodeDefault.description" size="xs" icon="info" color="info">
       <q-tooltip class="bg-purple text-body1" :offset="[10, 10]">
         {{ props.nodeDefault.description }}
       </q-tooltip>
     </q-btn>
-    <q-btn @click="()=>  {
+    <q-btn no-caps  @click="()=>  {
        $q.dialog({
         title: 'Confirm',
         message: `Would you like to delete node: \'${props.nodeDefault.readableName}\'`,

@@ -6,9 +6,7 @@ import {draggableItems} from "~/composables/api/StructureApp";
 
 let global_id: number = 0
 
-/**
- * @returns {string} - A unique id.
- */
+
 function getId(name: string): string {
     return `${name}_${global_id++}`
 }
@@ -19,9 +17,6 @@ function extractNumberFromString(str: string) {
 }
 
 const state = {
-    /**
-     * The type of the node being dragged.
-     */
     isDragOver: ref(false),
     isDragging: ref(false),
 }
@@ -71,11 +66,6 @@ export default function useDragAndDrop() {
         document.removeEventListener('drop', onDragEnd)
     }
 
-    /**
-     * Handles the drop event.
-     *
-     * @param {DragEvent} event
-     */
     function onDrop(event: DragEvent) {
         const position: XYPosition = screenToFlowCoordinate({
             x: event.clientX,
