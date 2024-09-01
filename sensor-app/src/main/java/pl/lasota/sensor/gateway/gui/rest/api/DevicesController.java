@@ -39,9 +39,10 @@ public class DevicesController {
     @PostMapping("/build")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ByteArrayResource> build(@RequestBody DeviceBuildI device) throws IOException {
-        byte[] build = sme.build(device.version(), device.name(), device.wifiSsid(), device.wifiPassword());
+        byte[] build = sme.build(device);
         ByteArrayResource resource = new ByteArrayResource(build);
-        return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=folder.zip").contentType(MediaType.APPLICATION_OCTET_STREAM).contentLength(build.length).body(resource);
+        return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=folder.zip")
+                .contentType(MediaType.APPLICATION_OCTET_STREAM).contentLength(build.length).body(resource);
     }
 
 

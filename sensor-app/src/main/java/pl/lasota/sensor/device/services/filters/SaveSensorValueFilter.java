@@ -8,8 +8,8 @@ import pl.lasota.sensor.bus.FlowSensorIInputStreamBus;
 import pl.lasota.sensor.bus.WaitForResponseInputStreamBus;
 import pl.lasota.sensor.device.services.DeviceDataService;
 import pl.lasota.sensor.device.services.DeviceMessagePublish;
-import pl.lasota.sensor.entities.AnalogAckSensor;
-import pl.lasota.sensor.entities.Sensor;
+import pl.lasota.sensor.entities.sensor.AnalogAckSensor;
+import pl.lasota.sensor.entities.sensor.Sensor;
 import pl.lasota.sensor.flow.model.FlowSensorAnalogI;
 import pl.lasota.sensor.flow.model.FlowSensorI;
 import pl.lasota.sensor.payload.MessageFrame;
@@ -50,8 +50,8 @@ public class SaveSensorValueFilter implements Filter<MessageFrame, MessageFrame>
 
             FlowSensorI fT = switch (sensor.getMessageType()) {
                 case DEVICE_CONNECTED, PING_ACK, PWM_ACK -> flowSensorI;
-                case CONFIG, PWM, ANALOG_ACK, DIGITAL_WRITE, PING -> null;
-                case ANALOG -> {
+                case CONFIG, PWM, ANALOG, DIGITAL_WRITE, PING -> null;
+                case ANALOG_ACK -> {
                     AnalogAckSensor aSensor = (AnalogAckSensor) sensor;
                     yield new FlowSensorAnalogI(flowSensorI).setPin(aSensor.getPin()).setValue(aSensor.getAdcRaw());
                 }

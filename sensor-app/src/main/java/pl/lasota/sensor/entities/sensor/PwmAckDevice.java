@@ -1,4 +1,4 @@
-package pl.lasota.sensor.entities;
+package pl.lasota.sensor.entities.sensor;
 
 import jakarta.persistence.Entity;
 import lombok.AllArgsConstructor;
@@ -11,6 +11,6 @@ import lombok.experimental.SuperBuilder;
 @Setter
 @SuperBuilder
 @AllArgsConstructor
-public class ConnectedDevice extends Sensor {
+public class PwmAckDevice extends Sensor {
 
 }

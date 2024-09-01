@@ -1,7 +1,7 @@
 package pl.lasota.sensor.payload.from;
 
-import pl.lasota.sensor.entities.PwmAckDevice;
-import pl.lasota.sensor.entities.Sensor;
+import pl.lasota.sensor.entities.sensor.PwmAckDevice;
+import pl.lasota.sensor.entities.sensor.Sensor;
 import pl.lasota.sensor.payload.Parse;
 
 

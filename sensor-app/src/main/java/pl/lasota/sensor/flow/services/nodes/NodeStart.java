@@ -36,7 +36,7 @@ public abstract class NodeStart extends Node {
     private void run(LocalContext localContext) throws Exception {
         boolean acquired = false;
         try {
-            acquired = lock.tryLock(0, TimeUnit.SECONDS);
+            acquired = lock.tryLock(10, TimeUnit.MILLISECONDS);
             if (acquired) {
                 super.fireChildNodes(localContext);
             }

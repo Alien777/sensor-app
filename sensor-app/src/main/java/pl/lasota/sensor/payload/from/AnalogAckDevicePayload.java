@@ -1,8 +1,8 @@
 package pl.lasota.sensor.payload.from;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import pl.lasota.sensor.entities.AnalogAckSensor;
-import pl.lasota.sensor.entities.Sensor;
+import pl.lasota.sensor.entities.sensor.AnalogAckSensor;
+import pl.lasota.sensor.entities.sensor.Sensor;
 import pl.lasota.sensor.payload.Parse;
 
 

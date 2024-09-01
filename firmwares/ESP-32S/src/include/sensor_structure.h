@@ -103,24 +103,18 @@ struct Message
     int digital_configs_size;
 };
 
-struct WifiNetwork
-{
-    char name[50];
-    bool hasPassword;
-    int8_t signalStrength;
-    WifiNetwork *next; // Wskaźnik na następny element
-};
-
+ 
 struct ConfigEps
 {
     char wifi_ssid[32];
     char wifi_password[64];
+    char ap_ssid[32];
+    char ap_password[64];
     char member_id[17];
     char server_ip[17];
     char token[37];
 };
 
-const char *convert_wifi_network_to_json(WifiNetwork *head);
 const char *topicSubscribe();
  
 #endif

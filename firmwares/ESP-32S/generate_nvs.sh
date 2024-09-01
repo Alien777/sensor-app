@@ -20,10 +20,12 @@ unzip_file() {
 generate_config_csv() {
     local SSID=$1
     local PASSWORD=$2
-    local MEMBER_ID=$3
-    local SERVER_IP=$4
-    local TOKEN=$5
-    local PATH=$6
+    local AP_SSID=$3
+    local AP_PASSWORD=$4
+    local MEMBER_ID=$5
+    local SERVER_IP=$6
+    local TOKEN=$7
+    local PATH=$8
     local CSV_FILE="$PATH/config.csv"
 
 
@@ -31,6 +33,8 @@ generate_config_csv() {
     echo "storage,namespace,," >> "$CSV_FILE"
     echo "wifi_ssid,string,string,$SSID" >> "$CSV_FILE"
     echo "wifi_password,string,string,$PASSWORD" >> "$CSV_FILE"
+    echo "ap_ssid,string,string,$AP_SSID" >> "$CSV_FILE"
+    echo "ap_password,string,string,$AP_PASSWORD" >> "$CSV_FILE"
     echo "member_id,string,string,$MEMBER_ID" >> "$CSV_FILE"
     echo "server_ip,string,string,$SERVER_IP" >> "$CSV_FILE"
     echo "token,string,string,$TOKEN" >> "$CSV_FILE"
@@ -66,10 +70,12 @@ run_python_script() {
 main() {
     local SSID=$1
     local PASSWORD=$2
-    local MEMBER_ID=$3
-    local SERVER_IP=$4
-    local TOKEN=$5
-    local SRC_PATH=$6
+    local AP_SSID=$3
+    local AP_PASSWORD=$4
+    local MEMBER_ID=$5
+    local SERVER_IP=$6
+    local TOKEN=$7
+    local SRC_PATH=$8
 
     local TMP_PATH=$(mktemp -d)
 
@@ -80,7 +86,7 @@ main() {
     unzip_file "$ZIP_FILE" "$TMP_PATH"
     rm "$ZIP_FILE"
 
-    generate_config_csv "$SSID" "$PASSWORD" "$MEMBER_ID" "$SERVER_IP" "$TOKEN" "$TMP_PATH"
+    generate_config_csv "$SSID" "$PASSWORD" "$AP_SSID" "$AP_PASSWORD"  "$MEMBER_ID" "$SERVER_IP" "$TOKEN" "$TMP_PATH"
     run_python_script "$TMP_PATH"
 
     cp $SRC_PATH/bin/*.bin $TMP_PATH
@@ -92,10 +98,10 @@ main() {
     echo "$TMP_PATH"
 }
 
-if [ "$#" -ne 6 ]; then
-    echo "Usage: $0 <ssid> <password> <member_id> <mqtt_ip_external> <token> <TMP_PATH>"
+if [ "$#" -ne 8 ]; then
+    echo "Usage: $0 <ssid> <password> <ap_ssid> <ap_password> <member_id> <mqtt_ip_external> <token> <TMP_PATH>"
     exit 1
 fi
 
 # Call the main function
-main "$1" "$2" "$3" "$4" "$5" "$6"
+main "$1" "$2" "$3" "$4" "$5" "$6" "$7" "$8"

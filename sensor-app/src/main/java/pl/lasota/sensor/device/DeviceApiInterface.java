@@ -2,6 +2,7 @@ package pl.lasota.sensor.device;
 
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+import pl.lasota.sensor.device.model.DeviceBuildI;
 import pl.lasota.sensor.device.model.DeviceCreateI;
 import pl.lasota.sensor.device.model.DeviceI;
 import pl.lasota.sensor.entities.Device;
@@ -27,9 +28,10 @@ public interface DeviceApiInterface {
 
     Optional<Device> getDevice(String memberId, String deviceId);
 
-    byte[] build(String version, String name, String ssid, String password) throws IOException;
+    byte[] build(DeviceBuildI device) throws IOException;
 
     List<String> getVersions();
+
 
 
 }

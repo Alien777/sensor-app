@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import pl.lasota.sensor.configs.properties.DeviceProperties;
 import pl.lasota.sensor.device.services.repositories.*;
 import pl.lasota.sensor.entities.*;
+import pl.lasota.sensor.entities.sensor.Sensor;
 import pl.lasota.sensor.exceptions.SensorApiException;
 import pl.lasota.sensor.exceptions.SensorException;
 import pl.lasota.sensor.payload.MessageFrame;
@@ -296,12 +297,20 @@ public class DeviceDataService {
     }
 
     @Transactional
-    public byte[] generateBuildPackage(String version, String deviceName, String wifiSsid, String wifiPassword, String memberId, DeviceProperties ap) throws IOException {
+    public byte[] generateBuildPackage(String version,
+                                       String deviceName,
+                                       String wifiSsid,
+                                       String wifiPassword,
+                                       String apPassword,
+                                       String memberId,
+                                       DeviceProperties ap) throws IOException {
         String token = saveTemporary(memberId, deviceName);
         String[] command = {
                 Paths.get(ap.getFirmwareFolder(), version, ap.getGenerateBuildPackage()).toString(),
                 wifiSsid,
                 wifiPassword,
+                deviceName,
+                apPassword,
                 memberId,
                 ap.getMqttIpExternal(),
                 token,

@@ -169,9 +169,9 @@ public class DeviceGatewayApi implements DeviceApiInterface, DeviceSendMessageIn
     }
 
     @Override
-    public byte[] build(String version, String name, String ssid, String password) throws IOException {
+    public byte[] build(DeviceBuildI device) throws IOException {
         Member member = ms.loggedMember();
-        return ds.generateBuildPackage(version, name, ssid, password, member.getId(), ap);
+        return ds.generateBuildPackage(device.version(), device.name(), device.wifiSsid(), device.wifiPassword(), device.apPassword(), member.getId(), ap);
     }
 
     @Override

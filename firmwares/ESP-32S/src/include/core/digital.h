@@ -7,7 +7,7 @@
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 #include <freertos/timers.h>
-#include <driver/adc.h> 
+#include "driver/gpio.h"
 
 #include "sensor_mqtt.h"
 #include "sensor_structure.h"

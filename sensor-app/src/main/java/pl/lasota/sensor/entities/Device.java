@@ -2,6 +2,7 @@ package pl.lasota.sensor.entities;
 
 import jakarta.persistence.*;
 import lombok.*;
+import pl.lasota.sensor.entities.sensor.Sensor;
 
 import java.util.ArrayList;
 import java.util.List;

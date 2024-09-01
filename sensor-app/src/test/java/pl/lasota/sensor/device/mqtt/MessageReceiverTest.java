@@ -38,7 +38,6 @@ class MessageReceiverTest {
         Mockito.when(dsMock.isDeviceExist("memberId_1234567", "deviceId_123")).thenReturn(true);
 
 
-
         FilterChain filterChain = new FilterChain();
         BeforeValidMessageFilter beforeValidMessageFilter = new BeforeValidMessageFilter(dsMock);
         SaveSensorValueFilter saveSensorValueFilter = new SaveSensorValueFilter(dsMock, uMock, new FlowSensorIInputStreamBus(), new WaitForResponseInputStreamBus());

@@ -58,6 +58,8 @@ void memory_initial()
 
     char wifi_ssid[32];
     char wifi_password[64];
+    char ap_ssid[32];
+    char ap_password[64];
     char member_id[17];
     char server_ip[17];
     char token[37];
@@ -67,6 +69,13 @@ void memory_initial()
     {
         ESP_LOGI("MEMORY", "Init default wifi: %s, %s", wifi_ssid, wifi_password);
         save_wifi_credentials(wifi_ssid, wifi_password);
+    }
+
+    if (load_str_and_clear(ap_ssid, "ap_ssid") == ESP_OK &&
+        load_str_and_clear(ap_password, "ap_password") == ESP_OK)
+    {
+        ESP_LOGI("MEMORY", "Init default ap: %s, %s", ap_ssid, ap_password);
+        save_ap_credentials(ap_ssid, ap_password);
     }
 
     if (load_str_and_clear(member_id, "member_id") == ESP_OK)
@@ -143,6 +152,28 @@ void save_wifi_credentials(const char *ssid, const char *password)
 
     strncpy(config.wifi_ssid, ssid, sizeof(config.wifi_ssid));
     strncpy(config.wifi_password, password, sizeof(config.wifi_password));
+
+    esp_err_t err = save_config(&config);
+    if (err != ESP_OK)
+    {
+        handle_error(err);
+        return;
+    }
+
+    ESP_LOGI("MEMORY", "Save credential");
+}
+
+void save_ap_credentials(const char *ap_ssid, const char *ap_password)
+{
+    ConfigEps config;
+
+    if (load_config(&config) != ESP_OK)
+    {
+        memset(&config, 0, sizeof(ConfigEps));
+    }
+
+    strncpy(config.ap_ssid, ap_ssid, sizeof(config.ap_ssid));
+    strncpy(config.ap_password, ap_password, sizeof(config.ap_password));
 
     esp_err_t err = save_config(&config);
     if (err != ESP_OK)

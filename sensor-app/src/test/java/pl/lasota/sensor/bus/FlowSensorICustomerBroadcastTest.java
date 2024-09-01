@@ -1,33 +1,30 @@
 package pl.lasota.sensor.bus;
 
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import pl.lasota.sensor.flow.model.FlowSensorI;
 
-import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-//@Disabled
-//@SpringBootTest
-class FlowSensorICustomerBroadcastTest {
 
-    //    @Autowired
-    private FlowSensorIInputStreamBus flowSensorIInputStreamBus;
+public class FlowSensorICustomerBroadcastTest {
 
-    @BeforeEach
-    void setUp() throws IOException {
-        // Set up any required resources or configuration
-    }
 
-    //    @Test
-    void testPerformance() throws IOException, InterruptedException {
-        final int recordCount = 50000;
+    @Test
+    void testPerformance() throws Exception {
+        final int recordCount = 2000;
+        FlowSensorIInputStreamBus flowSensorIInputStreamBus = new FlowSensorIInputStreamBus();
         CountDownLatch latch = new CountDownLatch(recordCount);
+        AtomicInteger counter = new AtomicInteger(0);
 
-
-        flowSensorIInputStreamBus.addConsumer((s, flowSensorI) -> latch.countDown());
+        flowSensorIInputStreamBus.addConsumer((s, d) -> {
+            latch.countDown();
+            counter.incrementAndGet();
+        });
 
         long startTime = System.nanoTime();
 
@@ -36,13 +33,12 @@ class FlowSensorICustomerBroadcastTest {
             flowSensorIInputStreamBus.takeBroadcaster("streamInfo").write(flowSensorI);
         }
 
-        latch.await();
+        latch.await(100, TimeUnit.MILLISECONDS);
 
         long endTime = System.nanoTime();
         long durationInMillis = TimeUnit.NANOSECONDS.toMillis(endTime - startTime);
 
-        System.out.println("Processed " + recordCount + " objects in " + durationInMillis + " ms");
-
-        assertTrue(durationInMillis < 3000, "Performance test failed: took longer than expected");
+        assertTrue(durationInMillis < 2000, "Performance test failed: took longer than expected");
+        assertEquals(counter.get(), recordCount);
     }
 }

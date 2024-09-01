@@ -6,6 +6,7 @@ import pl.lasota.sensor.bus.conventer.Converter;
 import java.io.IOException;
 import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
@@ -25,8 +26,8 @@ public abstract class BroadcastEvent<RESULT, TYPE, STREAM_INFORMATION> extends B
     }
 
     @Override
-    public void write(TYPE type) {
-        queue.add(type);
+    public void write(TYPE type) throws Exception {
+        queue.offer(type, 100, TimeUnit.MILLISECONDS);
     }
 
     @Override

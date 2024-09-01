@@ -1,7 +1,7 @@
 package pl.lasota.sensor.payload.from;
 
-import pl.lasota.sensor.entities.ConnectedDevice;
-import pl.lasota.sensor.entities.Sensor;
+import pl.lasota.sensor.entities.sensor.ConnectedDevice;
+import pl.lasota.sensor.entities.sensor.Sensor;
 import pl.lasota.sensor.payload.Parse;
 
 

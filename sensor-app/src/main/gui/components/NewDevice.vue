@@ -27,6 +27,7 @@ const device_name = ref<string>();
 const version = ref<string>('');
 const wifi_ssid = ref<string>('');
 const wifi_password = ref<string>('');
+const ap_password = ref<string>('');
 
 const isNameValid = computed(() => device_name.value != null && device_name.value.length >= 1);
 const versionValid = computed(() => version.value != null && version.value.length >= 1);
@@ -43,7 +44,7 @@ const execute = (step: string) => {
 
 const onFinish = (ref: any) => {
   loading.value = true;
-  if (!wifi_password.value || !wifi_ssid.value || !device_name.value || !version.value) {
+  if (!wifi_password.value || !wifi_ssid.value || !device_name.value || !version.value || !ap_password.value) {
     Notify.create({
       type: 'error',
       message: 'Problem with send message. Data not valid'
@@ -51,7 +52,7 @@ const onFinish = (ref: any) => {
     loading.value = false;
     return;
   }
-  initDevice(version.value, device_name.value, wifi_ssid.value, wifi_password.value)
+  initDevice(version.value, device_name.value, wifi_ssid.value, wifi_password.value, ap_password.value)
       .then(success => {
         if (success) {
           ref.stepper.next();
@@ -96,6 +97,9 @@ const provideVersions = (value: any) => {
           ></q-input>
           <q-input label="Password" v-model="wifi_password" maxlength="64" clearable
           ></q-input>
+          <br>
+          <q-input label="AP password" v-model="ap_password" maxlength="64" clearable
+          ></q-input>
         </div>
         <div v-else class="flex flex-center">
           <q-spinner-gears size="50px" color="primary"/>
@@ -120,10 +124,11 @@ const provideVersions = (value: any) => {
               :disabled="!canProceed"
               color="primary"
               label="Next"/>
-          <q-btn no-caps  v-if="!loading && step === stepPath[stepPath.length-2]" @click="()=>onFinish($refs) && loading"
+          <q-btn no-caps v-if="!loading && step === stepPath[stepPath.length-2]" @click="()=>onFinish($refs) && loading"
                  :disabled="!canProceed"
                  color="primary" label="Finish"/>
-          <q-btn no-caps  v-if=" !loading && step !== stepPath[0] && step !== stepPath[stepPath.length-1]  && loading" flat
+          <q-btn no-caps v-if=" !loading && step !== stepPath[0] && step !== stepPath[stepPath.length-1]  && loading"
+                 flat
                  color="primary"
                  @click="$refs.stepper.previous()" label="Back"
                  class="q-ml-sm"/>

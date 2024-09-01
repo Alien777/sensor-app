@@ -27,7 +27,6 @@ typedef struct
     char request_id[MAX_REQUEST_ID_LENGTH + 1];
     MessageType messageType;
     char payload[MAX_PAYLOAD_LENGTH];
-    size_t payload_length;
 } MessageFrame;
 
 void chars_to_message_frame(MessageFrame *frame, const char *source);

@@ -55,7 +55,7 @@ public enum MessageType {
 
 
     public static List<MessageType> getListMessageTypeFromDevice() {
-        return List.of(DEVICE_CONNECTED, ANALOG, PING_ACK, PWM_ACK);
+        return List.of(DEVICE_CONNECTED, ANALOG_ACK, PING_ACK, PWM_ACK);
     }
 
     public static boolean isFromDevice(MessageType messageType) {

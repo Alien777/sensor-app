@@ -6,11 +6,17 @@
 #include <stddef.h>
 typedef enum
 {
-    DEVICE_CONNECTED = 1,
+    CONNECTED_ACK=1,
+
     CONFIG = 2,
+    CONFIG_ACK=3,
+
+    PWM_SETUP,
+    PWM_SETUP_ACK,
+
     ANALOG = 3,
     ANALOG_ACK = 4,
-    PWM = 5,
+    PWM_SETUP = 5,
     PWM_ACK = 6,
     DIGITAL_WRITE = 7,
     PING = 8,

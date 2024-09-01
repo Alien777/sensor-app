@@ -13,14 +13,14 @@ static void mqttEventHandler(void *handler_args, esp_event_base_t base, int32_t 
 
 static void mqttEventHandler(void *handler_args, esp_event_base_t base, int32_t event_id, void *event_data)
 {
-    // ESP_LOGI(TAG_MQTT, "Event dispatched from event loop base=%s topic=%s, event_id=%" PRIi32 "", base, topicSubscribe(), event_id);
+  
     esp_mqtt_event_handle_t event = (esp_mqtt_event_handle_t)event_data;
 
     switch ((esp_mqtt_event_id_t)event_id)
     {
     case MQTT_EVENT_CONNECTED:
         ESP_LOGI(TAG_MQTT, "MQTT_EVENT_CONNECTED");
-        publish(-1, "DEVICE_CONNECTION", ";", DEVICE_CONNECTED);
+        publish(-1, "DEVICE_CONNECTION", ";", CONNECTED_ACK);
         esp_mqtt_client_subscribe(client, topicSubscribe(), 0); // Subscribe to the topic
         break;
     case MQTT_EVENT_DISCONNECTED:

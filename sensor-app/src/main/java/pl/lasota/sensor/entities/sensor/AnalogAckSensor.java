@@ -1,4 +1,4 @@
-package pl.lasota.sensor.entities;
+package pl.lasota.sensor.entities.sensor;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

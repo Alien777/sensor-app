@@ -1,6 +1,7 @@
 #include "payload/message_frame.h"
 #include "payload/message_type.h"
 #include "sensor_structure.h"
+#include "sensor_ntp.h"
 #include "payload/payload.h"
 void message_frame_to_chars(const MessageFrame *frame, char *result)
 {
@@ -93,7 +94,7 @@ void convert_message_frame_to_internal_object(Message *i, MessageFrame *mf)
         digitalPayload(i, mf->payload);
     }
 
-    if (mf->messageType == PWM)
+    if (mf->messageType == PWM_SETUP)
     {
         pwmSetupPayload(i, mf->payload);
     }
@@ -110,5 +111,5 @@ void print_message_frame(const MessageFrame *frame)
     printf("requestId: %s\n", frame->request_id);
     printf("messageType: %s\n", message_type_to_string(frame->messageType));
     printf("payload: %s\n", frame->payload);
-    printf("**************** %s ****************\n", message_type_to_string(frame->messageType));
+    printf("*****************END***************\n");
 }

@@ -13,9 +13,9 @@ void pwmStopCallback(TimerHandle_t xTimer);
 
 void set_pwm(Message *message)
 {
-    if (message->message_type != PWM)
+    if (message->message_type != PWM_SETUP)
     {
-        ESP_LOGI(TAG, "This not PWM message");
+        ESP_LOGI(TAG, "This not PWM_SETUP message");
         return;
     }
     publish(message->config_id, message->request_id, ";", PWM_ACK);

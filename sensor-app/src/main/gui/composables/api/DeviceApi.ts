@@ -21,7 +21,7 @@ export const deviceApi = (runtimeConfig: any) => {
         return value.data.value;
     }
 
-    const initDevice = async (version: string, name: string, wifiSsid: string, wifiPassword: string): Promise<boolean> => {
+    const initDevice = async (version: string, name: string, wifiSsid: string, wifiPassword: string, apPassword): Promise<boolean> => {
         try {
             let value = await fetchApiRequest<any>(`/device/build`, {
                 method: 'post',
@@ -30,6 +30,7 @@ export const deviceApi = (runtimeConfig: any) => {
                     name: name,
                     wifiSsid: wifiSsid,
                     wifiPassword: wifiPassword,
+                    apPassword: apPassword,
                 },
                 responseType: 'blob',
             });

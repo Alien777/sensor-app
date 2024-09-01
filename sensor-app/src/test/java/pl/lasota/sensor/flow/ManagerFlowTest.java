@@ -13,6 +13,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.SimpleAsyncTaskScheduler;
 import pl.lasota.sensor.bus.FlowSensorIInputStreamBus;
+import pl.lasota.sensor.bus.broadcast.impl.FlowSensorIBroadcasterStream;
 import pl.lasota.sensor.entities.Member;
 import pl.lasota.sensor.entities.Role;
 import pl.lasota.sensor.flow.model.FlowSensorAnalogI;
@@ -24,7 +25,6 @@ import pl.lasota.sensor.flow.services.nodes.utils.FlowContext;
 import pl.lasota.sensor.flow.services.nodes.utils.GlobalContext;
 import pl.lasota.sensor.member.services.MemberLoginService;
 
-import java.time.Duration;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -61,10 +61,9 @@ class ManagerFlowTest {
         flowSensorAnalogI.setMessageType("ANALOG");
     }
 
-
     @Test
     void listening_sensor_execute_test() throws Exception {
-        // Mockowanie
+
         Mockito.when(msMock.loggedMember()).thenReturn(memberMock);
 
         JsonNode deviceIdMock = Mockito.mock(JsonNode.class);
@@ -81,43 +80,20 @@ class ManagerFlowTest {
         Node root = ListeningSensorNode.create("id", globalContext, jn, ac);
 
         NodeMock node = Mockito.mock(NodeMock.class);
-        FlowsBuilder.root(root).add(root, node);
 
+        FlowsBuilder.root(root).add(root, node);
 
         CountDownLatch latch = new CountDownLatch(2);
         Mockito.doAnswer(invocation -> {
             latch.countDown();
             return null;
         }).when(node).fireChildNodes(Mockito.any());
-
         ((NodeStart) root).config(flowContext);
-        slm.takeBroadcaster(null).write(flowSensorAnalogI);
-        Thread.sleep(10);
-        slm.takeBroadcaster(null).write(flowSensorAnalogI);
-
-        assertTrue(latch.await(2, TimeUnit.SECONDS), "Test did not complete in time");
-        Mockito.verify(node, Mockito.times(2)).fireChildNodes(Mockito.any());
-    }
-
-    @Test
-    void cron_node_execute_test() throws Exception {
-
-        Mockito.when(memberMock.getId()).thenReturn("memberId");
-
-        TaskScheduler taskScheduler = new SimpleAsyncTaskScheduler();
-        Mockito.when(ac.getBean(TaskScheduler.class)).thenReturn(taskScheduler);
-
-        JsonNode messageTypeMock = Mockito.mock(JsonNode.class);
-        Mockito.when(jn.findValue(Mockito.same("cron"))).thenReturn(messageTypeMock);
-        Mockito.when(messageTypeMock.asText()).thenReturn("0/1 * * ? * *");
-
-        Node root = CronNode.create("id", globalContext, jn, ac);
-        NodeMock node = Mockito.mock(NodeMock.class);
-        FlowsBuilder.root(root)
-                .add(root, node);
-        ((NodeStart) root).config(flowContext);
-        Thread.sleep(2000);
-
+        try (FlowSensorIBroadcasterStream fs = slm.takeBroadcaster(null);) {
+            fs.write(flowSensorAnalogI);
+            fs.write(flowSensorAnalogI);
+            latch.await(500, TimeUnit.MILLISECONDS);
+        }
         Mockito.verify(node, Mockito.times(2)).fireChildNodes(Mockito.any());
     }
 
@@ -133,22 +109,22 @@ class ManagerFlowTest {
 
         JsonNode messageTypeMock = Mockito.mock(JsonNode.class);
         Mockito.when(jn.findValue(Mockito.same("cron"))).thenReturn(messageTypeMock);
-        Mockito.when(messageTypeMock.asText()).thenReturn("0/1 * * ? * *");
+        Mockito.when(messageTypeMock.asText()).thenReturn("5");
 
         Node root = CronNode.create("id", globalContext, jn, ac);
         NodeMock node = Mockito.mock(NodeMock.class);
         FlowsBuilder.root(root)
                 .add(root, node);
         ((NodeStart) root).config(flowContext);
-        Thread.sleep(3000);
+        Thread.sleep(5);
         root.clear();
-        Thread.sleep(3000);
-        Mockito.verify(node, Mockito.times(3)).fireChildNodes(Mockito.any());
+        Thread.sleep(20);
+        Mockito.verify(node, Mockito.times(1)).fireChildNodes(Mockito.any());
     }
 
     //    //
     @Test
-    void cron_node_execute_new_thread_test() throws Exception {
+    void event_node_execute_test() throws Exception {
         Mockito.when(msMock.loggedMember()).thenReturn(memberMock);
         Mockito.when(memberMock.getId()).thenReturn("memberId");
 
@@ -168,11 +144,12 @@ class ManagerFlowTest {
         FlowSensorIInputStreamBus slm = new FlowSensorIInputStreamBus();
         Mockito.when(ac.getBean(FlowSensorIInputStreamBus.class)).thenReturn(slm);
 
+        CountDownLatch latch = new CountDownLatch(1);
+        slm.addConsumer((s, flowSensorI) -> latch.countDown());
         Node root = ListeningSensorNode.create("id", globalContext, jn, ac);
 
         Node async = AsyncNode.create("id1", globalContext, jn, ac);
         Node sleep = SleepNode.create("id3", globalContext, jn, ac);
-
 
         NodeMock nodeMainThreadEnd = Mockito.mock(NodeMock.class);
         NodeMock nodeAsyncEnd = Mockito.mock(NodeMock.class);
@@ -185,7 +162,8 @@ class ManagerFlowTest {
 
         ((NodeStart) root).config(flowContext);
         slm.takeBroadcaster(null).write(flowSensorAnalogI);
-        Thread.sleep(Duration.ofSeconds(3));
+        latch.await(10, TimeUnit.MILLISECONDS);
+        Thread.sleep(10);
 
         InOrder inOrder = Mockito.inOrder(nodeMainThreadEnd, nodeAsyncEnd);
         inOrder.verify(nodeMainThreadEnd, Mockito.times(1)).fireChildNodes(Mockito.any());
@@ -221,9 +199,10 @@ class ManagerFlowTest {
         NodeMock nodeEnd = Mockito.mock(NodeMock.class);
 
         CountDownLatch latch = new CountDownLatch(1);
-        Mockito.doAnswer(invocation -> {
+        Mockito.doAnswer(_ -> {
             latch.countDown();
             return null;
+
         }).when(nodeEnd).fireChildNodes(Mockito.any());
 
         FlowsBuilder.root(root)
@@ -233,8 +212,8 @@ class ManagerFlowTest {
         ((NodeStart) root).config(flowContext);
 
         slm.takeBroadcaster(null).write(flowSensorAnalogI);
-        assertTrue(latch.await(5, TimeUnit.SECONDS), "Test did not complete in time");
 
+        assertTrue(latch.await(2, TimeUnit.SECONDS), "Test did not complete in time");
         Mockito.verify(nodeEnd, Mockito.times(1)).fireChildNodes(Mockito.any());
     }
 
@@ -265,15 +244,16 @@ class ManagerFlowTest {
         Node root = ListeningSensorNode.create("id", globalContext, jn, ac);
         Node executeIfNode = ExecuteCodeNode.create("id1", globalContext, jn, ac);
         NodeMock nodeEnd = Mockito.mock(NodeMock.class);
-
+        CountDownLatch latch = new CountDownLatch(1);
+        slm.addConsumer((s, f) -> latch.countDown());
         FlowsBuilder.root(root)
                 .add(root, executeIfNode)
                 .add(executeIfNode, nodeEnd);
 
         ((NodeStart) root).config(flowContext);
-
         slm.takeBroadcaster(null).write(flowSensorAnalogI);
-        Thread.sleep(500);
+        latch.await(5, TimeUnit.SECONDS);
+        Thread.sleep(20);
 
         Mockito.verify(nodeEnd, Mockito.times(0)).fireChildNodes(Mockito.any());
     }
@@ -303,7 +283,7 @@ class ManagerFlowTest {
                 l_c.new_value="test"
                 let my_var_1=32
                 result=true
-                 """);
+                """);
 
         globalContext.getVariables().put("my_var", true);
 

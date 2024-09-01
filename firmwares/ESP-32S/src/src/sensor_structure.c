@@ -10,47 +10,6 @@
 
 static char topic[50] = {0};
  
- 
-
-const char *convert_wifi_network_to_json(WifiNetwork *head)
-{
-    static char jsonBuffer[JSON_BUFFER_SIZE]; // Statyczny bufor zamiast malloc
-    if (!head)
-    {
-        return NULL;
-    }
-    char *writePtr = jsonBuffer;
-    *writePtr++ = '[';
-    for (WifiNetwork *current = head; current != NULL; current = current->next)
-    {
-        if (current == NULL)
-        {
-            continue;
-        }
-        size_t remaining_space = JSON_BUFFER_SIZE - (writePtr - jsonBuffer);
-        if (remaining_space < 100)
-        {
-            break;
-        }
-        int written = snprintf(writePtr, remaining_space,
-                               "{\"name\":\"%s\",\"hasPassword\":%s,\"signalStrength\":%d},",
-                               current->name, current->hasPassword ? "true" : "false", current->signalStrength);
-        if (written < 0 || written >= remaining_space)
-        {
-            break;
-        }
-        writePtr += written;
-    }
-    if (writePtr != jsonBuffer && *(writePtr - 1) == ',')
-    {
-        writePtr--;
-    }
-    *writePtr++ = ']';
-    *writePtr = '\0';
-    return jsonBuffer;
-}
- 
-
 const char *topicSubscribe()
 {
     ConfigEps config;
