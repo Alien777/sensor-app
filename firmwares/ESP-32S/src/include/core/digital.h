@@ -12,8 +12,6 @@
 #include "sensor_mqtt.h"
 #include "sensor_structure.h"
 #include "payload/message_type.h"
-void set_digital(Message *message);
-void setup_digital(Message *message);
-void reset_digital_settings();
-
+void digital_set_up(ParsedMessage  message, DigitalSetUp  payload);
+void digital_write_request(ParsedMessage message, DigitalWriteRequest  payload);
 #endif

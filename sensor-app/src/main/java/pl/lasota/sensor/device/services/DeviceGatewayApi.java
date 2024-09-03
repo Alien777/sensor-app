@@ -8,7 +8,6 @@ import pl.lasota.sensor.device.DeviceApiInterface;
 import pl.lasota.sensor.device.DeviceConfigInterface;
 import pl.lasota.sensor.device.DeviceSendMessageInterface;
 import pl.lasota.sensor.device.model.*;
-import pl.lasota.sensor.entities.Device;
 import pl.lasota.sensor.entities.DeviceConfig;
 import pl.lasota.sensor.entities.Member;
 import pl.lasota.sensor.exceptions.SensorApiException;
@@ -16,7 +15,6 @@ import pl.lasota.sensor.member.MemberLoginDetailsServiceInterface;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 
@@ -32,39 +30,67 @@ public class DeviceGatewayApi implements DeviceApiInterface, DeviceSendMessageIn
     private final DeviceConfigService dsu;
 
     @Override
-    public UUID sendConfigToDevice(SendConfigI configS) throws Exception {
+    public UUID sendConfig(ConfigMessage configS) throws Exception {
         Member member = ms.loggedMember();
         return deviceMessagePublish.sendConfig(member.getId(), configS.deviceId());
     }
 
     @Override
-    public UUID sendDigitalValueToDevice(SendDigitalI configS) throws Exception {
+    public UUID sendDigitalWriteRequest(DigitalWriteMessage digitalWriteMessage) throws Exception {
         Member member = ms.loggedMember();
-        return deviceMessagePublish.sendDigital(member.getId(), configS.deviceId(), configS.pin(), configS.value());
+        return deviceMessagePublish.sendDigitalWriteRequest(member.getId(), digitalWriteMessage.deviceId(), digitalWriteMessage.pin(), digitalWriteMessage.level());
+    }
+
+    @Override
+    public UUID sendPwmWriteSetUp(PwmWriteSetUpMessage pwmWriteSetUpMessage) throws Exception {
+        Member member = ms.loggedMember();
+        return deviceMessagePublish.sendPwmWriteSetUp(member.getId(),
+                pwmWriteSetUpMessage.deviceId(),
+                pwmWriteSetUpMessage.gpio(),
+                pwmWriteSetUpMessage.frequency(),
+                pwmWriteSetUpMessage.resolution(),
+                pwmWriteSetUpMessage.duty());
+    }
+
+    @Override
+    public UUID sendAnalogReadSetUp(AnalogReadSetUpMessage analogWriteSetUpMessage) throws Exception {
+        Member member = ms.loggedMember();
+        return deviceMessagePublish.sendAnalogReadSetUp(member.getId(),
+                analogWriteSetUpMessage.deviceId(),
+                analogWriteSetUpMessage.gpio(),
+                analogWriteSetUpMessage.resolution());
+    }
+
+    @Override
+    public UUID sendDigitalSetUp(DigitalSetUpMessage messageDigitalSetUp) throws Exception {
+        Member member = ms.loggedMember();
+        return deviceMessagePublish.sendDigitalSetUp(member.getId(),
+                messageDigitalSetUp.deviceId(),
+                messageDigitalSetUp.gpio(),
+                messageDigitalSetUp.mode());
+    }
+
+    @Override
+    public UUID sendPing(PingMessage pingMessage) throws Exception {
+        Member member = ms.loggedMember();
+        return deviceMessagePublish.sendPing(member.getId(), pingMessage.deviceId());
+    }
+
+    @Override
+    public UUID sendPwmWriteRequest(PwmWriteRequestMessage pwmWriteRequestMessage) throws Exception {
+        Member member = ms.loggedMember();
+        return deviceMessagePublish.sendPwmWriteRequest(member.getId(), pwmWriteRequestMessage.deviceId(), pwmWriteRequestMessage.pin(), pwmWriteRequestMessage.value(), pwmWriteRequestMessage.duration());
+    }
+
+    @Override
+    public UUID sendAnalogReadOneShotRequest(AnalogReadOneShotRequestMessage analogReadOneShotRequestMessage) throws Exception {
+        Member member = ms.loggedMember();
+        return deviceMessagePublish.sendAnalogReadOneShotRequest(member.getId(), analogReadOneShotRequestMessage.deviceId(), analogReadOneShotRequestMessage.pin());
     }
 
 
     @Override
-    public UUID sendPwmValueToDevice(SendPwmI configS) throws Exception {
-        Member member = ms.loggedMember();
-        return deviceMessagePublish.sendPwm(member.getId(), configS.deviceId(), configS.pin(), configS.value(), configS.duration());
-    }
-
-    @Override
-    public UUID sendRequestForDataAnalog(SendForAnalogDataI configS) throws Exception {
-        Member member = ms.loggedMember();
-        return deviceMessagePublish.sendForAnalogData(member.getId(), configS.deviceId(), configS.pin());
-    }
-
-
-    @Override
-    public UUID sendPing(SendDigitalI configS) throws Exception {
-        Member member = ms.loggedMember();
-        return deviceMessagePublish.sendForAnalogData(member.getId(), configS.deviceId(), configS.pin());
-    }
-
-    @Override
-    public String save(DeviceCreateI deviceCreateI) {
+    public UUID save(DeviceCreateI deviceCreateI) {
         Member member = ms.loggedMember();
         return ds.saveTemporary(member.getId(), deviceCreateI.name());
     }
@@ -156,16 +182,6 @@ public class DeviceGatewayApi implements DeviceApiInterface, DeviceSendMessageIn
     @Override
     public String getMqttIp() {
         return ap.getMqttIpExternal();
-    }
-
-    @Override
-    public DeviceConfig currentDeviceConfig(String memberId, String deviceId) {
-        return ds.currentDeviceConfig(memberId, deviceId);
-    }
-
-    @Override
-    public Optional<Device> getDevice(String memberId, String deviceId) {
-        return ds.getDevice(memberId, deviceId);
     }
 
     @Override

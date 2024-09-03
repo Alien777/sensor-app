@@ -10,7 +10,7 @@ const runtimeConfig = useRuntimeConfig();
 const {getAllDevice} = deviceApi(runtimeConfig);
 const {getMessageTypes} = configUtilsApi(runtimeConfig);
 const deviceId = ref(null);
-const messageType = ref(null);
+const payloadType = ref(null);
 
 
 const props = defineProps({
@@ -29,7 +29,7 @@ onMounted(() => {
     return;
   }
   deviceId.value = props.sensor.deviceId
-  messageType.value = props.sensor.messageType
+  payloadType.value = props.sensor.payloadType
 })
 
 const provideDataDevice = (value: any) => {
@@ -51,7 +51,7 @@ const provideDataMessageType = (value: any) => {
     value(v);
   })
 }
-watch(messageType, () => {
+watch(payloadType, () => {
   handleUpdate();
 })
 
@@ -63,7 +63,7 @@ function handleUpdate() {
   updateNode(props.id, {
     sensor: {
       deviceId: deviceId,
-      messageType: messageType
+      payloadType: payloadType
     }
   } as any)
 }
@@ -71,5 +71,5 @@ function handleUpdate() {
 
 <template>
   <SelectLazy v-model="deviceId" :provide-data="provideDataDevice" label="Device Id"/>
-  <SelectLazy v-model="messageType" :provide-data="provideDataMessageType" label="Message type"/>
+  <SelectLazy v-model="payloadType" :provide-data="provideDataMessageType" label="Payload Type"/>
 </template>

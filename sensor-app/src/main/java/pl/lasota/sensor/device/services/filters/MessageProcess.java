@@ -24,7 +24,7 @@ public class MessageProcess {
                 .addFilter(ac.getBean(BeforeValidMessageFilter.class))
                 .addFilter(ac.getBean(SetUpDeviceFilter.class))
                 .addFilter(ac.getBean(AuthFilter.class))
-                .addFilter(ac.getBean(SaveSensorValueFilter.class));
+                .addFilter(ac.getBean(BroadcastSensorValueFilter.class));
 
         received(messagePayload.messageFrame(), filterChain);
     }

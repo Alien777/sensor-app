@@ -7,17 +7,18 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pl.lasota.sensor.configs.properties.DeviceProperties;
-import pl.lasota.sensor.device.services.repositories.*;
-import pl.lasota.sensor.entities.*;
-import pl.lasota.sensor.entities.sensor.Sensor;
+import pl.lasota.sensor.device.services.repositories.DeviceConfigRepository;
+import pl.lasota.sensor.device.services.repositories.DeviceRepository;
+import pl.lasota.sensor.device.services.repositories.DeviceTemporaryRepository;
+import pl.lasota.sensor.device.services.repositories.DeviceTokenRepository;
+import pl.lasota.sensor.entities.Device;
+import pl.lasota.sensor.entities.DeviceConfig;
+import pl.lasota.sensor.entities.DeviceTemporary;
+import pl.lasota.sensor.entities.DeviceToken;
 import pl.lasota.sensor.exceptions.SensorApiException;
-import pl.lasota.sensor.exceptions.SensorException;
-import pl.lasota.sensor.payload.MessageFrame;
-import pl.lasota.sensor.payload.MessageType;
-import pl.lasota.sensor.payload.to.dependet.AnalogConfig;
-import pl.lasota.sensor.payload.to.ConfigPayload;
-import pl.lasota.sensor.payload.to.dependet.DigitalConfig;
-import pl.lasota.sensor.payload.to.dependet.PwmConfig;
+import pl.lasota.sensor.flow.SettingDeviceConfigInterface;
+import pl.lasota.sensor.payload.PayloadType;
+import pl.lasota.sensor.payload.message.Config;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -25,12 +26,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.OffsetDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
-
-import static pl.lasota.sensor.payload.MessageType.*;
 
 @Service
 @RequiredArgsConstructor
@@ -38,49 +36,15 @@ import static pl.lasota.sensor.payload.MessageType.*;
 public class DeviceDataService {
 
     private final DeviceRepository dr;
-    private final SensorRecordingRepository srr;
     private final DeviceConfigRepository dcr;
     private final DeviceConfigService dsu;
     private final DeviceTemporaryRepository dtr;
     private final DeviceTokenRepository dtor;
-
-    @Transactional(rollbackFor = SensorException.class)
-    public Sensor insertSensorReading(MessageFrame messageFrame) {
-        Optional<Device> deviceOptional = dr.findDeviceBy(messageFrame.getMemberId(), messageFrame.getDeviceId());
-
-        if (deviceOptional.isEmpty()) {
-            return null;
-        }
-        Device device = deviceOptional.get();
-
-        var sensorBuilder = (Sensor.SensorBuilder) messageFrame.getPayloadFromDriver(messageFrame.getPayload());
-        if (sensorBuilder == null) {
-            return null;
-        }
-        Optional<DeviceConfig> configOptional = dcr.getDeviceConfig(device.getId(), messageFrame.getConfigIdentifier());
-
-        if (configOptional.isEmpty() && !DEVICE_CONNECTED.equals(messageFrame.getMessageType()) && !PING_ACK.equals(messageFrame.getMessageType())) {
-            throw new SensorApiException("Not found device config");
-        }
-
-        Sensor sensor = sensorBuilder.time(OffsetDateTime.now())
-                .device(device)
-                .forConfig(configOptional.orElse(device.getCurrentDeviceConfig()))
-                .messageType(messageFrame.getMessageType())
-                .build();
-
-        device.getSensor().add(sensor);
-
-        srr.save(sensor);
-        dr.save(device);
-
-        return sensor;
-
-    }
+    private final SettingDeviceConfigInterface sdci;
 
     @Transactional
-    public String saveTemporary(String memberId, String name) {
-        String token = UUID.randomUUID().toString();
+    public UUID saveTemporary(String memberId, String name) {
+        UUID token = UUID.randomUUID();
         DeviceToken deviceToken = DeviceToken.builder()
                 .member(memberId)
                 .token(token).build();
@@ -95,7 +59,7 @@ public class DeviceDataService {
 
 
     @Transactional
-    public boolean moveToDeviceFromTemporary(String memberId, String deviceId, String token) {
+    public boolean moveToDeviceFromTemporary(String memberId, String deviceId, UUID token) {
 
         Optional<DeviceTemporary> deviceTemplateOptional = dtr.getDeviceTemplate(memberId, token);
         Optional<Device> deviceOptional = dr.findDeviceBy(memberId, deviceId);
@@ -126,23 +90,6 @@ public class DeviceDataService {
         }
     }
 
-    @Transactional(rollbackFor = SensorException.class)
-    public void setUpVersion(String memberId, String deviceId, String version) {
-        if (!dr.existsDevice(memberId, deviceId)) {
-            return;
-        }
-        Device device = dr.getReferenceById(deviceId);
-        if (device.getVersion() != null) {
-            return;
-        }
-
-        device.setVersion(version);
-
-        DeviceConfig deviceConfig = dsu.createDefaultDeviceConfig(version, device);
-        device.setCurrentDeviceConfig(deviceConfig);
-
-        dr.save(device);
-    }
 
     @Transactional
     public DeviceConfig currentDeviceConfig(String memberId, String deviceId) {
@@ -166,7 +113,7 @@ public class DeviceDataService {
     @Transactional
     public DeviceConfig saveConfig(String memberId, String config, String versionConfig, String deviceId) {
         try {
-            new ObjectMapper().readValue(config, ConfigPayload.class);
+            new ObjectMapper().readValue(config, Config.class);
         } catch (JsonProcessingException e) {
             throw new SensorApiException(e, "Occurred problem with parser config");
         }
@@ -209,7 +156,7 @@ public class DeviceDataService {
         return dr.existsDevice(memberId, deviceId);
     }
 
-    public boolean isCurrentTokenValid(String memberId, String deviceId, String token) {
+    public boolean isCurrentTokenValid(String memberId, String deviceId, UUID token) {
         return dr.isCurrentTokenValid(memberId, deviceId, token);
     }
 
@@ -242,58 +189,23 @@ public class DeviceDataService {
 
     @Transactional
     public List<Integer> getPwmPins(String memberId, String deviceId) {
-
-        DeviceConfig deviceConfig = currentDeviceConfig(memberId, deviceId);
-        ConfigPayload configPayload;
-        try {
-            configPayload = dsu.mapConfigToObject(deviceConfig.getConfig());
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
-        return configPayload.getPwmConfig().stream().map(PwmConfig::getPin).collect(Collectors.toList());
+        return sdci.configuredPwmGpioPins(deviceId);
     }
 
     @Transactional
     public List<Integer> getDigitalPins(String memberId, String deviceId) {
-
-        DeviceConfig deviceConfig = currentDeviceConfig(memberId, deviceId);
-        ConfigPayload configPayload;
-        try {
-            configPayload = dsu.mapConfigToObject(deviceConfig.getConfig());
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
-        return configPayload.getDigitalConfig().stream().map(DigitalConfig::getPin).collect(Collectors.toList());
+        return sdci.configuredDigitalGpioPins(deviceId);
     }
 
     @Transactional
     public List<Integer> getAnalogPins(String memberId, String deviceId) {
-
-        DeviceConfig deviceConfig = currentDeviceConfig(memberId, deviceId);
-        ConfigPayload configPayload;
-        try {
-            configPayload = dsu.mapConfigToObject(deviceConfig.getConfig());
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
-        return configPayload.getAnalogReader().stream().map(AnalogConfig::getPin).collect(Collectors.toList());
+        return sdci.configuredAnalogGpioPins(deviceId);
     }
 
     @Transactional
-    public List<MessageType> getMessageType(String memberId, String deviceId) {
-        ConfigPayload configPayload;
-        DeviceConfig deviceConfig = currentDeviceConfig(memberId, deviceId);
-        try {
-            configPayload = dsu.mapConfigToObject(deviceConfig.getConfig());
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+    public List<PayloadType> getMessageType(String memberId, String deviceId) {
 
-        if (!configPayload.getAnalogReader().isEmpty()) {
-            return MessageType.getListMessageTypeFromDevice();
-        }
-
-        return Collections.singletonList(DEVICE_CONNECTED);
+        return PayloadType.getListMessageTypeFromDevice();
     }
 
     @Transactional
@@ -304,7 +216,7 @@ public class DeviceDataService {
                                        String apPassword,
                                        String memberId,
                                        DeviceProperties ap) throws IOException {
-        String token = saveTemporary(memberId, deviceName);
+        UUID token = saveTemporary(memberId, deviceName);
         String[] command = {
                 Paths.get(ap.getFirmwareFolder(), version, ap.getGenerateBuildPackage()).toString(),
                 wifiSsid,
@@ -313,7 +225,7 @@ public class DeviceDataService {
                 apPassword,
                 memberId,
                 ap.getMqttIpExternal(),
-                token,
+                token.toString(),
                 Paths.get(ap.getFirmwareFolder(), version).toAbsolutePath().toString()
         };
         String last = "";
@@ -371,7 +283,7 @@ public class DeviceDataService {
 
     }
 
-    public boolean isTokenExist(String memberId, String token) {
+    public boolean isTokenExist(String memberId, UUID token) {
         return dtor.isExist(memberId, token);
     }
 

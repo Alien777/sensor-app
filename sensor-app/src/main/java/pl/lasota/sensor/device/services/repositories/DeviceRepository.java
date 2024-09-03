@@ -9,6 +9,7 @@ import pl.lasota.sensor.entities.Device;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
 public interface DeviceRepository extends JpaRepository<Device, String> {
@@ -17,7 +18,7 @@ public interface DeviceRepository extends JpaRepository<Device, String> {
     boolean existsDevice(@Param("memberId") String memberId, @Param("deviceId") String deviceId);
 
     @Query("SELECT COUNT(s) > 0 FROM Device s WHERE s.member = :memberId AND s.id = :deviceId AND s.currentDeviceToken.token = :token")
-    boolean isCurrentTokenValid(@Param("memberId") String memberId, @Param("deviceId") String deviceId, @Param("token") String token);
+    boolean isCurrentTokenValid(@Param("memberId") String memberId, @Param("deviceId") String deviceId, @Param("token") UUID token);
 
     @Query("SELECT s FROM Device s WHERE s.member = :memberId AND s.version IS NOT NULL")
     List<Device> findAllDevicesBy(@Param("memberId") String memberId);

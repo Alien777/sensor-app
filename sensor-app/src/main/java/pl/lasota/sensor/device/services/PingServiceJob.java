@@ -22,7 +22,7 @@ public class PingServiceJob {
         List<Device> allDevices = deviceDataService.getAllDevices();
         for (Device allDevice : allDevices) {
             try {
-                mf.sendForPingData(allDevice.getMember(), allDevice.getId());
+                mf.sendPing(allDevice.getMember(), allDevice.getId());
             } catch (Exception e) {
                 log.error("Problem with send ping {}", allDevice.getId(), e);
             }

@@ -5,9 +5,11 @@ import org.springframework.stereotype.Service;
 import pl.lasota.sensor.bus.broadcast.CustomerBroadcast;
 import pl.lasota.sensor.bus.broadcast.impl.WaitForResponseBroadcasterStream;
 
+import java.util.UUID;
+
 @Service
 @RequiredArgsConstructor
-public class WaitForResponseInputStreamBus extends CustomerBroadcast<String, String> {
+public class WaitForResponseInputStreamBus extends CustomerBroadcast<String, UUID> {
 
     private final WaitForResponseBroadcasterStream broadcast;
 

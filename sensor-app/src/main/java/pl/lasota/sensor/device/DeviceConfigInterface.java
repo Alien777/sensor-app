@@ -4,7 +4,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import pl.lasota.sensor.device.model.ConfigCreateI;
 import pl.lasota.sensor.device.model.ConfigI;
-import pl.lasota.sensor.entities.DeviceConfig;
 
 import java.util.List;
 
@@ -28,6 +27,4 @@ public interface DeviceConfigInterface {
     List<String> getConfigMessageType(@RequestParam(value = "deviceId") String deviceId);
 
     List<Integer> getConfigDigitalPins(String deviceId);
-
-    DeviceConfig currentDeviceConfig(String memberId, String deviceId);
 }

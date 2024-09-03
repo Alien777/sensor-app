@@ -12,7 +12,7 @@ public class MessageMappingFilter implements Filter<String, MessageFrame> {
 
     @Override
     public void execute(String request, FilterContext context, Chain<MessageFrame> chain) throws Exception {
-        chain.doFilter(new MessageFrame().revertConvert(request));
+        chain.doFilter(MessageFrame.of(request));
     }
 
 }

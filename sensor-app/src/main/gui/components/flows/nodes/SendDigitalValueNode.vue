@@ -40,7 +40,7 @@ const provideDataPins = (value: any) => {
 }
 
 const deviceId = ref(null);
-const pin = ref(null);
+const gpio = ref(null);
 const valueVariable = ref(null);
 
 onMounted(() => {
@@ -48,14 +48,14 @@ onMounted(() => {
     return;
   }
   deviceId.value = props.sensor.deviceId
-  pin.value = props.sensor.pin
+  gpio.value = props.sensor.gpio
   valueVariable.value = props.sensor.valueVariable
 })
 
 watch(deviceId, () => {
   handleUpdate();
 })
-watch(pin, () => {
+watch(gpio, () => {
   handleUpdate();
 })
 watch(valueVariable, () => {
@@ -66,7 +66,7 @@ function handleUpdate() {
   updateNode(props.id, {
     sensor: {
       deviceId: deviceId,
-      pin: pin,
+      gpio: gpio,
       valueVariable: valueVariable
     }
   } as any)
@@ -75,6 +75,6 @@ function handleUpdate() {
 
 <template>
   <SelectLazy v-model="deviceId" :provide-data="provideDataDevice" label="Device id"/>
-  <SelectLazy v-model="pin" :provide-data="provideDataPins" label="Digital pin"/>
+  <SelectLazy v-model="gpio" :provide-data="provideDataPins" label="Digital pin"/>
   <q-input v-model="valueVariable" label="Variable" maxlength="40"/>
 </template>

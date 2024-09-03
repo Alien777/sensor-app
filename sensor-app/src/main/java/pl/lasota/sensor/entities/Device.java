@@ -2,10 +2,7 @@ package pl.lasota.sensor.entities;
 
 import jakarta.persistence.*;
 import lombok.*;
-import pl.lasota.sensor.entities.sensor.Sensor;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 @Entity
@@ -37,9 +34,6 @@ public class Device {
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinColumn(name = "current_device_config_id")
     private DeviceConfig currentDeviceConfig;
-
-    @OneToMany(mappedBy = "device", fetch = FetchType.LAZY)
-    private List<Sensor> sensor = new ArrayList<>();
 
     @Override
     public boolean equals(Object o) {

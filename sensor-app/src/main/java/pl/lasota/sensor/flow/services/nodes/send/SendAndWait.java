@@ -9,7 +9,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
-public class SendAndWait implements AsyncNodeConsumer<String, String> {
+public class SendAndWait implements AsyncNodeConsumer<String, UUID> {
     private final WaitForResponseInputStreamBus waitForResponseInputStreamBus;
     private final ProvideRequest provideRequest;
     private final CountDownLatch latch;
@@ -40,8 +40,8 @@ public class SendAndWait implements AsyncNodeConsumer<String, String> {
     }
 
     @Override
-    public void consume(String s, String requestId) {
-        if (requestId.equals(waitForMessage.toString())) {
+    public void consume(String s, UUID requestId) {
+        if (requestId.equals(waitForMessage)) {
             latch.countDown();
         }
     }

@@ -60,7 +60,7 @@ class ParserFlowTest {
                     "sensor":{
                        "deviceId": "device",
                        "memberId": "member",
-                       "messageType": "ANALOG",
+                       "payloadType": "ANALOG",
                        "pin": "1",
                        "valueVariable": "value"
                     },
@@ -92,7 +92,7 @@ class ParserFlowTest {
                     "sensor":{
                        "deviceId": "device",
                        "memberId": "member",
-                       "messageType": "ANALOG",
+                       "payloadType": "ANALOG",
                        "pin": "1",
                        "valueVariable": "value"
                     },
@@ -154,7 +154,7 @@ class ParserFlowTest {
                       "type": "input",
                       "sensor": {
                         "deviceId": "DDDDDDDDDDDD",
-                        "messageType": "DEVICE_CONNECTED"
+                        "payloadType": "DEVICE_CONNECTED"
                       },
                       "childed": [
                         "ExecuteCodeNode_0"

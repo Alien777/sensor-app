@@ -19,8 +19,9 @@ public class MqttMessagePublish {
     private final IMqttClient iMqttClient;
 
     public void publish(MessageFrame messageFrame) throws MqttException, JsonProcessingException {
-        iMqttClient.publish("/" + messageFrame.getMemberId() + "/" + messageFrame.getDeviceId(), new MqttMessage(messageFrame.convert().getBytes(StandardCharsets.UTF_8)));
-        log.info("Sent messageFrame  {}", messageFrame.getMessageType());
+        String payload = messageFrame.convert();
+        iMqttClient.publish("/" + messageFrame.getMemberId() + "/" + messageFrame.getDeviceId(), new MqttMessage(payload.getBytes(StandardCharsets.UTF_8)));
+        log.info("Sent messageFrame  {} {}", messageFrame.getPayloadType(),payload);
     }
 
 }

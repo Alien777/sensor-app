@@ -22,88 +22,69 @@
 #include <esp_err.h>
 #include "payload/message_type.h"
 typedef struct WifiNetwork WifiNetwork;
-typedef struct AnalogTask AnalogTask;
-typedef struct PwmTask PwmTask;
-typedef struct Message Message;
-typedef struct AnalogConfig AnalogConfig;
-typedef struct PwmConfig PwmConfig;
-typedef struct DigitalConfig DigitalConfig;
+
 typedef struct ConfigEps ConfigEps;
-typedef struct PwmSetup PwmSetup;
-typedef struct DigitalSetup DigitalSetup;
-typedef struct AnalogReadData AnalogReadData;
 
-struct PwmConfig
+typedef struct ParsedMessage ParsedMessage;
+typedef struct AnalogReadSetUp AnalogReadSetUp;
+typedef struct PwmWriteSetUp PwmWriteSetUp;
+typedef struct DigitalSetUp DigitalSetUp;
+typedef struct PwmWriteRequest PwmWriteRequest;
+typedef struct DigitalWriteRequest DigitalWriteRequest;
+typedef struct AnalogReadOneShotRequest AnalogReadOneShotRequest;
+
+struct PwmWriteSetUp
 {
+    int gpio;
+    int frequency;
     int resolution;
-    int freq;
-    int channel;
-    int pin;
-};
-
-struct DigitalConfig
-{
-    int pin;
-};
-
-struct AnalogConfig
-{
-    int pin;
-    int width;
-    int atten;
-};
-
-struct PwmTask
-{
-    int config_id;
-    char request_id[37];
-    PwmConfig pwm_config;
-};
-
-struct AnalogTask
-{
-    int config_id;
-    char request_id[37];
-    AnalogConfig analog_config;
-};
-
-struct PwmSetup
-{
-    int pin;
     int duty;
+};
+
+struct DigitalSetUp
+{
+    int gpio;
+    int mode;
+};
+
+struct AnalogReadSetUp
+{
+    int gpio;
+    int resolution;
+};
+
+struct PwmWriteRequest
+{
+    int gpio;
     int duration;
+    int duty;
 };
 
-struct DigitalSetup
+struct DigitalWriteRequest
 {
-    int pin;
-    int value;
+    int gpio;
+    bool level;
 };
 
-struct AnalogReadData
+struct AnalogReadOneShotRequest
 {
-    int pin;
+    int gpio;
 };
 
-struct Message
+struct ParsedMessage
 {
-    int config_id;
     char *request_id;
     MessageType message_type;
 
-    PwmConfig pwm_configs[MAX_S];
-    AnalogConfig analog_configs[MAX_S];
-    DigitalConfig digital_configs[MAX_S];
-    PwmSetup pwn_setup;
-    DigitalSetup digital_setup;
-    AnalogReadData analog_read_data;
+    DigitalSetUp  digital_set_up;
+    AnalogReadSetUp analog_read_set_up;
+    PwmWriteSetUp pwm_write_set_up;
 
-    int analog_configs_size;
-    int pwm_configs_size;
-    int digital_configs_size;
+    PwmWriteRequest pwm_write_request;
+    DigitalWriteRequest digital_write_request;
+    AnalogReadOneShotRequest analog_read_one_shot_request;
 };
 
- 
 struct ConfigEps
 {
     char wifi_ssid[32];
@@ -116,5 +97,6 @@ struct ConfigEps
 };
 
 const char *topicSubscribe();
- 
+
+void generate_uuid(char *uuid_str);
 #endif

@@ -18,7 +18,6 @@ public  class SetUpDeviceFilter implements Filter<MessageFrame, MessageFrame> {
 
     @Override
     public void execute(MessageFrame request, FilterContext context, Chain<MessageFrame> chain) throws Exception {
-        deviceDataService.setUpVersion(request.getMemberId(), request.getDeviceId(), request.getVersionFirmware());
         chain.doFilter(request);
     }
 }

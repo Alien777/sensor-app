@@ -10,8 +10,8 @@ void start()
   file_system_initial();
   memory_initial();
   wifi_init();
-  time_initial();
-  showTime();
+  // time_initial();
+  // showTime();
   mqtt_initial();
 }
 

@@ -15,6 +15,7 @@ import pl.lasota.sensor.flow.services.nodes.NodeStart;
 import pl.lasota.sensor.flow.services.nodes.utils.FlowContext;
 import pl.lasota.sensor.flow.services.nodes.utils.GlobalContext;
 import pl.lasota.sensor.flow.services.nodes.utils.LocalContext;
+import pl.lasota.sensor.payload.PayloadType;
 
 import static pl.lasota.sensor.flow.services.nodes.builder.ParserFlows.fString;
 
@@ -33,7 +34,7 @@ public class ListeningSensorNode extends NodeStart implements AsyncNodeConsumer<
 
     public static Node create(String ref, GlobalContext globalContext, JsonNode node, ApplicationContext context) {
         String deviceId = fString(node, "deviceId");
-        String type = fString(node, "messageType").toUpperCase();
+        PayloadType type = PayloadType.valueOf(fString(node, "payloadType").toUpperCase());
         ListeningSensorNode.Data data = ListeningSensorNode.Data.create(deviceId, type);
         return new ListeningSensorNode(ref, globalContext, data, context.getBean(FlowSensorIInputStreamBus.class));
     }
@@ -75,25 +76,25 @@ public class ListeningSensorNode extends NodeStart implements AsyncNodeConsumer<
     @Getter
     public static class Data {
         private final String deviceId;
-        private final String forMessageType;
+        private final PayloadType forMessageType;
     }
 
 
     private boolean analyze(FlowSensorI sensor, LocalContext localContext) {
-        if (!sensor.getMessageType().equals(data.forMessageType)) {
+        if (!sensor.getPayloadType().equals(data.forMessageType)) {
             return false;
         }
 
-        return switch (sensor.getMessageType()) {
-            case "DEVICE_CONNECTED", "PING_ACK", "PWM_ACK" -> {
-                yield true;
+        switch (sensor.getPayloadType()) {
+            case CONNECTED_ACK -> {
             }
-            case "ANALOG" -> {
+            case ANALOG_READ_ONE_SHOT_RESPONSE -> {
                 FlowSensorAnalogI s = (FlowSensorAnalogI) sensor;
                 localContext.getVariables().put(id, s);
-                yield true;
             }
-            default -> false;
-        };
+            default -> {
+            }
+        }
+        return true;
     }
 }

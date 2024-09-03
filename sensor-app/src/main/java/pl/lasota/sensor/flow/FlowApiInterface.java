@@ -17,8 +17,6 @@ public interface FlowApiInterface {
 
     void stopFlows(@PathVariable(value = "id") Long id) throws SensorFlowException;
 
-    void fireOnce(@PathVariable(value = "id") Long id) throws SensorFlowException;
-
     void restartFlow(@PathVariable(value = "id") Long id) throws SensorFlowException;
 
     void delete(@PathVariable(value = "id") Long id) throws SensorFlowException;

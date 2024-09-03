@@ -5,7 +5,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.context.ApplicationContext;
 import pl.lasota.sensor.device.DeviceSendMessageInterface;
-import pl.lasota.sensor.device.model.SendForAnalogDataI;
+import pl.lasota.sensor.device.model.AnalogReadOneShotRequestMessage;
+import pl.lasota.sensor.exceptions.SensorFlowException;
+import pl.lasota.sensor.flow.services.keeper.KeeperForSetUp;
 import pl.lasota.sensor.flow.services.nodes.FlowNode;
 import pl.lasota.sensor.flow.services.nodes.Node;
 import pl.lasota.sensor.flow.services.nodes.utils.GlobalContext;
@@ -28,13 +30,18 @@ public class RequestAnalogDataNode extends Node {
 
     public static Node create(String ref, GlobalContext globalContext, JsonNode node, ApplicationContext context) {
         String deviceId = fString(node, "deviceId");
-        Integer pin = fInteger(node, "pin");
-        return new RequestAnalogDataNode(ref, globalContext, RequestAnalogDataNode.Data.create(deviceId, pin), context.getBean(DeviceSendMessageInterface.class));
+        Integer gpio = fInteger(node, "gpio");
+        KeeperForSetUp dci = context.getBean(KeeperForSetUp.class);
+
+        if (!dci.contains(deviceId, KeeperForSetUp.TypeConfig.ANALOG, gpio)) {
+            throw new SensorFlowException("Analog pin {} not found for device {}", gpio, deviceId);
+        }
+        return new RequestAnalogDataNode(ref, globalContext, RequestAnalogDataNode.Data.create(deviceId, gpio), context.getBean(DeviceSendMessageInterface.class));
     }
 
     @Override
     protected void fireChildNodes(LocalContext localContext) throws Exception {
-        deviceSendMessageInterface.sendRequestForDataAnalog(new SendForAnalogDataI(data.deviceId, data.pin));
+        deviceSendMessageInterface.sendAnalogReadOneShotRequest(new AnalogReadOneShotRequestMessage(data.deviceId, data.pin));
         super.fireChildNodes(localContext);
     }
 

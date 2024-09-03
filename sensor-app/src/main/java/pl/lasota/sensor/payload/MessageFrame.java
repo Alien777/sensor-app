@@ -1,126 +1,57 @@
 package pl.lasota.sensor.payload;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
-import pl.lasota.sensor.payload.from.AnalogAckDevicePayload;
-import pl.lasota.sensor.payload.from.ConnectDevicePayload;
-import pl.lasota.sensor.payload.from.PingAckDevicePayload;
-import pl.lasota.sensor.payload.from.PwmAckDevicePayload;
-import pl.lasota.sensor.payload.to.*;
+import pl.lasota.sensor.payload.message.*;
+import pl.lasota.sensor.payload.message.analog.*;
+import pl.lasota.sensor.payload.message.digital.*;
+import pl.lasota.sensor.payload.message.pwm.*;
 
 import java.util.Arrays;
 import java.util.UUID;
 
 @Data
-public class MessageFrame implements Parse<MessageFrame, String> {
 
-    /**
-     * @hidden
-     */
-    public MessageFrame() {
-    }
+public class MessageFrame implements PayloadParser<MessageFrame, String> {
 
-    @JsonProperty("config_identifier")
-    private Long configIdentifier;
-
-    @JsonProperty("version_firmware")
-    private String versionFirmware;//max 12 chars
-
-    @JsonProperty("device_id")
     private String deviceId;//max 12 chars
 
-    @JsonProperty("member_id")
     private String memberId;//max 16 chars
 
-    @JsonProperty("token")
-    private String token; // max 36 chars
+    private String versionFirmware;//max 12 chars
 
-    @JsonProperty("request_id")
-    private String requestId;// max 36 chars
+    private UUID token; // max 36 chars
 
-    @JsonProperty("message_type")
-    private MessageType messageType; //max 20 chars
+    private UUID requestId;// max 36 chars
 
-    @JsonProperty("payload")
-    private String payload;
+    private PayloadType payloadType; //max 20 chars
 
+    private PayloadParser<?, String> payload;
 
     public String getDeviceId() {
         return deviceId == null ? null : deviceId.toUpperCase();
     }
 
-    /**
-     * @hidden
-     */
-    private MessageFrame(Long configId, String version, String deviceId, String memberId, MessageType messageType, String token, String payload) {
-        this.configIdentifier = configId;
-        this.versionFirmware = version;
-        this.token = token;
+
+    public static MessageFrame of(String memberId, String deviceId, UUID token, String versionFirmware, PayloadType payloadType, PayloadParser<?, String> payload) {
+        return new MessageFrame(memberId, deviceId, token, versionFirmware, UUID.randomUUID(), payloadType, payload);
+    }
+
+    private MessageFrame(String memberId, String deviceId, UUID token, String versionFirmware, UUID requestId, PayloadType payloadType, PayloadParser<?, String> payload) {
         this.deviceId = deviceId;
         this.memberId = memberId;
-        this.messageType = messageType;
+        this.token = token;
+        this.versionFirmware = versionFirmware;
+        this.requestId = requestId;
+        this.payloadType = payloadType;
         this.payload = payload;
-        this.requestId = UUID.randomUUID().toString();
     }
 
 
-    /**
-     * @hidden
-     */
-    @JsonIgnore
-    public Object getPayloadFromDriver(String source) {
-        return switch (messageType) {
-            case DEVICE_CONNECTED -> new ConnectDevicePayload().revertConvert(source);
-            case PING_ACK -> new PingAckDevicePayload().revertConvert(source);
-            case PWM_ACK -> new PwmAckDevicePayload().revertConvert(source);
-            case CONFIG -> new ConfigPayload().revertConvert(source);
-            case ANALOG -> new AnalogDataPayload().revertConvert(source);
-            case ANALOG_ACK -> new AnalogAckDevicePayload().revertConvert(source);
-            case PWM -> new PwmPayload().revertConvert(source);
-            case DIGITAL_WRITE -> new DigitalPayload().revertConvert(source);
-            case PING -> new PingPayload().revertConvert(source);
-        };
-    }
-
-    /**
-     * @hidden
-     */
-    @JsonIgnore
-    public static MessageFrame factoryConfigPayload(Long configId, String version, String deviceId, String memberId, String token, ConfigPayload configPayload) {
-        return new MessageFrame(configId, version, deviceId, memberId, MessageType.CONFIG, token, configPayload.convert());
-    }
-
-    /**
-     * @hidden
-     */
-    @JsonIgnore
-    public static MessageFrame factoryPwmPayload(Long configId, String version, String deviceId, String memberId, String token, PwmPayload pwmPayload) {
-        return new MessageFrame(configId, version, deviceId, memberId, MessageType.PWM, token, pwmPayload.convert());
-    }
-
-    /**
-     * @hidden
-     */
-    public static MessageFrame factoryDigitalPayload(Long configId, String version, String deviceId, String memberId, String token, DigitalPayload digitalPayload) {
-        return new MessageFrame(configId, version, deviceId, memberId, MessageType.DIGITAL_WRITE, token, digitalPayload.convert());
-    }
-
-    /**
-     * @hidden
-     */
-    @JsonIgnore
-    public static MessageFrame factorySendForAnalogData(Long configId, String version, String deviceId, String memberId,
-                                                        String token, AnalogDataPayload analogDataPayload) {
-        return new MessageFrame(configId, version, deviceId, memberId, MessageType.ANALOG, token, analogDataPayload.convert());
-    }
-
-    /**
-     * @hidden
-     */
-    @JsonIgnore
-    public static MessageFrame factorySendPingData(Long configId, String version, String deviceId, String memberId, String token, PingPayload pingPayload) {
-        return new MessageFrame(configId, version, deviceId, memberId, MessageType.PING, token, pingPayload.convert());
+    public static MessageFrame of(String source) {
+        String[] split = source.split(";");
+        PayloadType payloadType1 = PayloadType.valueOf(split[5]);
+        PayloadParser<?, String> stringPayloadParser = serializePayload(String.join(";", Arrays.copyOfRange(split, 6, split.length)), payloadType1);
+        return new MessageFrame(split[1], split[0],  UUID.fromString(split[2]), split[3], UUID.fromString(split[4]), payloadType1, stringPayloadParser);
     }
 
     @Override
@@ -128,25 +59,54 @@ public class MessageFrame implements Parse<MessageFrame, String> {
         return deviceId + ";"
                 + memberId + ";"
                 + token + ";"
-                + versionFirmware + ";" +
-                (configIdentifier != null ? configIdentifier : 0) + ";"
+                + versionFirmware + ";"
                 + requestId + ";"
-                + messageType.name() + ";"
-                + payload;
+                + payloadType.name() + ";"
+                + payload.convert();
     }
 
     @Override
     public MessageFrame revertConvert(String source) {
-        String[] split = source.split(";");
-
-        this.deviceId = split[0];
-        this.memberId = split[1];
-        this.token = split[2];
-        this.versionFirmware = split[3];
-        this.configIdentifier = Long.valueOf(split[4]);
-        this.requestId = split[5];
-        this.messageType = MessageType.valueOf(split[6]);
-        this.payload =  String.join(";", Arrays.copyOfRange(split, 7, split.length));
-        return this;
+        return of(source);
     }
+
+
+    private static PayloadParser<?, String> serializePayload(String source, PayloadType payloadType) {
+        // Handle any remaining cases
+        return switch (payloadType) {
+            case PWM_WRITE_REQUEST -> PwmWriteRequest.of(source);
+            case PING -> Ping.of(source);
+            case CONFIG -> Config.of(source);
+            case CONNECTED_ACK -> ConnectedAck.of(source);
+            case PING_ACK -> PingAck.of(source);
+            case CONFIG_ACK -> ConfigAck.of(source);
+            case PWM_WRITE_SET_UP -> PwmWriteSetUp.of(source);
+            case PWM_WRITE_SET_UP_ACK -> PwmWriteSetUpAck.of(source);
+            case PWM_WRITE_TEAR_DOWN -> PwmWriteTearDown.of(source);
+            case PWM_WRITE_TEAR_DOWN_ACK -> PwmWriteTearDownAck.of(source);
+            case PWM_WRITE_RESPONSE -> PwmWriteResponse.of(source);
+            case ANALOG_READ_SET_UP -> AnalogReadSetUp.of(source);
+            case ANALOG_READ_SET_UP_ACK -> AnalogReadSetUpAck.of(source);
+            case ANALOG_READ_TEAR_DOWN -> AnalogReadTearDown.of(source);
+            case ANALOG_READ_TEAR_DOWN_ACK -> AnalogReadTearDownAck.of(source);
+            case ANALOG_READ_ONE_SHOT_REQUEST -> AnalogReadOneShotRequest.of(source);
+            case ANALOG_READ_ONE_SHOT_RESPONSE -> AnalogReadOneShotResponse.of(source);
+            case ANALOG_READ_CONTINOUS_REQUEST -> AnalogReadContinuousRequest.of(source);
+            case ANALOG_READ_CONTINOUS_RESPONSE -> AnalogReadContinuousResponse.of(source);
+            case DIGITAL_SET_UP -> DigitalSetUp.of(source);
+            case DIGITAL_SET_UP_ACK -> DigitalSetUpAck.of(source);
+            case DIGITAL_TEAR_DOWN -> DigitalTearDown.of(source);
+            case DIGITAL_TEAR_DOWN_ACK -> DigitalTearDownAck.of(source);
+            case DIGITAL_WRITE_REQUEST -> DigitalWriteRequest.of(source);
+            case DIGITAL_WRITE_RESPONSE -> DigitalWriteResponse.of(source);
+            case DIGITAL_READ_ONE_SHOT_REQUEST -> DigitalReadOneShotRequest.of(source);
+            case DIGITAL_READ_ONE_SHOT_RESPONSE -> DigitalReadOneShotResponse.of(source);
+            case DIGITAL_READ_CONTINOUS_REQUEST -> DigitalReadContinuousRequest.of(source);
+            case DIGITAL_READ_CONTINOUS_RESPONSE -> DigitalReadContinuousResponse.of(source);
+            // Handle any remaining cases
+            default -> throw new IllegalArgumentException("Unsupported payload type: " + payloadType);
+        };
+    }
+
+
 }

@@ -79,18 +79,6 @@ public class FlowGatewayApi implements FlowApiInterface {
     }
 
     @Override
-    public void fireOnce(Long id) throws SensorFlowException {
-        Member member = ms.loggedMember();
-        Optional<Flow> flowsInDb = flowDataService.findFlows(member.getId(), id);
-        if (flowsInDb.isEmpty()) {
-            throw new SensorFlowException("Not Fire Once flow by id: {} because not existing in db", id);
-        }
-        Flow flow = flowsInDb.get();
-        managerFlowService.start(id, flow.getConfig());
-    }
-
-
-    @Override
     public void delete(Long id) {
         Member member = ms.loggedMember();
         Optional<Flow> flowsInDb = flowDataService.findFlows(member.getId(), id);
@@ -99,8 +87,8 @@ public class FlowGatewayApi implements FlowApiInterface {
         }
         if (managerFlowService.contains(id)) {
             managerFlowService.stop(id);
-            flowDataService.delete(id);
         }
+        flowDataService.delete(id);
     }
 
     @Override

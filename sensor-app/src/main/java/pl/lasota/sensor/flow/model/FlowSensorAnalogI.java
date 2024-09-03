@@ -18,7 +18,7 @@ public class FlowSensorAnalogI extends FlowSensorI implements Serializable {
     public FlowSensorAnalogI(FlowSensorI flowSensorI) {
         setDeviceId(flowSensorI.getDeviceId());
         setMemberId(flowSensorI.getMemberId());
-        setMessageType(flowSensorI.getMessageType());
+        setPayloadType(flowSensorI.getPayloadType());
     }
 
     public FlowSensorAnalogI setPin(Integer pin) {

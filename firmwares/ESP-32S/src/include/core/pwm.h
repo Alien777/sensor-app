@@ -12,8 +12,7 @@
 #include "sensor_mqtt.h"
 #include "sensor_structure.h"
 #include "payload/message_type.h"
-void set_pwm(Message *message);
-void setup_pwm(Message *message);
-void reset_pwm_settings();
+void pwm_write_request(ParsedMessage message, PwmWriteRequest payload);
+void pwm_write_set_up(ParsedMessage message, PwmWriteSetUp payload);
 
 #endif

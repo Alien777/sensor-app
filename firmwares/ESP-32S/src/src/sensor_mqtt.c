@@ -2,7 +2,7 @@
 #include "sensor_memory.h"
 #include "sensor_mqtt.h"
 #include "sensor_wifi.h"
-#include "core/sensor_config.h"
+#include "core/message_distribute.h"
 #include "payload/message_frame.h"
 
 const static char *TAG_MQTT = "MQTT";
@@ -13,14 +13,16 @@ static void mqttEventHandler(void *handler_args, esp_event_base_t base, int32_t 
 
 static void mqttEventHandler(void *handler_args, esp_event_base_t base, int32_t event_id, void *event_data)
 {
-  
+
     esp_mqtt_event_handle_t event = (esp_mqtt_event_handle_t)event_data;
 
     switch ((esp_mqtt_event_id_t)event_id)
     {
     case MQTT_EVENT_CONNECTED:
         ESP_LOGI(TAG_MQTT, "MQTT_EVENT_CONNECTED");
-        publish(-1, "DEVICE_CONNECTION", ";", CONNECTED_ACK);
+        char uuid_str[37]; // UUIDs are 36 characters plus the null terminator
+        generate_uuid(uuid_str);
+        publish("88440fe2-f6cd-4b47-8e1b-10367cc48b4d", ";", CONNECTED_ACK);
         esp_mqtt_client_subscribe(client, topicSubscribe(), 0); // Subscribe to the topic
         break;
     case MQTT_EVENT_DISCONNECTED:
@@ -35,7 +37,6 @@ static void mqttEventHandler(void *handler_args, esp_event_base_t base, int32_t 
     case MQTT_EVENT_DATA:
         if (strncmp(event->topic, topicSubscribe(), event->topic_len) == 0)
         {
-            ESP_LOGI(TAG_MQTT, "Received data length: %d", event->data_len);
             char *received_data = malloc(event->data_len + 1);
             if (received_data == NULL)
             {
@@ -44,7 +45,6 @@ static void mqttEventHandler(void *handler_args, esp_event_base_t base, int32_t 
             }
             memcpy(received_data, event->data, event->data_len);
             received_data[event->data_len] = '\0';
-            ESP_LOGI(TAG_MQTT, "Received data: %s", received_data);
 
             MessageFrame new_frame;
             memset(&new_frame, 0, sizeof(MessageFrame));
@@ -55,44 +55,36 @@ static void mqttEventHandler(void *handler_args, esp_event_base_t base, int32_t 
 
             if (new_frame.messageType == PING)
             {
-                publish(-1, new_frame.request_id, ";", PING_ACK);
+                publish(new_frame.request_id, ";", PING_ACK);
                 return;
             }
+
             ConfigEps config;
             if (load_config(&config) != ESP_OK)
             {
                 memset(&config, 0, sizeof(ConfigEps));
                 return;
             }
-
             if (strcmp(new_frame.token, config.token) != 0)
             {
                 return;
             }
-
             if (strcmp(new_frame.member_id, config.member_id) != 0)
             {
                 return;
             }
-
             if (strcmp(new_frame.device_id, get_mac_address()) != 0)
             {
                 return;
             }
-
             if (strcmp(new_frame.firmware, VERSION_FIRMWARE) != 0)
             {
                 return;
             }
-
-            Message message;
-            memset(&message, 0, sizeof(Message));
+            ParsedMessage message;
+            memset(&message, 0, sizeof(ParsedMessage));
             convert_message_frame_to_internal_object(&message, &new_frame);
-
-            setup_config(&message);
-            set_pwm(&message);
-            set_digital(&message);
-            request_for_analog_value(&message);
+            distribute(message);
             free(received_data);
         }
         break;
@@ -103,7 +95,7 @@ static void mqttEventHandler(void *handler_args, esp_event_base_t base, int32_t 
     }
 }
 
-void publish(const int config_id, const char *request_id, const char *payload, MessageType type)
+void publish(const char *request_id, const char *payload, MessageType type)
 {
     ConfigEps config;
     if (load_config(&config) == ESP_FAIL)
@@ -112,7 +104,7 @@ void publish(const int config_id, const char *request_id, const char *payload, M
     }
 
     MessageFrame frame;
-    create_message_frame_by_field(&frame, config_id, VERSION_FIRMWARE, get_mac_address(),
+    create_message_frame_by_field(&frame, VERSION_FIRMWARE, get_mac_address(),
                                   config.member_id, type, config.token, request_id, payload);
 
     char messageFrameToSend[512];

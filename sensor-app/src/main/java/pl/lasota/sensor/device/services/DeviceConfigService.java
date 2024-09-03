@@ -9,15 +9,13 @@ import com.networknt.schema.SpecVersion;
 import com.networknt.schema.ValidationMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import pl.lasota.sensor.configs.properties.DeviceProperties;
 import pl.lasota.sensor.entities.Device;
 import pl.lasota.sensor.entities.DeviceConfig;
 import pl.lasota.sensor.exceptions.SensorApiException;
-import pl.lasota.sensor.payload.to.ConfigPayload;
-import pl.lasota.sensor.configs.properties.DeviceProperties;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.OffsetDateTime;
 import java.util.Set;
 import java.util.zip.CRC32;
 import java.util.zip.Checksum;
@@ -40,27 +38,6 @@ public class DeviceConfigService {
         } catch (Exception e) {
             throw new SensorApiException("Occurred problem with read schema", e);
         }
-
-    }
-
-    public DeviceConfig createDefaultDeviceConfig(String version, Device device) {
-
-        String config;
-        try {
-            String firmwareFolder = properties.getFirmwareFolder();
-            config = Files.readString(Path.of(firmwareFolder, version, NAME_DEFAULT_CONFIG));
-            new ObjectMapper().readValue(config, ConfigPayload.class);
-        } catch (Exception e) {
-            throw new SensorApiException("Occurred problem with read default config", e);
-        }
-
-        return DeviceConfig
-                .builder()
-                .config(config)
-                .checksum(checkSum(config + version))
-                .forVersion(version)
-                .time(OffsetDateTime.now())
-                .device(device).build();
 
     }
 
@@ -95,10 +72,6 @@ public class DeviceConfigService {
 
     public DeviceConfig currentDeviceConfigCheck(Device device) {
         return device.getCurrentDeviceConfig();
-    }
-
-    public ConfigPayload mapConfigToObject(String config) throws JsonProcessingException {
-        return new ObjectMapper().readValue(config, ConfigPayload.class);
     }
 
 }

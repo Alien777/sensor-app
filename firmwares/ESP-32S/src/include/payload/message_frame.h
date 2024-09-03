@@ -16,14 +16,13 @@
 #define MAX_TOKEN_LENGTH 36
 #define MAX_REQUEST_ID_LENGTH 36
 #define MAX_PAYLOAD_LENGTH 256
-
+ 
 typedef struct
 {
     char device_id[MAX_DEVICE_ID_LENGTH + 1];
     char member_id[MAX_MEMBER_ID_LENGTH + 1];
     char token[MAX_TOKEN_LENGTH + 1];
     char firmware[MAX_VERSION_FIRMWARE_LENGTH + 1];
-    int config_id;
     char request_id[MAX_REQUEST_ID_LENGTH + 1];
     MessageType messageType;
     char payload[MAX_PAYLOAD_LENGTH];
@@ -32,7 +31,7 @@ typedef struct
 void chars_to_message_frame(MessageFrame *frame, const char *source);
 void print_message_frame(const MessageFrame *frame);
 void message_frame_to_chars(const MessageFrame *frame, char *result);
-void create_message_frame_by_field(MessageFrame *frame, long configId, const char *version, const char *deviceId,
+void create_message_frame_by_field(MessageFrame *frame,  const char *version, const char *deviceId,
                         const char *memberId, MessageType messageType, const char *token, const char *requestId, const char *payload);
-void convert_message_frame_to_internal_object(Message *i, MessageFrame *mf);
+void convert_message_frame_to_internal_object(ParsedMessage *i, MessageFrame *mf);
 #endif // MESSAGE_FRAME_H

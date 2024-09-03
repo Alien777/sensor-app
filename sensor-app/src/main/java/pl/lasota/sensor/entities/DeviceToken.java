@@ -3,6 +3,8 @@ package pl.lasota.sensor.entities;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.UUID;
+
 @Entity
 @Table(name = "device_token")
 @Getter
@@ -21,5 +23,5 @@ public class DeviceToken {
     private String member;
 
     @Column(name = "token", unique = true)
-    private String token;
+    private UUID token;
 }

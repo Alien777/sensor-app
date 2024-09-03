@@ -1,24 +1,25 @@
 package pl.lasota.sensor.device;
 
-import org.springframework.web.bind.annotation.RequestBody;
-import pl.lasota.sensor.device.model.SendConfigI;
-import pl.lasota.sensor.device.model.SendDigitalI;
-import pl.lasota.sensor.device.model.SendForAnalogDataI;
-import pl.lasota.sensor.device.model.SendPwmI;
+import pl.lasota.sensor.device.model.*;
 
 import java.util.UUID;
 
 
 public interface DeviceSendMessageInterface {
 
-    UUID sendConfigToDevice(SendConfigI configS) throws Exception;
+    UUID sendConfig(ConfigMessage configS) throws Exception;
 
-    UUID sendPwmValueToDevice(@RequestBody SendPwmI configS) throws Exception;
+    UUID sendPwmWriteRequest(PwmWriteRequestMessage pwmWriteRequestMessage) throws Exception;
 
-    UUID sendRequestForDataAnalog(@RequestBody SendForAnalogDataI configS) throws Exception;
+    UUID sendAnalogReadOneShotRequest(AnalogReadOneShotRequestMessage analogReadOneShotRequestMessage) throws Exception;
 
-    UUID sendDigitalValueToDevice(SendDigitalI configS) throws Exception;
+    UUID sendDigitalWriteRequest(DigitalWriteMessage digitalWriteMessage) throws Exception;
 
-    UUID sendPing(SendDigitalI configS) throws Exception;
+    UUID sendPwmWriteSetUp(PwmWriteSetUpMessage pwmWriteSetUpMessage) throws Exception;
 
+    UUID sendAnalogReadSetUp(AnalogReadSetUpMessage analogReadSetUpMessage) throws Exception;
+
+    UUID sendDigitalSetUp(DigitalSetUpMessage messageDigitalSetUp) throws Exception;
+
+    UUID sendPing(PingMessage pingMessage) throws Exception;
 }

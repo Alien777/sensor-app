@@ -81,6 +81,9 @@ export function formatTime(time: Date) {
 }
 
 export const draggableItems = ref([
+    {type: 'default', name: 'AnalogReadSetUpNode', readableName: "Analog Set up", description: "setup analog pin"},
+    {type: 'default', name: 'DigitalSetUpNode', readableName: "Digital Set up", description: "setup digital pin"},
+    {type: 'default', name: 'PwmWriteSetUpNode', readableName: "Pwm Set up", description: "setup pwm pin"},
     {type: 'input', name: 'ListeningSensorNode', readableName: "Listening events", description: "fires up when it receives a message"},
     {type: 'input', name: 'CronNode', readableName: "Cron executor"},
     {type: 'input', name: 'FireOnceNode', readableName: "Fire once", description: "Node important for api fire-once"},

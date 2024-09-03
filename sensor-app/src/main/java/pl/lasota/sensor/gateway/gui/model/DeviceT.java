@@ -3,6 +3,8 @@ package pl.lasota.sensor.gateway.gui.model;
 import lombok.Data;
 import pl.lasota.sensor.device.model.DeviceI;
 
+import java.util.UUID;
+
 
 @Data
 public class DeviceT {
@@ -11,7 +13,7 @@ public class DeviceT {
     private String version;
     private String name;
     private boolean hasConfig;
-    private String token;
+    private UUID token;
 
     public static DeviceT map(DeviceI device) {
         DeviceT deviceT = new DeviceT();

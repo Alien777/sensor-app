@@ -19,6 +19,7 @@ import pl.lasota.sensor.gateway.gui.model.DeviceT;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @RestController()
 @RequestMapping("/api/device")
@@ -32,7 +33,7 @@ public class DevicesController {
 
     @PostMapping()
     @PreAuthorize("isAuthenticated()")
-    public String saveDevice(@RequestBody DeviceSaveT device) {
+    public UUID saveDevice(@RequestBody DeviceSaveT device) {
         return sme.save(new DeviceCreateI(device.getId(), device.getName()));
     }
 

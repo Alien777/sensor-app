@@ -5,9 +5,8 @@
 #include "payload/payload.h"
 void message_frame_to_chars(const MessageFrame *frame, char *result)
 {
-    snprintf(result, 512, "%s;%s;%s;%s;%i;%s;%s;%s",
-             frame->device_id, frame->member_id, frame->token, frame->firmware,
-             frame->config_id, frame->request_id, message_type_to_string(frame->messageType), frame->payload);
+    snprintf(result, 512, "%s;%s;%s;%s;%s;%s;%s",
+             frame->device_id, frame->member_id, frame->token, frame->firmware, frame->request_id, message_type_to_string(frame->messageType), frame->payload);
 }
 
 void chars_to_message_frame(MessageFrame *frame, const char *source)
@@ -32,9 +31,6 @@ void chars_to_message_frame(MessageFrame *frame, const char *source)
     frame->firmware[sizeof(frame->firmware) - 1] = '\0';
 
     field = strtok(NULL, ";");
-    frame->config_id = atol(field);
-
-    field = strtok(NULL, ";");
     strncpy(frame->request_id, field, sizeof(frame->request_id));
     frame->request_id[sizeof(frame->request_id) - 1] = '\0';
 
@@ -54,10 +50,9 @@ void chars_to_message_frame(MessageFrame *frame, const char *source)
     free(buffer);
 }
 
-void create_message_frame_by_field(MessageFrame *frame, long configId, const char *version, const char *deviceId,
-                        const char *memberId, MessageType messageType, const char *token, const char *requestId, const char *payload)
+void create_message_frame_by_field(MessageFrame *frame, const char *version, const char *deviceId,
+                                   const char *memberId, MessageType messageType, const char *token, const char *requestId, const char *payload)
 {
-    frame->config_id = configId;
     strncpy(frame->firmware, version, sizeof(frame->firmware) - 1);
     frame->firmware[sizeof(frame->firmware) - 1] = '\0';
     strncpy(frame->device_id, deviceId, sizeof(frame->device_id) - 1);
@@ -73,37 +68,45 @@ void create_message_frame_by_field(MessageFrame *frame, long configId, const cha
     frame->payload[sizeof(frame->payload) - 1] = '\0';
 }
 
-void convert_message_frame_to_internal_object(Message *i, MessageFrame *mf)
+void convert_message_frame_to_internal_object(ParsedMessage *i, MessageFrame *mf)
 {
-    i->config_id = mf->config_id;
     i->request_id = mf->request_id;
     i->message_type = mf->messageType;
 
-    if (mf->messageType == CONFIG)
+    if (mf->messageType == ANALOG_READ_SET_UP)
     {
-        configPayload(i, mf->payload);
+        analogReadSetUpConvert(i, mf->payload);
     }
 
-    if (mf->messageType == ANALOG)
+    if (mf->messageType == DIGITAL_SET_UP)
     {
-        analogExpotPayload(i, mf->payload);
+        digitalSetUpConvert(i, mf->payload);
     }
 
-    if (mf->messageType == DIGITAL_WRITE)
+    if (mf->messageType == PWM_WRITE_SET_UP)
     {
-        digitalPayload(i, mf->payload);
+        pwmWriteSetUpConvert(i, mf->payload);
     }
 
-    if (mf->messageType == PWM_SETUP)
+    if (mf->messageType == ANALOG_READ_ONE_SHOT_REQUEST)
     {
-        pwmSetupPayload(i, mf->payload);
+        analogReadOneShotRequestConvert(i, mf->payload);
+    }
+
+    if (mf->messageType == DIGITAL_WRITE_REQUEST)
+    {
+        digitalWriteRequestConvert(i, mf->payload);
+    }
+
+    if (mf->messageType == PWM_WRITE_REQUEST)
+    {
+        pwmWriteRequestConvert(i, mf->payload);
     }
 }
 
 void print_message_frame(const MessageFrame *frame)
 {
     printf("**************** %s ****************\n", message_type_to_string(frame->messageType));
-    printf("configIdentifier: %i\n", frame->config_id);
     printf("versionFirmware: %s\n", frame->firmware);
     printf("deviceId: %s\n", frame->device_id);
     printf("memberId: %s\n", frame->member_id);

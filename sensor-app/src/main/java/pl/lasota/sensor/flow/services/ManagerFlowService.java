@@ -29,7 +29,7 @@ public class ManagerFlowService {
 
     private final Map<Long, ActiveFlow> startedFlow = new ConcurrentHashMap<>();
 
-    public void start(Long id, String config, Class<Node> asRoot) {
+    public void start(Long id, String config) {
         if (startedFlow.containsKey(id)) {
             return;
         }
@@ -55,9 +55,6 @@ public class ManagerFlowService {
         }
     }
 
-    public void start(Long id, String config) {
-        start(id, config, null);
-    }
 
     public void stop(Long id) {
         if (!startedFlow.containsKey(id)) {
