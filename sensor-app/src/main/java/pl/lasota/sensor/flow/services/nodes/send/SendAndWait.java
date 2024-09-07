@@ -14,6 +14,7 @@ public class SendAndWait implements AsyncNodeConsumer<String, UUID> {
     private final ProvideRequest provideRequest;
     private final CountDownLatch latch;
     private UUID waitForMessage;
+    private final long start = System.currentTimeMillis();
 
     public static SendAndWait of(WaitForResponseInputStreamBus waitForResponseInputStreamBus, ProvideRequest provideRequest) {
         return new SendAndWait(waitForResponseInputStreamBus, provideRequest);
@@ -30,12 +31,15 @@ public class SendAndWait implements AsyncNodeConsumer<String, UUID> {
     public boolean send() {
         try {
             waitForMessage = provideRequest.send();
-            return latch.await(1000, TimeUnit.MILLISECONDS);
+            boolean await = latch.await(3000, TimeUnit.MILLISECONDS);
+            log.info("Time to send request {} == {}", waitForMessage, await);
+            return await;
         } catch (Exception e) {
             log.error("Error while sending provide request [Send And Wait]", e);
             return false;
         } finally {
             waitForResponseInputStreamBus.removeConsumer(this);
+            log.info("Time to send request {} == {}", waitForMessage, System.currentTimeMillis() - start);
         }
     }
 

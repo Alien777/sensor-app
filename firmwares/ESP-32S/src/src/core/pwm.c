@@ -29,7 +29,7 @@ void pwm_write_request(ParsedMessage message, PwmWriteRequest payload)
     {
         if (pwm_timers[channel] != NULL)
         {
-            ESP_LOGI(TAG, "Extending timer duration for channel: %d", channel);
+            ESP_LOGI(TAG, "Extending timer duration for channel: %d, %d", channel, payload.duration);
             if (xTimerChangePeriod(pwm_timers[channel], pdMS_TO_TICKS(payload.duration), 0) != pdPASS)
             {
                 ESP_LOGE(TAG, "Failed to change timer period for channel: %d", channel);
@@ -54,9 +54,24 @@ void pwm_write_request(ParsedMessage message, PwmWriteRequest payload)
             }
         }
     }
-    ledc_set_duty(LEDC_HIGH_SPEED_MODE, channel, payload.duty);
-    ledc_update_duty(LEDC_HIGH_SPEED_MODE, channel);
     publish(message.request_id, ";", PWM_WRITE_RESPONSE);
+    esp_err_t err;
+
+    // Ustawienie wartości duty cycle
+    err = ledc_set_duty(LEDC_HIGH_SPEED_MODE, channel, payload.duty);
+    if (err != ESP_OK)
+    {
+        ESP_LOGE(TAG, "Failed to set duty cycle for channel: %d, error: %s", channel, esp_err_to_name(err));
+        return; // Opcjonalnie, jeśli chcesz przerwać operację
+    }
+
+    // Aktualizacja wartości duty cycle
+    err = ledc_update_duty(LEDC_HIGH_SPEED_MODE, channel);
+    if (err != ESP_OK)
+    {
+        ESP_LOGE(TAG, "Failed to update duty cycle for channel: %d, error: %s", channel, esp_err_to_name(err));
+        return; // Opcjonalnie, jeśli chcesz przerwać operację
+    }
 }
 
 void pwm_write_set_up(ParsedMessage message, PwmWriteSetUp payload)
@@ -113,5 +128,6 @@ void pwmStopCallback(TimerHandle_t xTimer)
     ledc_update_duty(LEDC_HIGH_SPEED_MODE, channel);
     ESP_LOGI(TAG, "Duty cycle set to 0 for channel: %d", channel);
 
+    xTimerDelete(xTimer, 0);
     pwm_timers[channel] = NULL; // Reset the timer in the array
 }

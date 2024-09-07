@@ -41,7 +41,7 @@ sensor:
   device:
     firmware-folder: firmwares
     generate-build-package: generate_nvs.sh
-    mqtt-ip-external: 192.168.1.235
+    mqtt-ip-external: 192.168.1.10
     mqtt:
       client-id: ${random.uuid}
       url: tcp://localhost:1883
