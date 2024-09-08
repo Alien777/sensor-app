@@ -10,6 +10,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @Getter
 @RequiredArgsConstructor
 public class GlobalContext {
+    @Getter
+    private final long flowId;
     private final AtomicBoolean stopped = new AtomicBoolean(false);
     private final Map<String, Object> variables = new ConcurrentHashMap<>();
 

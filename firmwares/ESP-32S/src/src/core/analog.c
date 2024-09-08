@@ -2,21 +2,21 @@
 
 const static char *TAG = "ANALOG";
 static adc_oneshot_unit_handle_t adc_handle[GPIO_NUM_MAX] = {[0 ... GPIO_NUM_MAX - 1] = NULL};
-
+static void analog_reset_pin(int gpio);
 void analog_read_one_shot_request(ParsedMessage message, AnalogReadOneShotRequest paylaod)
 {
- 
+
     if (message.message_type != ANALOG_READ_ONE_SHOT_REQUEST)
     {
         return;
     }
 
-    if (adc_handle[paylaod.gpio] == NULL)
+    if (paylaod.gpio >= GPIO_NUM_MAX || paylaod.gpio < 0)
     {
-        ESP_LOGE(TAG, "ADC handle or channel not configured for pin: %d", paylaod.gpio);
+        ESP_LOGE(TAG, "Invalid GPIO number analog: %d", paylaod.gpio);
         return;
     }
- 
+
     int adc_raw = 0;
 
     adc_unit_t unit_id;
@@ -52,6 +52,14 @@ void analog_read_set_up(ParsedMessage message, AnalogReadSetUp paylaod)
         return;
     }
 
+    if (paylaod.gpio >= GPIO_NUM_MAX || paylaod.gpio < 0)
+    {
+        ESP_LOGE(TAG, "Invalid GPIO number analog: %d", paylaod.gpio);
+        return;
+    }
+
+    analog_reset_pin(paylaod.gpio);
+
     ESP_LOGE(TAG, "Config analog from pin %d, resolution %d", paylaod.gpio, paylaod.resolution);
 
     adc_oneshot_unit_handle_t adc_handle_val = NULL;
@@ -79,4 +87,26 @@ void analog_read_set_up(ParsedMessage message, AnalogReadSetUp paylaod)
     adc_handle[paylaod.gpio] = adc_handle_val;
     publish(message.request_id, "", ANALOG_READ_SET_UP_ACK);
 }
- 
+
+void analog_reset_pin(int gpio)
+{
+
+    if (adc_handle[gpio] == NULL)
+    {
+        ESP_LOGE(TAG, "ADC handle is not set up for GPIO %d", gpio);
+        return;
+    }
+
+    ESP_LOGI(TAG, "Resetting ADC for GPIO %d", gpio);
+
+    esp_err_t ret = adc_oneshot_del_unit(adc_handle[gpio]);
+    if (ret != ESP_OK)
+    {
+        ESP_LOGE(TAG, "Failed to delete ADC unit for GPIO %d, error: %s", gpio, esp_err_to_name(ret));
+        return;
+    }
+
+    adc_handle[gpio] = NULL;
+
+    ESP_LOGI(TAG, "ADC reset complete for GPIO %d", gpio);
+}

@@ -10,6 +10,7 @@ import pl.lasota.sensor.bus.WaitForResponseInputStreamBus;
 import pl.lasota.sensor.device.DeviceSendMessageInterface;
 import pl.lasota.sensor.device.model.PwmWriteRequestMessage;
 import pl.lasota.sensor.exceptions.SensorFlowException;
+import pl.lasota.sensor.flow.FlowApiInterface;
 import pl.lasota.sensor.flow.services.keeper.KeeperForSetUp;
 import pl.lasota.sensor.flow.services.nodes.FlowNode;
 import pl.lasota.sensor.flow.services.nodes.Node;
@@ -29,12 +30,16 @@ public class SendPwmValueNode extends Node {
     private static final Logger log = LoggerFactory.getLogger(SendPwmValueNode.class);
     private final Data data;
     private final DeviceSendMessageInterface deviceSendMessageInterface;
+    private final FlowApiInterface flowApiInterface;
     private final WaitForResponseInputStreamBus waitForResponseInputStreamBus;
 
-    private SendPwmValueNode(String id, GlobalContext globalContext, Data data, DeviceSendMessageInterface deviceSendMessageInterface, WaitForResponseInputStreamBus waitForResponseInputStreamBus) {
+    private SendPwmValueNode(String id, GlobalContext globalContext, Data data, DeviceSendMessageInterface deviceSendMessageInterface,
+                             FlowApiInterface flowApiInterface,
+                             WaitForResponseInputStreamBus waitForResponseInputStreamBus) {
         super(id, globalContext);
         this.data = data;
         this.deviceSendMessageInterface = deviceSendMessageInterface;
+        this.flowApiInterface = flowApiInterface;
         this.waitForResponseInputStreamBus = waitForResponseInputStreamBus;
     }
 
@@ -50,8 +55,9 @@ public class SendPwmValueNode extends Node {
         if (!dci.contains(deviceId, KeeperForSetUp.TypeConfig.PWM, gpio)) {
             throw new SensorFlowException("Pwm pin {} not found for device {}", gpio, deviceId);
         }
+        FlowApiInterface flowApiInterface = context.getBean(FlowApiInterface.class);
 
-        return new SendPwmValueNode(ref, globalContext, data, dsmi, context.getBean(WaitForResponseInputStreamBus.class));
+        return new SendPwmValueNode(ref, globalContext, data, dsmi, flowApiInterface, context.getBean(WaitForResponseInputStreamBus.class));
     }
 
     @Override
@@ -65,6 +71,8 @@ public class SendPwmValueNode extends Node {
                     .send();
             if (send) {
                 super.fireChildNodes(localContext);
+            } else {
+                flowApiInterface.restartFlow(globalContext.getFlowId());
             }
         }
     }

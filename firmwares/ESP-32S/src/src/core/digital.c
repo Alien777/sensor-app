@@ -3,6 +3,7 @@
 const static char *TAG = "DIGITAL";
 
 static bool digital_pin[GPIO_NUM_MAX] = {[0 ... GPIO_NUM_MAX - 1] = false};
+static void digital_reset_pin(int gpio);
 
 void digital_set_up(ParsedMessage message, DigitalSetUp payload)
 {
@@ -12,7 +13,15 @@ void digital_set_up(ParsedMessage message, DigitalSetUp payload)
         return;
     }
 
-    ESP_LOGE(TAG, "Config digital from pin %d", payload.gpio);
+    if (payload.gpio >= GPIO_NUM_MAX || payload.gpio < 0)
+    {
+        ESP_LOGE(TAG, "Invalid GPIO number: %d", payload.gpio);
+        return;
+    }
+
+    digital_reset_pin(payload.gpio);
+
+    ESP_LOGE(TAG, "  %d", payload.gpio);
 
     gpio_config_t io_conf;
     io_conf.intr_type = GPIO_INTR_DISABLE;
@@ -32,6 +41,12 @@ void digital_write_request(ParsedMessage message, DigitalWriteRequest payload)
         return;
     }
 
+    if (payload.gpio >= GPIO_NUM_MAX || payload.gpio < 0)
+    {
+        ESP_LOGE(TAG, "Invalid GPIO number: %d", payload.gpio);
+        return;
+    }
+
     if (!digital_pin[payload.gpio])
     {
         ESP_LOGE(TAG, "Config digital for gpio %d is not setup", payload.gpio);
@@ -39,6 +54,32 @@ void digital_write_request(ParsedMessage message, DigitalWriteRequest payload)
     }
 
     ESP_LOGI("DIGITAL", "Setup value: %d for pin: %d", payload.level == true ? 1 : 0, payload.gpio);
-    gpio_set_level(payload.gpio, payload.level == true ? 1 : 0);
+    gpio_set_level(payload.gpio,  payload.level);
     publish(message.request_id, ";", DIGITAL_WRITE_RESPONSE);
+}
+
+void digital_reset_pin(int gpio)
+{
+
+    if (!digital_pin[gpio])
+    {
+        ESP_LOGE(TAG, "GPIO %d is not set up, nothing to reset", gpio);
+        return;
+    }
+
+    ESP_LOGI(TAG, "Resetting GPIO %d", gpio);
+
+    gpio_set_level(gpio, 0);
+
+    gpio_config_t io_conf;
+    io_conf.intr_type = GPIO_INTR_DISABLE;
+    io_conf.mode = GPIO_MODE_INPUT;
+    io_conf.pin_bit_mask = (1ULL << gpio);
+    io_conf.pull_down_en = GPIO_PULLDOWN_DISABLE;
+    io_conf.pull_up_en = GPIO_PULLUP_DISABLE;
+    gpio_config(&io_conf);
+
+    digital_pin[gpio] = false;
+
+    ESP_LOGI(TAG, "GPIO %d has been reset", gpio);
 }

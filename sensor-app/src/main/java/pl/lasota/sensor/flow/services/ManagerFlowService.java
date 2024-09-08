@@ -36,7 +36,7 @@ public class ManagerFlowService {
         fs.activateFlow(id);
         log.info("Start flow id {} config {}", id, config);
         try {
-            List<Node> flows = pf.flows(config, new GlobalContext());
+            List<Node> flows = pf.flows(config, new GlobalContext(id));
 
             startedFlow.put(id, new ActiveFlow(flows, config));
             for (Node node : flows) {
