@@ -8,14 +8,19 @@ import pl.lasota.sensor.payload.PayloadParser;
 @AllArgsConstructor(staticName = "of")
 public class AnalogReadOneShotResponse implements PayloadParser<AnalogReadOneShotResponse, String> {
 
+    private int gpio;
+    private int value;
 
     public static AnalogReadOneShotResponse of(String source) {
-        return new AnalogReadOneShotResponse();
+        String[] buffer = source.split(";");
+        int gpio = Integer.parseInt(buffer[0]);
+        int value = Integer.parseInt(buffer[1]);
+        return new AnalogReadOneShotResponse(gpio, value);
     }
 
     @Override
     public String convert() {
-        return "";
+        return gpio + ";" + value;
     }
 
     @Override

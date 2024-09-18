@@ -10,6 +10,7 @@ import org.springframework.context.ApplicationContext;
 import pl.lasota.sensor.configs.properties.FlowsProperties;
 import pl.lasota.sensor.device.DeviceConfigInterface;
 import pl.lasota.sensor.entities.Member;
+import pl.lasota.sensor.flow.services.keeper.KeeperForSetUp;
 import pl.lasota.sensor.flow.services.nodes.Node;
 import pl.lasota.sensor.flow.services.nodes.builder.ParserFlows;
 import pl.lasota.sensor.flow.services.nodes.nodes.AsyncNode;
@@ -18,7 +19,6 @@ import pl.lasota.sensor.flow.services.nodes.nodes.ListeningSensorNode;
 import pl.lasota.sensor.flow.services.nodes.utils.GlobalContext;
 import pl.lasota.sensor.member.services.MemberLoginService;
 
-import java.util.Collections;
 import java.util.List;
 
 class ParserFlowTest {
@@ -40,6 +40,9 @@ class ParserFlowTest {
     @Mock
     private Member memberMock;
 
+    @Mock
+    private KeeperForSetUp keeperForSetUpMock;
+
 
     @BeforeEach
     public void setup() {
@@ -60,7 +63,7 @@ class ParserFlowTest {
                     "sensor":{
                        "deviceId": "device",
                        "memberId": "member",
-                       "payloadType": "ANALOG",
+                       "payloadType": "ANALOG_READ_ONE_SHOT_REQUEST",
                        "pin": "1",
                        "valueVariable": "value"
                     },
@@ -92,7 +95,7 @@ class ParserFlowTest {
                     "sensor":{
                        "deviceId": "device",
                        "memberId": "member",
-                       "payloadType": "ANALOG",
+                       "payloadType": "ANALOG_READ_ONE_SHOT_REQUEST",
                        "pin": "1",
                        "valueVariable": "value"
                     },
@@ -143,7 +146,8 @@ class ParserFlowTest {
 
         Mockito.when(msMock.loggedMember()).thenReturn(memberMock);
         Mockito.when(ac.getBean(DeviceConfigInterface.class)).thenReturn(dciMock);
-        Mockito.when(dciMock.getConfigPwmPins(Mockito.any())).thenReturn(Collections.singletonList(23));
+        Mockito.when(ac.getBean(KeeperForSetUp.class)).thenReturn(keeperForSetUpMock);
+        Mockito.when(keeperForSetUpMock.contains(Mockito.any(), Mockito.any(), Mockito.same(23))).thenReturn(true);
 
         List<Node> root = new ParserFlows(fp, ac).flows("""
                 {
@@ -154,7 +158,7 @@ class ParserFlowTest {
                       "type": "input",
                       "sensor": {
                         "deviceId": "DDDDDDDDDDDD",
-                        "payloadType": "DEVICE_CONNECTED"
+                        "payloadType": "CONNECTED_ACK"
                       },
                       "childed": [
                         "ExecuteCodeNode_0"
@@ -184,7 +188,7 @@ class ParserFlowTest {
                       "name": "SendPwmValueNode",
                       "type": "default",
                       "sensor": {
-                        "pin": 23,
+                        "gpio": 23,
                         "deviceId": "DDDDDDDDDDDD",
                         "valueVariable": "g_c.pwm_value",
                         "durationVariable": "g_c.duration"
@@ -227,9 +231,12 @@ class ParserFlowTest {
 
         Mockito.when(msMock.loggedMember()).thenReturn(memberMock);
         Mockito.when(ac.getBean(DeviceConfigInterface.class)).thenReturn(dciMock);
+        Mockito.when(ac.getBean(KeeperForSetUp.class)).thenReturn(keeperForSetUpMock);
         Mockito.when(dciMock.getConfigPwmPins(Mockito.any())).thenReturn(List.of(23));
         Mockito.when(dciMock.getConfigDigitalPins(Mockito.any())).thenReturn(List.of(22));
-
+        Mockito.when(msMock.loggedMember()).thenReturn(memberMock);
+        Mockito.when(keeperForSetUpMock.contains(Mockito.any(), Mockito.same(KeeperForSetUp.TypeConfig.PWM), Mockito.same(23))).thenReturn(true);
+        Mockito.when(keeperForSetUpMock.contains(Mockito.any(), Mockito.same(KeeperForSetUp.TypeConfig.DIGITAL), Mockito.same(22))).thenReturn(true);
         List<Node> root = new ParserFlows(fp, ac).flows("""
                 {
                   "nodes": [
@@ -283,7 +290,7 @@ class ParserFlowTest {
                       "name": "SendDigitalValueNode",
                       "type": "default",
                       "sensor": {
-                        "pin": 22,
+                        "gpio": 22,
                         "deviceId": "device",
                         "valueVariable": "g_c.digit"
                       },
@@ -300,7 +307,7 @@ class ParserFlowTest {
                       "name": "SendPwmValueNode",
                       "type": "default",
                       "sensor": {
-                        "pin": 23,
+                        "gpio": 23,
                         "deviceId": "device",
                         "valueVariable": "g_c.duty",
                         "durationVariable": "g_c.duration"

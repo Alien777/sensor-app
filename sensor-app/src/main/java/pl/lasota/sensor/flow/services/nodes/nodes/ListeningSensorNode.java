@@ -57,10 +57,7 @@ public class ListeningSensorNode extends NodeStart implements AsyncNodeConsumer<
         if (!flowContext.getMember().getId().equals(sensor.getMemberId())) {
             return false;
         }
-        if (!data.getDeviceId().equals(sensor.getDeviceId())) {
-            return false;
-        }
-        return true;
+        return data.getDeviceId().equals(sensor.getDeviceId());
     }
 
     @Override

@@ -27,7 +27,13 @@ public abstract class BroadcastEvent<RESULT, TYPE, STREAM_INFORMATION> extends B
 
     @Override
     public void write(TYPE type) throws Exception {
-        queue.offer(type, 100, TimeUnit.MILLISECONDS);
+        if (type == null) {
+            return;
+        }
+        boolean offer = queue.offer(type, 100, TimeUnit.MILLISECONDS);
+        if (!offer) {
+            log.error("Queue overflow {}", type);
+        }
     }
 
     @Override

@@ -4,11 +4,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import pl.lasota.sensor.flow.FlowApiInterface;
 import pl.lasota.sensor.exceptions.SensorFlowException;
+import pl.lasota.sensor.flow.FlowApiInterface;
 import pl.lasota.sensor.flow.model.FlowI;
 import pl.lasota.sensor.flow.model.FlowSaveI;
-import pl.lasota.sensor.flow.services.FlowDataService;
 
 import java.util.List;
 
@@ -20,12 +19,12 @@ import java.util.List;
 public class FlowsController {
 
     private final FlowApiInterface sfe;
-    private final FlowDataService fds;
 
     @PostMapping
     @PreAuthorize("isAuthenticated()")
     public void save(@RequestBody FlowSaveI flowT) throws SensorFlowException {
         sfe.save(flowT);
+
     }
 
     @PostMapping("/start/{id}")

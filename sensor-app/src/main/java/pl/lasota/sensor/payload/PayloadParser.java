@@ -9,6 +9,9 @@ public interface PayloadParser<A, B> {
      */
     B convert();
 
-     A revertConvert(B source);
+    A revertConvert(B source);
 
+   default A get(){
+       return this.revertConvert(this.convert());
+   }
 }

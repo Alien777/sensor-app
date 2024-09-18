@@ -31,7 +31,7 @@ public class AnalogReadSetUpNode extends Node {
 
     public static Node create(String ref, GlobalContext globalContext, JsonNode node, ApplicationContext context) {
         String deviceId = fString(node, "deviceId");
-        Integer gpio = fInteger(node, "gpio");
+        int gpio = fInteger(node, "gpio");
         Integer resolution = fInteger(node, "resolution");
         Data data = Data.create(deviceId, gpio, resolution);
 

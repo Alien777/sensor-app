@@ -31,7 +31,7 @@ public class DigitalSetUpNode extends Node {
 
     public static Node create(String ref, GlobalContext globalContext, JsonNode node, ApplicationContext context) {
         String deviceId = fString(node, "deviceId");
-        Integer gpio = fInteger(node, "gpio");
+        int gpio = fInteger(node, "gpio");
         Integer mode = fInteger(node, "mode");
 
         KeeperForSetUp kfsu = context.getBean(KeeperForSetUp.class);

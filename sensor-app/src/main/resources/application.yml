@@ -30,9 +30,6 @@ spring:
       hibernate:
         format_sql: true
     show-sql: false
-  cloud:
-    config:
-      enabled: false
 sensor:
   ai:
     voice-model: docker/data/config/voice-model

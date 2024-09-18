@@ -83,11 +83,7 @@ public class DeviceDataService {
             dr.save(device);
             dtr.delete(deviceTemporary);
             return true;
-        } else if (deviceOptional.isPresent()) {
-            return true;
-        } else {
-            return false;
-        }
+        } else return deviceOptional.isPresent();
     }
 
 
@@ -241,7 +237,7 @@ public class DeviceDataService {
             process.waitFor();
             byte[] bytes = zipFolder(last);
 
-            try (Stream<Path> walk = Files.walk(Path.of(last));) {
+            try (Stream<Path> walk = Files.walk(Path.of(last))) {
                 walk.sorted(Comparator.reverseOrder())
                         .map(Path::toFile)
                         .forEach(File::delete);

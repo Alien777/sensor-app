@@ -17,9 +17,9 @@ public interface AuthServiceInterface {
 
     void login(HttpServletRequest request, HttpServletResponse response) throws  AuthException;
 
-    void initialAuthenticationByMemberId(String memberId) throws AuthException;;
+    void initialAuthenticationByMemberId(String memberId) throws AuthException;
 
-    void initialAuthenticationByOnlyToken(Map<String, String> request) throws AuthException;;
+    void initialAuthenticationByOnlyToken(Map<String, String> request) throws AuthException;
 
     void initialAuthenticationContextByOnlySession(HttpServletRequest request) throws AuthException;
 

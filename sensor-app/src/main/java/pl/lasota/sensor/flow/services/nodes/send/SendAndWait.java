@@ -31,9 +31,7 @@ public class SendAndWait implements AsyncNodeConsumer<String, UUID> {
     public boolean send() {
         try {
             waitForMessage = provideRequest.send();
-            boolean await = latch.await(3000, TimeUnit.MILLISECONDS);
-            log.info("Time to send request {} == {}", waitForMessage, await);
-            return await;
+            return latch.await(3000, TimeUnit.MILLISECONDS);
         } catch (Exception e) {
             log.error("Error while sending provide request [Send And Wait]", e);
             return false;

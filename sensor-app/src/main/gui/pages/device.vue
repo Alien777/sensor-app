@@ -25,9 +25,6 @@
       <q-tab-panels
           vertical
           v-model="innerTab">
-        <q-tab-panel v-for="device in devices" :name="device.id" icon="not_">
-          <AdvencedConfigurationDevice :onChange="onChange" :device="device"/>
-        </q-tab-panel>
         <q-tab-panel name="newDevice">
           <div class="text-h5"><p>Create new device</p></div>
           <hr>

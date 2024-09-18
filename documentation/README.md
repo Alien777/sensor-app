@@ -1,198 +1,165 @@
-# Communication Contract API
+## Message Frame
 
-This api is constant for all devices. Basic of structures of api they ensure Java classes. It is possible extend this
-api
-using [schema.json](../firmwares/ESP-32S/schema.json). For example attent is optional in Java class but for version
-firmwares
-ESP-32S schema reduces it to values 0, 1, 2, 3
+- **Description**: This is the base structure of the message used for communication between the device and the
+  Application Server.
 
-AS and Device using for communication CSV format.
-
-## MessageFrame
-
-- **Description**: This is the base message frame.
+### Fields:
 
 - `device_id`:
     - **Type**: String
-    - 12 chars
-    - **Description**: A unique key associated with the device, used for secure identification and communication.
+    - **Length**: 12 characters
+    - **Description**: A unique identifier associated with the device, used for secure identification and communication.
+
 - `member_id`:
     - **Type**: String
-    - 16 chars
-    - **Description**: Specific key related to a member, used for authentication and ensuring secure access.
+    - **Length**: 16 characters
+    - **Description**: A unique identifier for the member, used for authentication and access control.
+
 - `token`:
     - **Type**: UUID
-    - 36 chars
-    - **Description**: Unique generated token for communication
-- `firmware`:
+    - **Length**: 36 characters
+    - **Description**: A unique token generated for secure communication between the device and the AS.
+
+- `version_firmware`:
     - **Type**: String
-    - 12 chars
-    - **Description**: Specifies the firmwares version of the device, crucial for compatibility checks and updates.
-- `config_id`:
-    - **Type**: Number
-    - **Description**: Unique identifier for the configuration, facilitating precise configuration management and
-      retrieval.
+    - **Length**: 12 characters
+    - **Description**: Specifies the firmware version of the device, used for compatibility checks and updates.
+
 - `request_id`:
     - **Type**: String
-    - 36 chars
-    - **Description**: field for identifying the query
+    - **Length**: 36 characters
+    - **Description**: A unique identifier for the request.
+
 - `message_type`:
-    - **Type**: MessageType
-    - **Description**: Indicates the type of message being sent, ensuring proper handling and processing.
+    - **Type**: Enum
+    - **Description**: Indicates the type of message being sent, which helps in proper message processing.
+
 - `payload`:
-    - **Type**: JsonNode
-    - 256 chars
-    - csv type
-    - **Description**: The content of the message, structured in a flexible JSON format to accommodate various data
-      types and structures.
+    - **Type**: CSV
+    - **Length**: Up to 256 characters
+    - **Description**: Contains the message content, structured as CSV format for transmission.
 
-**Example:**
-device_id;member_id;token;firmware;config_id;request_id;message_type;payload
-7C9EBDF513CC;TIKDvPt3Lu0wYiNg;51c6c380-b3a6-4550-bac0-65781eb7ce0d;ESP-32S;1;51c6c380-b3a6-4550-bac0-65781eb7ce0d;CONFIG;payload
+**Example Message:**
+device_id;member_id;token;version_firmware;request_id;message_type;payload_of_message_type
+7C9EBDF513CC;TIKDvPt3Lu0wYiNg;51c6c380-b3a6-4550-bac0-65781eb7ce0d;ESP-32S;51c6c380-b3a6-4550-bac0-65781eb7ce0d;ANALOG_READ_SET_UP;23;12
+---
 
-## MessageType
+## Message Types
 
-- `DEVICE_CONNECTED`:
-    - **Type**: String
-    - **Description**: Occurs when a sensor is connected to MQTT.
-    - **Communication way**: DEVICE to Application Server (AS)
+### `CONNECTED_ACK`
 
-- `CONFIG`:
-    - **Type**: String
-    - **Description**: Configuration type is used to send configuration from the Application Server (AS) to the device.
-    - **Communication way**: AS to DEVICE
+- **Description**: Sent when a sensor successfully connects to the MQTT broker.
+- **Communication Direction**: Device → Application Server
+- **Payload**: Empty
 
-- `ANALOG`:
-    - **Type**: String
-    - **Description**: Ask device for analog value
-    - **Communication way**: AS to DEVICE
+### `PING`
 
-- `ANALOG_ACK`:
-    - **Type**: String
-    - **Description**: Received analog value
-    - **Communication way**: DEVICE to AS
+- **Description**: Sent to ping a device and ensure it is connected.
+- **Communication Direction**: Application Server → Device
+- **Payload**: Empty
 
-- `PWM`:
-    - **Type**: String
-    - **Description**: Indicates that the Application Server (AS) sends a value to the PWM pin.
-    - **Communication way**: AS to DEVICE
+### `PING_ACK`
 
-- `PWM_ACK`:
-    - **Type**: String
-    - **Description**: Mean is device received the PWM message.
-    - **Communication way**: DEVICE to AS
+- **Description**: Sent by the device to acknowledge a PING.
+- **Communication Direction**: Device → Application Server
+- **Payload**: Empty
 
-- `PING`:
-    - **Type**: String
-    - **Description**: AS send to Device message to pinging
-    - **Communication way**: AS to DEVICE
+### `CONFIG`
 
-- `PING_ACK`:
-    - **Type**: String
-    - **Description**: Response on the message ping
-    - **Communication way**: DEVICE to AS
+- **Description**: Configuration message sent from the AS to the device to configure its settings.
+- **Communication Direction**: Application Server → Device
+- **Payload**: Empty
 
-## Payload
+### `CONFIG_ACK`
 
-### ConfigPayload (`CONFIG`)
+- **Description**: Sent by the device to acknowledge a CONFIG.
+- **Communication Direction**: Application Server → Device
+- **Payload**: Empty
 
-- `analog_size_config`:
-    - **Type**: Integer
-    - **Description**: Size of analogs config
-- `pwm_size_config`:
-    - **Type**: Integer
-    - **Description**: Size of PWMs config
-- `digital_size_config`:
-    - **Type**: Integer
-    - **Description**: Size of digitals config
-- `analog_config`:
-    - **Type**: list of values in csv format
-    - **Description**: Configuration of analog reader.
-- `pwm_config`:
-    - **Type**: list of values in csv format
-    - **Description**: Configuration of PWM.
-- `digital_config`:
-    - **Type**: list of values in csv format
-    - **Description**: Configuration of PWM.
+### `ANALOG_READ_SET_UP`
 
-device_id;member_id;token;firmware;config_id;request_id;message_type;analog_size_config;pwm_size_config;digital_size_config;analog_pin;analog_width;analog_atten;analog_pin_2;analog_width_2;analog_atten_2;digital_pin;digital_pin_2
-deviceId;memberId;token;version;1;51c6c380-b3a6-4550-bac0-65781eb7ce0d;CONFIG;2;0;2;4;12;3;4;12;3;22;21;
+- **Description**: Sets up an analog read on the device.
+- **Communication Direction**: Device → Application Server
+- **Fields**:
+    - `gpio` (Integer): The GPIO pin number to read from.
+    - `width` (Integer): The width parameter for the analog read.
 
-### AnalogConfig (`CONFIG`)
+### `ANALOG_READ_SET_UP_ACK`
 
-- `pin`:
-    - **Type**: Integer
-    - **Description**: The pin number on the microcontroller that is configured for analog reading. It specifies which
-      analog input pin is being used.
+- **Description**: Acknowledges the setup of an analog read.
+- **Communication Direction**: Application Server → Device
+- **Payload**: Empty
 
-- `width`:
-    - **Type**: Integer
-    - **Description**: The resolution of the analog-to-digital converter (ADC) for this pin, determining how finely the
-      signal is quantized.
+### `ANALOG_READ_ONE_SHOT_REQUEST`
 
-- `atten`:
-    - **Type**: Integer, Optional, Null
-    - **Description**: Attenuation setting for the analog pin. This refers to the reduction of the signal's amplitude,
-      affecting the range of voltage the pin can read.
+- **Description**: Requests a one-time analog read from the device.
+- **Communication Direction**: Application Server → Device
+- **Fields**:
+    - `gpio` (Integer): The GPIO pin to perform the read on.
 
-### PwmConfig (`CONFIG`)
+### `ANALOG_READ_ONE_SHOT_RESPONSE`
 
-- `pin`:
-    - **Type**: Integer
-    - **Description**: Pwm pin
+- **Description**: Response to a one-shot analog read request, providing the read value.
+- **Communication Direction**: Device → Application Server
+- **Fields**:
+    - `gpio` (Integer): The GPIO pin.
+    - `value` (Integer): The value read from the GPIO pin.
 
-- `freq`:
-    - **Type**: Integer
-    - **Description**: Frequency of PWM
+### `PWM_WRITE_SET_UP`
 
-- `resolution`:
-    - **Type**: Integer
-    - **Description**:  Resolution of PWM
+- **Description**: Configures a PWM signal on a specified GPIO pin.
+- **Communication Direction**: Device → Application Server
+- **Fields**:
+    - `gpio` (Integer): The GPIO pin.
+    - `frequency` (Integer): The frequency of the PWM signal.
+    - `resolution` (Integer): The resolution of the PWM signal.
+    - `duty` (Integer): The duty cycle of the PWM signal.
 
-### DigitalConfig (`CONFIG`)
+### `PWM_WRITE_SET_UP_ACK`
 
-- `pin`:
-    - **Type**: Integer
-    - **Description**: Digital pin
+- **Description**: Acknowledges the setup of a PWM signal.
+- **Communication Direction**: Application Server → Device
+- **Payload**: Empty
 
-### PwmPayload (`PWM`)
+### `PWM_WRITE_REQUEST`
 
-- `pin`:
-    - **Type**: Integer
-    - **Description**: Identifies a specific pin capable of PWM output.
-    -
-- `value`:
-    - **Type**: Integer
-    - **Description**: The PWM value to be set on the specified pin.
+- **Description**: Requests a PWM signal to be written to a GPIO pin.
+- **Communication Direction**: Device → Application Server
+- **Fields**:
+    - `gpio` (Integer): The GPIO pin.
+    - `duty` (Integer): The duty cycle.
+    - `duration` (Integer): The duration to apply the duty cycle.
 
-- `duration`:
-    - **Type**: Integer
-    - **Description**: Time in millisecond then after this time pwm will be set 0 on the device
+### `PWM_WRITE_RESPONSE`
 
-### AnalogAckDataPayload (`ANALOG`)
+- **Description**: Acknowledges a PWM write request.
+- **Communication Direction**: Device → Application Server
+- **Payload**: Empty
 
-- `pin`:
-    - **Type**: Integer
-    - **Description**: Represents the pin number on the device.
+### `DIGITAL_SET_UP`
 
-- `adc_raw`:
-    - **Type**: Integer
-    - **Description**: The analog value.
+- **Description**: Sets up a digital pin on the device.
+- **Communication Direction**: Device → Application Server
+- **Fields**:
+    - `gpio` (Integer): The GPIO pin.
+    - `mode` (Integer): The mode for the GPIO pin.
 
-### ConnectDevicePayload (`DEVICE_CONNECTED`)
+### `DIGITAL_SET_UP_ACK`
 
-- No fields required.
+- **Description**: Acknowledges the setup of a digital pin.
+- **Communication Direction**: Application Server → Device
+- **Payload**: Empty
 
-### PingDataPayload (`PING`)
+### `DIGITAL_WRITE_REQUEST`
 
-- No fields required.
+- **Description**: Requests a digital write on a GPIO pin.
+- **Communication Direction**: Device → Application Server
+- **Fields**:
+    - `gpio` (Integer): The GPIO pin.
+    - `level` (Integer): The digital level (HIGH or LOW).
 
-### PingDevicePayload (`PING_ACK`)
+### `DIGITAL_WRITE_RESPONSE`
 
-- No fields required.
-
-### AnalogDataPayload (`ANALOG`)
-
-- `pin`:
-    - **Type**: Integer
-    - **Description**: Pin on which it will force reading
+- **Description**: Acknowledges a digital write request.
+- **Communication Direction**: Device → Application Server
+- **Payload**: Empty

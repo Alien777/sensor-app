@@ -22,4 +22,6 @@ public class AnalogReadContinuousRequest implements PayloadParser<AnalogReadCont
     public AnalogReadContinuousRequest revertConvert(String source) {
         return of(source);
     }
+
+
 }
