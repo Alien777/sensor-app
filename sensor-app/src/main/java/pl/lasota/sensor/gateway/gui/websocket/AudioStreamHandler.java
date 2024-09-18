@@ -14,7 +14,6 @@ import pl.lasota.sensor.entities.Member;
 import pl.lasota.sensor.member.MemberLoginDetailsServiceInterface;
 import pl.lasota.sensor.security.AuthServiceInterface;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -59,12 +58,7 @@ public class AudioStreamHandler extends TextWebSocketHandler {
         byte[] audioData = new byte[payload.remaining()];
         payload.get(audioData);
 
-        try {
-            audioBroadcasterStream.write(audioData);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
+        audioBroadcasterStream.write(audioData);
     }
 
 

@@ -2,6 +2,7 @@ package pl.lasota.sensor.bus.broadcast;
 
 import lombok.extern.slf4j.Slf4j;
 import pl.lasota.sensor.bus.conventer.Converter;
+import pl.lasota.sensor.exceptions.SensorBusException;
 
 import java.io.IOException;
 import java.util.Queue;
@@ -22,23 +23,28 @@ public abstract class BroadcastEvent<RESULT, TYPE, STREAM_INFORMATION> extends B
         this.queue = queue;
 
         Converter<RESULT, BlockingQueue<TYPE>> converter = conventerSupplier.get();
-        run(converter, queue);
+        super.run(converter, getNewStream());
     }
 
     @Override
-    public void write(TYPE type) throws Exception {
+    protected BlockingQueue<TYPE> getNewStream() {
+        return queue;
+    }
+
+    @Override
+    public void write(TYPE type) throws SensorBusException {
         if (type == null) {
             return;
         }
-        boolean offer = queue.offer(type, 100, TimeUnit.MILLISECONDS);
+        boolean offer;
+        blockIfError();
+        try {
+            offer = queue.offer(type, 100, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException e) {
+            throw new SensorBusException(e);
+        }
         if (!offer) {
             log.error("Queue overflow {}", type);
         }
     }
-
-    @Override
-    public void close() {
-        queue.clear();
-    }
-
 }

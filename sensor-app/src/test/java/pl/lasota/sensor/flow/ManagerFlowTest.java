@@ -200,7 +200,7 @@ class ManagerFlowTest {
         NodeMock nodeEnd = Mockito.mock(NodeMock.class);
 
         CountDownLatch latch = new CountDownLatch(1);
-        Mockito.doAnswer(_ -> {
+        Mockito.doAnswer(a -> {
             latch.countDown();
             return null;
 

@@ -61,7 +61,7 @@ public class VoiceFireCommendNode extends NodeStart implements AsyncNodeConsumer
 
     @Override
     public void error(Exception e) {
-        log.error(e.getMessage(), e);
+        log.info("Occurred error", e);
     }
 
     @Override

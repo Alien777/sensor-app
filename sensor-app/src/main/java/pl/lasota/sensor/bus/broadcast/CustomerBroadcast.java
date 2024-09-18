@@ -19,7 +19,7 @@ public abstract class CustomerBroadcast<STREAM_INFORMATION, RESULT> {
         customers.remove(consumer);
     }
 
-    public abstract Broadcast<?, ?, ?, ?> takeBroadcaster(STREAM_INFORMATION streamInformation) throws Exception;
+    public abstract Broadcast<RESULT, ?, STREAM_INFORMATION, ?> takeBroadcaster(STREAM_INFORMATION streamInformation) throws Exception;
 
     protected Queue<BiConsumer<STREAM_INFORMATION, RESULT>> getCustomers() {
         return customers;

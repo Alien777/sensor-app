@@ -47,4 +47,9 @@ public class SendAndWait implements AsyncNodeConsumer<String, UUID> {
             latch.countDown();
         }
     }
+
+    @Override
+    public void error(Exception e) {
+        log.error("Error while sending provide request [Send And Wait]", e);
+    }
 }

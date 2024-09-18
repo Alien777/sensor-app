@@ -61,6 +61,11 @@ public class ListeningSensorNode extends NodeStart implements AsyncNodeConsumer<
     }
 
     @Override
+    public void error(Exception e) {
+        log.info("Occurred error", e);
+    }
+
+    @Override
     public void consume(String s, FlowSensorI flowSensorI) throws Exception {
         LocalContext localContext = new LocalContext();
         if (!analyze(flowSensorI, localContext)) {

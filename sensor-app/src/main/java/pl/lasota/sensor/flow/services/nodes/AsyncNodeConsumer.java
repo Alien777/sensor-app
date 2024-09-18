@@ -11,9 +11,7 @@ public interface AsyncNodeConsumer<STREAM_INFORMATION, RESULT> extends BiConsume
         return true;
     }
 
-    default void error(Exception e) {
-        e.printStackTrace();
-    }
+    void error(Exception e);
 
     default ExecutorService getExecutorService() {
         return new ThreadPoolExecutor(
