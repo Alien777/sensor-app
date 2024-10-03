@@ -6,7 +6,6 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContext;
 import pl.lasota.sensor.bus.FlowSensorIInputStreamBus;
-import pl.lasota.sensor.flow.model.FlowSensorAnalogI;
 import pl.lasota.sensor.flow.model.FlowSensorI;
 import pl.lasota.sensor.flow.services.nodes.AsyncNodeConsumer;
 import pl.lasota.sensor.flow.services.nodes.FlowNode;
@@ -81,21 +80,13 @@ public class ListeningSensorNode extends NodeStart implements AsyncNodeConsumer<
         private final PayloadType forMessageType;
     }
 
-
     private boolean analyze(FlowSensorI sensor, LocalContext localContext) {
         if (!sensor.getPayloadType().equals(data.forMessageType)) {
             return false;
         }
 
-        switch (sensor.getPayloadType()) {
-            case CONNECTED_ACK -> {
-            }
-            case ANALOG_READ_ONE_SHOT_RESPONSE -> {
-                FlowSensorAnalogI s = (FlowSensorAnalogI) sensor;
-                localContext.getVariables().put(id, s);
-            }
-            default -> {
-            }
+        if (sensor.getPayloadType() == PayloadType.ANALOG_READ_ONE_SHOT_RESPONSE) {
+            localContext.getVariables().put(id, sensor);
         }
         return true;
     }

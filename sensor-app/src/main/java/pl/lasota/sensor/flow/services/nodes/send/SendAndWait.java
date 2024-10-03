@@ -1,7 +1,8 @@
 package pl.lasota.sensor.flow.services.nodes.send;
 
 import lombok.extern.slf4j.Slf4j;
-import pl.lasota.sensor.bus.WaitForResponseInputStreamBus;
+import pl.lasota.sensor.bus.FlowSensorIInputStreamBus;
+import pl.lasota.sensor.flow.model.FlowSensorI;
 import pl.lasota.sensor.flow.services.nodes.AsyncNodeConsumer;
 
 import java.util.UUID;
@@ -9,23 +10,22 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
-public class SendAndWait implements AsyncNodeConsumer<String, UUID> {
-    private final WaitForResponseInputStreamBus waitForResponseInputStreamBus;
+public class SendAndWait implements AsyncNodeConsumer<String, FlowSensorI> {
+    private final FlowSensorIInputStreamBus flowSensorIInputStreamBus;
     private final ProvideRequest provideRequest;
     private final CountDownLatch latch;
     private UUID waitForMessage;
     private final long start = System.currentTimeMillis();
 
-    public static SendAndWait of(WaitForResponseInputStreamBus waitForResponseInputStreamBus, ProvideRequest provideRequest) {
-        return new SendAndWait(waitForResponseInputStreamBus, provideRequest);
+    public static SendAndWait of(FlowSensorIInputStreamBus flowSensorIInputStreamBus, ProvideRequest provideRequest) {
+        return new SendAndWait(flowSensorIInputStreamBus, provideRequest);
     }
 
-    private SendAndWait(WaitForResponseInputStreamBus waitForResponseInputStreamBus, ProvideRequest provideRequest) {
-        this.waitForResponseInputStreamBus = waitForResponseInputStreamBus;
+    private SendAndWait(FlowSensorIInputStreamBus flowSensorIInputStreamBus, ProvideRequest provideRequest) {
+        this.flowSensorIInputStreamBus = flowSensorIInputStreamBus;
         this.provideRequest = provideRequest;
-        waitForResponseInputStreamBus.addConsumer(this);
+        flowSensorIInputStreamBus.addConsumer(this);
         latch = new CountDownLatch(1);
-
     }
 
     public boolean send() {
@@ -36,14 +36,14 @@ public class SendAndWait implements AsyncNodeConsumer<String, UUID> {
             log.error("Error while sending provide request [Send And Wait]", e);
             return false;
         } finally {
-            waitForResponseInputStreamBus.removeConsumer(this);
+            flowSensorIInputStreamBus.removeConsumer(this);
             log.info("Time to send request {} == {}", waitForMessage, System.currentTimeMillis() - start);
         }
     }
 
     @Override
-    public void consume(String s, UUID requestId) {
-        if (requestId.equals(waitForMessage)) {
+    public void consume(String s, FlowSensorI requestId) {
+        if (requestId.getRequestId().equals(waitForMessage)) {
             latch.countDown();
         }
     }

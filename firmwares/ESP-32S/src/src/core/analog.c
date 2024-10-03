@@ -79,7 +79,7 @@ void analog_read_set_up(ParsedMessage message, AnalogReadSetUp paylaod)
     ESP_ERROR_CHECK(adc_oneshot_new_unit(&init_config, &adc_handle_val));
 
     adc_oneshot_chan_cfg_t config = {
-        .atten = ADC_ATTEN_DB_11,
+        .atten = ADC_ATTEN_DB_12,
         .bitwidth = paylaod.resolution,
     };
     ESP_ERROR_CHECK(adc_oneshot_config_channel(adc_handle_val, channel, &config));

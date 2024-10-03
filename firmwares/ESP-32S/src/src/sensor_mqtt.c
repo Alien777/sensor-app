@@ -64,7 +64,7 @@ static void mqttEventHandler(void *handler_args, esp_event_base_t base, int32_t 
             time_taken_ms = time_taken_us / 1000.0; // Przelicz czas na milisekundy
             ESP_LOGI(TAG, "A2: %.3f ms", time_taken_ms);
 
-            print_message_frame(&new_frame);
+            // print_message_frame(&new_frame);
 
             end_time = esp_timer_get_time();        // Pobierz czas końcowy
             time_taken_us = end_time - start_time;  // Oblicz różnicę, czyli czas wykonania funkcji w mikrosekundach
@@ -139,7 +139,7 @@ void publish(const char *request_id, const char *payload, MessageType type)
 
     char messageFrameToSend[512];
     message_frame_to_chars(&frame, messageFrameToSend);
-    print_message_frame(&frame);
+    // print_message_frame(&frame);
     esp_mqtt_client_publish(client, PUBLISH_TOPIC, messageFrameToSend, 0, 2, 0);
 }
 

@@ -6,7 +6,7 @@ import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
-import pl.lasota.sensor.bus.WaitForResponseInputStreamBus;
+import pl.lasota.sensor.bus.FlowSensorIInputStreamBus;
 import pl.lasota.sensor.device.DeviceSendMessageInterface;
 import pl.lasota.sensor.device.model.PwmWriteRequestMessage;
 import pl.lasota.sensor.exceptions.SensorFlowException;
@@ -31,16 +31,16 @@ public class SendPwmValueNode extends Node {
     private final Data data;
     private final DeviceSendMessageInterface deviceSendMessageInterface;
     private final FlowApiInterface flowApiInterface;
-    private final WaitForResponseInputStreamBus waitForResponseInputStreamBus;
+    private final FlowSensorIInputStreamBus flowSensorIInputStreamBus;
 
     private SendPwmValueNode(String id, GlobalContext globalContext, Data data, DeviceSendMessageInterface deviceSendMessageInterface,
                              FlowApiInterface flowApiInterface,
-                             WaitForResponseInputStreamBus waitForResponseInputStreamBus) {
+                             FlowSensorIInputStreamBus flowSensorIInputStreamBus) {
         super(id, globalContext);
         this.data = data;
         this.deviceSendMessageInterface = deviceSendMessageInterface;
         this.flowApiInterface = flowApiInterface;
-        this.waitForResponseInputStreamBus = waitForResponseInputStreamBus;
+        this.flowSensorIInputStreamBus = flowSensorIInputStreamBus;
     }
 
     public static Node create(String ref, GlobalContext globalContext, JsonNode node, ApplicationContext context) {
@@ -57,7 +57,7 @@ public class SendPwmValueNode extends Node {
         }
         FlowApiInterface flowApiInterface = context.getBean(FlowApiInterface.class);
 
-        return new SendPwmValueNode(ref, globalContext, data, dsmi, flowApiInterface, context.getBean(WaitForResponseInputStreamBus.class));
+        return new SendPwmValueNode(ref, globalContext, data, dsmi, flowApiInterface, context.getBean(FlowSensorIInputStreamBus.class));
     }
 
     @Override
@@ -67,7 +67,7 @@ public class SendPwmValueNode extends Node {
 
         if (value.isPresent()) {
             boolean send = SendAndWait.
-                    of(waitForResponseInputStreamBus, () -> deviceSendMessageInterface.sendPwmWriteRequest(new PwmWriteRequestMessage(data.deviceId, data.pin, value.get(), duration.orElse(0L))))
+                    of(flowSensorIInputStreamBus, () -> deviceSendMessageInterface.sendPwmWriteRequest(new PwmWriteRequestMessage(data.deviceId, data.pin, value.get(), duration.orElse(0L))))
                     .send();
             if (send) {
                 super.fireChildNodes(localContext);

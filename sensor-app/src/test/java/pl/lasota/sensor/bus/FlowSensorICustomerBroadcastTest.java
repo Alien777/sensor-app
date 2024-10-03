@@ -2,7 +2,10 @@ package pl.lasota.sensor.bus;
 
 import org.junit.jupiter.api.Test;
 import pl.lasota.sensor.flow.model.FlowSensorI;
+import pl.lasota.sensor.payload.PayloadType;
+import pl.lasota.sensor.payload.message.ConnectedAck;
 
+import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -29,7 +32,7 @@ public class FlowSensorICustomerBroadcastTest {
         long startTime = System.nanoTime();
 
         for (int i = 0; i < recordCount; i++) {
-            FlowSensorI flowSensorI = new FlowSensorI();
+            FlowSensorI flowSensorI = FlowSensorI.of(PayloadType.CONNECTED_ACK, "m", "d", UUID.randomUUID(), ConnectedAck.of());
             flowSensorIInputStreamBus.takeBroadcaster("streamInfo").write(flowSensorI);
         }
 

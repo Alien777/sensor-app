@@ -16,7 +16,7 @@ import pl.lasota.sensor.bus.FlowSensorIInputStreamBus;
 import pl.lasota.sensor.bus.broadcast.impl.FlowSensorIBroadcasterStream;
 import pl.lasota.sensor.entities.Member;
 import pl.lasota.sensor.entities.Role;
-import pl.lasota.sensor.flow.model.FlowSensorAnalogI;
+import pl.lasota.sensor.flow.model.FlowSensorI;
 import pl.lasota.sensor.flow.services.nodes.Node;
 import pl.lasota.sensor.flow.services.nodes.NodeStart;
 import pl.lasota.sensor.flow.services.nodes.builder.FlowsBuilder;
@@ -24,7 +24,9 @@ import pl.lasota.sensor.flow.services.nodes.nodes.*;
 import pl.lasota.sensor.flow.services.nodes.utils.FlowContext;
 import pl.lasota.sensor.flow.services.nodes.utils.GlobalContext;
 import pl.lasota.sensor.member.services.MemberLoginService;
+import pl.lasota.sensor.payload.message.analog.AnalogReadOneShotResponse;
 
+import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -46,7 +48,7 @@ class ManagerFlowTest {
     @Mock
     private Member memberMock;
 
-    private FlowSensorAnalogI flowSensorAnalogI;
+    private FlowSensorI flowSensorAnalogI;
 
     private GlobalContext globalContext;
 
@@ -57,7 +59,7 @@ class ManagerFlowTest {
         MockitoAnnotations.openMocks(this);
         globalContext = new GlobalContext(1);
         flowContext = new FlowContext(Member.builder().id("memberId").role(Role.ROLE_USER).build());
-        flowSensorAnalogI = new FlowSensorAnalogI();
+        flowSensorAnalogI = FlowSensorI.of(ANALOG_READ_ONE_SHOT_RESPONSE, "memberId", "deviceId", UUID.randomUUID(), AnalogReadOneShotResponse.of(1, 29));
         flowSensorAnalogI.setDeviceId("deviceId");
         flowSensorAnalogI.setMemberId("memberId");
         flowSensorAnalogI.setPayloadType(ANALOG_READ_ONE_SHOT_RESPONSE);
