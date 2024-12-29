@@ -1,8 +1,7 @@
 <script lang="ts" setup>
-import {onMounted, ref, watch} from 'vue'
-import {useVueFlow} from "@vue-flow/core";
 
-const sleepTime = ref("5000");
+
+const sleepTime = ref(5000);
 const props = defineProps({
   id: {
     type: String,
@@ -12,6 +11,10 @@ const props = defineProps({
     type: Object as () => any,
     required: false,
   },
+  callback: {
+    type: Function,
+    required: true
+  }
 })
 
 onMounted(() => {
@@ -20,21 +23,20 @@ onMounted(() => {
   }
   sleepTime.value = props.sensor.sleepTime
 })
-const {updateNode} = useVueFlow()
 
 watch(sleepTime, () => {
   handleUpdate();
 })
 
 function handleUpdate() {
-  updateNode(props.id, {
+  props.callback(props.id, {
     sensor: {
-      sleepTime: sleepTime
+      sleepTime: sleepTime.value
     }
   } as any)
 }
 </script>
 
 <template>
-  <q-input label="Sleep time [millisecond]" @keyup="handleUpdate" v-model="sleepTime"></q-input>
+  <el-input placeholder="Sleep time [millisecond]" v-model="sleepTime"></el-input>
 </template>

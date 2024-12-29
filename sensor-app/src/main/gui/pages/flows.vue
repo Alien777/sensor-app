@@ -1,66 +1,107 @@
 <template>
-  <q-splitter v-model="width" unit="px">
-    <template v-slot:before>
-      <q-tabs
-          vertical
-          v-model="tab">
-        <q-tab class="bg-green-2" :name="'new'" icon="schema"
-               label="Create New Flow"/>
-        <q-tab v-for="flow in flows"
-               :name="flow.id"
-               :icon="flow.isActivate?'start':'stop'"
-               :class="flow.isActivate?'bg-green-1':'bg-red-1'"
-               :label="flow.name?flow.name:flow.id">
-        </q-tab>
-      </q-tabs>
-    </template>
-    <template v-slot:after>
-      <q-tab-panels
-          vertical
-          v-model="tab">
-        <q-tab-panel :name="'new'" icon="schema">
-          <FlowEditor :onChangeFlow="onChangeFlow" :flow="null"/>
-        </q-tab-panel>
-        <q-tab-panel v-for="flow in flows" :name="flow.id" icon="schema">
-          <FlowEditor :onChangeFlow="onChangeFlow" :flow="flow"/>
-        </q-tab-panel>
-      </q-tab-panels>
-    </template>
-  </q-splitter>
+  <div style="display: flex;">
+    <ListOfNode/>
+
+    <div style="padding-bottom: 20px; width: 100%">
+      <div style="display: flex; gap: 10px;">
+        <el-button size="large" @click="addNew()">
+          Create New Flow
+        </el-button>
+
+        <el-button size="large" @click="save()">
+          Save
+        </el-button>
+        <el-input v-model="filter" placeholder="Filter" @input="applyFilter"></el-input>
+      </div>
+      <br>
+      <el-tabs
+          v-model="editableTabsValue"
+          type="card"
+          class="demo-tabs"
+          closable
+          @tab-remove="removeTab"
+      >
+        <el-tab-pane
+            v-for="item in originalTabs"
+            :key="item.name"
+            :label="item.title"
+            :name="item.name"
+        >
+          <FlowsFlowEditor/>
+        </el-tab-pane>
+      </el-tabs>
+    </div>
+  </div>
 </template>
 
-<script setup lang="ts">
-
+<script lang="ts" setup>
+import {ref} from 'vue';
+import ListOfNode from "~/components/flows/ListOfNode.vue";
 import {flowApi} from "~/composables/api/FlowApi";
-import {onMounted, ref} from 'vue'
-import FlowEditor from "~/components/flows/FlowEditor.vue";
 import type {FlowT} from "~/composables/api/StructureApp";
-
-definePageMeta({
-  layout: "panel",
-  middleware: "page-any-roles"
-})
-
 const runtimeConfig = useRuntimeConfig();
-const {getAll, deleteFlow} = flowApi(runtimeConfig)
-const {data: flows, refresh} = useAsyncData('flows', getAll);
+let flow = flowApi(runtimeConfig);
+let tabIndex = 1;
+const editableTabsValue = ref('2');
+const filter = ref('');
+const originalTabs = ref([
+  {
+    title: 'Tab 1',
+    name: '1',
+  },
+  {
+    title: 'Tab 2',
+    name: '2',
+  },
+]);
 
-const tab = ref('')
-const width = ref(200)
 
-const onChangeFlow = () => {
-  onMounted()
-  refresh();
+const applyFilter = () => {
+  const filteredTabs = originalTabs.value.filter((tab) =>
+      tab.title.toLowerCase().includes(filter.value.toLowerCase())
+  );
+
+  if (filteredTabs.length > 0) {
+    editableTabsValue.value = filteredTabs[0].name;
+  } else {
+    editableTabsValue.value = '';
+  }
+};
+
+const save = () => {
+  // const f=<FlowT>{
+  //   name:
+  // }
+  // flow.saveFlow()
 }
 
-onMounted(() => {
-  setTimeout(() => {
-    if (flows && flows.value && flows.value?.length >= 1) {
-      tab.value = flows.value[0].id;
-    }
-  }, 100)
-})
+const addNew = () => {
+  const newTabName = `${++tabIndex}`;
+  const newTab = {
+    title: 'New Tab',
+    name: newTabName,
+  };
 
+  originalTabs.value.push(newTab);
+  editableTabsValue.value = newTabName;
+};
 
+const removeTab = (targetName: string) => {
+  const index = originalTabs.value.findIndex((tab) => tab.name === targetName);
+  if (index > -1) originalTabs.value.splice(index, 1);
+  if (editableTabsValue.value === targetName) {
+    const nextTab = originalTabs.value[index] || originalTabs.value[index - 1];
+    editableTabsValue.value = nextTab ? nextTab.name : '';
+  }
+};
 </script>
 
+<style>
+
+.demo-tabs > .el-tabs__content {
+  color: #6b778c;
+  font-size: 32px;
+  font-weight: 600;
+  width: 100%;
+}
+</style>

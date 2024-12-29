@@ -1,11 +1,4 @@
-import {
-    type DeviceConfigSaveT,
-    type DeviceConfigT,
-    type DeviceSaveT,
-    type DeviceT,
-    timeToDate
-} from "~/composables/api/StructureApp";
-import {Notify} from "quasar";
+import {type DeviceConfigSaveT, type DeviceConfigT, type DeviceT, timeToDate} from "~/composables/api/StructureApp";
 
 export const deviceApi = (runtimeConfig: any) => {
     let {fetchApiRequest} = fetchUtils(runtimeConfig);
@@ -21,7 +14,7 @@ export const deviceApi = (runtimeConfig: any) => {
         return value.data.value;
     }
 
-    const initDevice = async (version: string, name: string, wifiSsid: string, wifiPassword: string, apPassword): Promise<boolean> => {
+    const initDevice = async (version: string, name: string, wifiSsid: string, wifiPassword: string, apPassword: string): Promise<boolean> => {
         try {
             let value = await fetchApiRequest<any>(`/device/build`, {
                 method: 'post',

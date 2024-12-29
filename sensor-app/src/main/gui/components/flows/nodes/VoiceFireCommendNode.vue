@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import {onMounted, ref, watch} from 'vue'
-import {useVueFlow} from "@vue-flow/core";
+// import {useVueFlow} from "@vue-flow/core";
 
 const commends = ref("");
 const props = defineProps({
@@ -21,21 +21,21 @@ onMounted(() => {
 
   commends.value = props.sensor.commends
 })
-const {updateNode} = useVueFlow()
+// const {updateNode} = useVueFlow()
 
 watch(commends, () => {
   handleUpdate();
 })
 
 function handleUpdate() {
-  updateNode(props.id, {
-    sensor: {
-      commends: commends
-    }
-  } as any)
+  // updateNode(props.id, {
+  //   sensor: {
+  //     commends: commends
+  //   }
+  // } as any)
 }
 </script>
 
 <template>
-  <q-input v-model="commends"  type="textarea" label="Commends" hint="Open windows; Is to hot"/>
+  <el-input v-model="commends"  type="textarea" label="Commends" hint="Open windows; Is to hot"/>
 </template>

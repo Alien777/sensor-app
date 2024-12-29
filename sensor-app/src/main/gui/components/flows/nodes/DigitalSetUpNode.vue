@@ -1,11 +1,10 @@
 <script lang="ts" setup>
 import {deviceApi} from "~/composables/api/DeviceApi";
 import SelectLazy from "~/components/common/SelectLazy.vue";
-import {watch, onMounted, ref, defineModel} from "vue";
-import {useVueFlow} from "@vue-flow/core";
-import {configUtilsApi} from "~/composables/api/ConfigUtilsApi";
+import {onMounted, ref, watch} from "vue";
+// import {useVueFlow} from "@vue-flow/core";
 
-const {updateNode} = useVueFlow()
+// const {updateNode} = useVueFlow()
 const runtimeConfig = useRuntimeConfig();
 const {getAllDevice} = deviceApi(runtimeConfig);
 
@@ -57,19 +56,19 @@ watch(mode, () => {
 
 
 function handleUpdate() {
-  updateNode(props.id, {
-    sensor: {
-      deviceId: deviceId,
-      gpio: gpio,
-      mode: mode,
-    }
-  } as any)
+  // updateNode(props.id, {
+  //   sensor: {
+  //     deviceId: deviceId,
+  //     gpio: gpio,
+  //     mode: mode,
+  //   }
+  // } as any)
 }
 </script>
 
 <template>
   <SelectLazy v-model="deviceId" :provide-data="provideDataDevice" label="Device Id"/>
-  <q-input v-model="gpio" label="GPIO"/>
-  <q-input v-model="mode" label="Mode"/>
+  <el-input v-model="gpio" label="GPIO"/>
+  <el-input v-model="mode" label="Mode"/>
 
 </template>

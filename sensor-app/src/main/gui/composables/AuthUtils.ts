@@ -34,7 +34,7 @@ export const authUtils = (runtimeConfig: any) => {
             if (!isAuthenticated) {
                 return navigateTo('/auth-error')
             } else {
-                return navigateTo('/panel')
+                return navigateTo('/device')
             }
         }
         return null;

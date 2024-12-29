@@ -3,9 +3,9 @@ import {deviceApi} from "~/composables/api/DeviceApi";
 import {configUtilsApi} from "~/composables/api/ConfigUtilsApi";
 import SelectLazy from "~/components/common/SelectLazy.vue";
 import {onMounted, watch} from "vue";
-import {useVueFlow} from "@vue-flow/core";
+// import {useVueFlow} from "@vue-flow/core";
 
-const {updateNode} = useVueFlow()
+// const {updateNode} = useVueFlow()
 const runtimeConfig = useRuntimeConfig();
 const {getAllDevice} = deviceApi(runtimeConfig);
 const {getAnalogsPins} = configUtilsApi(runtimeConfig);
@@ -58,12 +58,12 @@ watch(gpio, () => {
 })
 
 function handleUpdate() {
-  updateNode(props.id, {
-    sensor: {
-      deviceId: deviceId,
-      gpio: gpio
-    }
-  } as any)
+  // updateNode(props.id, {
+  //   sensor: {
+  //     deviceId: deviceId,
+  //     gpio: gpio
+  //   }
+  // } as any)
 }
 </script>
 

@@ -1,5 +1,18 @@
 import dayjs from "dayjs";
 import {ref} from "vue";
+import AnalogReadSetUpNode from "~/components/flows/nodes/AnalogReadSetUpNode.vue";
+import DigitalSetUpNode from "~/components/flows/nodes/DigitalSetUpNode.vue";
+import PwmWriteSetUpNode from "~/components/flows/nodes/PwmWriteSetUpNode.vue";
+import ListeningSensorNode from "~/components/flows/nodes/ListeningSensorNode.vue";
+import CronNode from "~/components/flows/nodes/CronNode.vue";
+import FireOnceNode from "~/components/flows/nodes/FireOnceNode.vue";
+import StopCurrentProcessFlowNode from "~/components/flows/nodes/StopCurrentProcessFlowNode.vue";
+import SleepNode from "~/components/flows/nodes/SleepNode.vue";
+import AsyncNode from "~/components/flows/nodes/AsyncNode.vue";
+import ExecuteCodeNode from "~/components/flows/nodes/ExecuteCodeNode.vue";
+import RequestAnalogDataNode from "~/components/flows/nodes/RequestAnalogDataNode.vue";
+import SendDigitalValueNode from "~/components/flows/nodes/SendDigitalValueNode.vue";
+import SendPwmValueNode from "~/components/flows/nodes/SendPwmValueNode.vue";
 
 export enum StatusOfFlow {
     OK = "OK",
@@ -80,19 +93,69 @@ export function formatTime(time: Date) {
     return dayjs(time).format("HH:mm:ss DD-mm-YYYY")
 }
 
-export const draggableItems = ref([
-    {type: 'default', name: 'AnalogReadSetUpNode', readableName: "Analog Set up", description: "setup analog pin"},
-    {type: 'default', name: 'DigitalSetUpNode', readableName: "Digital Set up", description: "setup digital pin"},
-    {type: 'default', name: 'PwmWriteSetUpNode', readableName: "Pwm Set up", description: "setup pwm pin"},
-    {type: 'input', name: 'ListeningSensorNode', readableName: "Listening events", description: "fires up when it receives a message"},
-    {type: 'input', name: 'CronNode', readableName: "Cron executor"},
-    {type: 'input', name: 'FireOnceNode', readableName: "Fire once", description: "Node important for api fire-once"},
-    {type: 'input', name: 'VoiceFireCommendNode', readableName: "Run flow by voice commend", description: "Run commend by voice"},
-    {type: 'default', name: 'SendPwmValueNode', readableName: "Send PWM to Device"},
-    {type: 'default', name: 'SendDigitalValueNode', readableName: "Send value as for digital input"},
-    {type: 'default', name: 'RequestAnalogDataNode', readableName: "Analog data query"},
-    {type: 'default', name: 'ExecuteCodeNode', readableName: "Custom code"},
-    {type: 'default', name: 'AsyncNode', readableName: "Execute as none block flow"},
-    {type: 'default', name: 'SleepNode', readableName: "Sleep flow"},
-    {type: 'default', name: 'StopCurrentProcessFlowNode', readableName: "Restart flow"}
-]);
+export const draggableItems = [
+    {
+        type: 'default',
+        name: 'AnalogReadSetUpNode',
+        component: AnalogReadSetUpNode,
+        readableName: "Analog Set up",
+        description: "setup analog pin"
+    },
+    {
+        type: 'default',
+        name: 'DigitalSetUpNode',
+        component: DigitalSetUpNode,
+        readableName: "Digital Set up",
+        description: "setup digital pin"
+    },
+    {
+        type: 'default',
+        name: 'PwmWriteSetUpNode',
+        component: PwmWriteSetUpNode,
+        readableName: "Pwm Set up",
+        description: "setup pwm pin"
+    },
+    {
+        type: 'input',
+        name: 'ListeningSensorNode',
+        component: ListeningSensorNode,
+        readableName: "Listening events",
+        description: "fires up when it receives a message"
+    },
+    {type: 'input', name: 'CronNode', component: CronNode, readableName: "Cron executor"},
+    {
+        type: 'input',
+        name: 'FireOnceNode',
+        component: FireOnceNode,
+        readableName: "Fire once",
+        description: "Node important for api fire-once"
+    },
+    {
+        type: 'input',
+        name: 'VoiceFireCommendNode',
+        readableName: "Run flow by voice commend",
+        description: "Run commend by voice"
+    },
+    {type: 'default', name: 'SendPwmValueNode', component: SendPwmValueNode, readableName: "Send PWM to Device"},
+    {
+        type: 'default',
+        name: 'SendDigitalValueNode',
+        component: SendDigitalValueNode,
+        readableName: "Send value as for digital input"
+    },
+    {
+        type: 'default',
+        name: 'RequestAnalogDataNode',
+        component: RequestAnalogDataNode,
+        readableName: "Analog data query"
+    },
+    {type: 'default', name: 'ExecuteCodeNode', component: ExecuteCodeNode, readableName: "Custom code"},
+    {type: 'default', name: 'AsyncNode', component: AsyncNode, readableName: "Execute as none block flow"},
+    {type: 'default', name: 'SleepNode', component: SleepNode, readableName: "Sleep flow"},
+    {
+        type: 'default',
+        name: 'StopCurrentProcessFlowNode',
+        component: StopCurrentProcessFlowNode,
+        readableName: "Restart flow"
+    }
+];

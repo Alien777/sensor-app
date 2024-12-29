@@ -2,6 +2,7 @@ import {defineNuxtConfig} from "nuxt/config";
 
 export default defineNuxtConfig({
     devtools: {enabled: true},
+
     runtimeConfig: {
         public: {
             wsApi: 'ws://localhost:8080/api',
@@ -9,15 +10,13 @@ export default defineNuxtConfig({
             apiUrl: 'http://localhost:8080/api',
         }
     },
-    css: [
-        "@vue-flow/core/dist/style.css",
-        "@vue-flow/core/dist/theme-default.css",
-    ],
+    // css: ['drawflow/dist/drawflow.min.css'],
     modules: [
         'dayjs-nuxt',
-        'nuxt-monaco-editor',
-        'nuxt-quasar-ui',
         'nuxt-socket-io',
+        '@element-plus/nuxt',
+
     ],
-    quasar: {plugins: ["Notify", "Dialog"]}
+
+    compatibilityDate: '2024-11-16',
 })

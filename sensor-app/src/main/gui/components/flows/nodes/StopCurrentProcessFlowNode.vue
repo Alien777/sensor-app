@@ -1,8 +1,11 @@
 <script lang="ts" setup>
-import {onMounted, ref, watch} from 'vue'
-import {useVueFlow} from "@vue-flow/core";
-import SelectLazy from "~/components/common/SelectLazy.vue";
+// import {onMounted, ref, watch} from 'vue'
+// import {useVueFlow} from "@vue-flow/core";
+// import SelectLazy from "~/components/common/SelectLazy.vue";
+// import {flowApi} from "~/composables/api/FlowApi";
 import {flowApi} from "~/composables/api/FlowApi";
+import SelectLazy from "~/components/common/SelectLazy.vue";
+
 const runtimeConfig = useRuntimeConfig();
 const { getAll} = flowApi(runtimeConfig)
 const flowId = ref("");
@@ -23,18 +26,18 @@ onMounted(() => {
   }
   flowId.value = props.sensor.flowId
 })
-const {updateNode} = useVueFlow()
+// const {updateNode} = useVueFlow()
 
 watch(flowId, () => {
   handleUpdate();
 })
 
 function handleUpdate() {
-  updateNode(props.id, {
-    sensor: {
-      flowId: flowId
-    }
-  } as any)
+  // updateNode(props.id, {
+  //   sensor: {
+  //     flowId: flowId
+  //   }
+  // } as any)
 }
 
 const provideDataFlows = (value: any) => {

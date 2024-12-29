@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import {ref, defineEmits, defineProps, onMounted, onBeforeMount, watch, defineModel} from "vue";
 
 const emit = defineEmits(['update:modelValue']);
 
@@ -12,42 +11,43 @@ const props = defineProps({
     type: Function,
     required: true,
   },
-})
+});
+
 const setOptions = (value: any) => {
   options.value = value;
-}
-const model = defineModel()
+};
 
-const options = ref(null)
+const model = ref(null); // Zamiana na ref do zarządzania modelem
+const options = ref<any[]>([]); // Używanie tablicy jako listy opcji
+
 props.provideData(setOptions);
-const filter = (val: any, update: any, abort: any) => {
-  update(() => {
-    props.provideData(setOptions);
-  })
-}
+
+const filter = (query: string) => {
+  props.provideData(setOptions);
+};
 </script>
 
 <template>
-  <div class="q-gutter-md row items-start">
-    <q-select
-        v-model="model"
-        :label="props.label"
-        :options="options"
-        @filter="filter"
-        emit-value
-        map-options
-        style="width: 100%">
-      <template v-slot:no-option>
-        <q-item>
-          <q-item-section class="text-grey">
-            No results
-          </q-item-section>
-        </q-item>
+  <div class="row items-start" style="width: 100%;">
+    <el-select
+        :v-model="model"
+        :placeholder="props.label"
+        filterable
+        :filter-method="filter"
+        style="width: 100%;">
+      <el-option
+          v-for="option in options"
+          :key="option.value"
+          :label="option.label"
+          :value="option.value">
+      </el-option>
+      <template v-if="options.length === 0" v-slot="scope">
+        <div class="text-grey" style="padding: 10px;">No results</div>
       </template>
-    </q-select>
+    </el-select>
   </div>
 </template>
 
-<style scoped lang="css">
-
+<style scoped>
+/* Możesz dodać tutaj swoje style */
 </style>

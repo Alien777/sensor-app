@@ -3,9 +3,9 @@ import {deviceApi} from "~/composables/api/DeviceApi";
 import {configUtilsApi} from "~/composables/api/ConfigUtilsApi";
 import SelectLazy from "~/components/common/SelectLazy.vue";
 import {onMounted, watch} from "vue";
-import {useVueFlow} from "@vue-flow/core";
+// import {useVueFlow} from "@vue-flow/core";
 
-const {updateNode} = useVueFlow()
+// const {updateNode} = useVueFlow()
 const runtimeConfig = useRuntimeConfig();
 const {getAllDevice} = deviceApi(runtimeConfig);
 const {getDigitalPins} = configUtilsApi(runtimeConfig);
@@ -63,18 +63,18 @@ watch(valueVariable, () => {
 })
 
 function handleUpdate() {
-  updateNode(props.id, {
-    sensor: {
-      deviceId: deviceId,
-      gpio: gpio,
-      valueVariable: valueVariable
-    }
-  } as any)
+  // updateNode(props.id, {
+  //   sensor: {
+  //     deviceId: deviceId,
+  //     gpio: gpio,
+  //     valueVariable: valueVariable
+  //   }
+  // } as any)
 }
 </script>
 
 <template>
   <SelectLazy v-model="deviceId" :provide-data="provideDataDevice" label="Device id"/>
   <SelectLazy v-model="gpio" :provide-data="provideDataPins" label="Digital pin"/>
-  <q-input v-model="valueVariable" label="Variable" maxlength="40"/>
+  <el-input v-model="valueVariable" label="Variable" maxlength="40"/>
 </template>
